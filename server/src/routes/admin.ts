@@ -6,11 +6,15 @@ import { adminStats } from '../services/adminStats';
 import { getFlagged, listFlagged, STATUS_FILTERS, type StatusFilter } from '../services/flagged';
 import type { Rule } from '../services/flaggedRows';
 import { readSecurityLog } from '../services/securityLogRead';
+import { adminUsersRouter } from './adminUsers';
 
 export const adminRouter = Router();
 
 // Runs before every route below, and for unknown /admin paths too, so customers always get 401/403, never 404.
 adminRouter.use(requireAuth, requireRole('admin'));
+
+// Users, unfreeze, freeze and trust (task E4), behind the same admin-only guard.
+adminRouter.use('/users', adminUsersRouter);
 
 /** GET /admin/me: the logged-in admin's name (the admin console header uses it). */
 adminRouter.get('/me', async (_req, res, next) => {

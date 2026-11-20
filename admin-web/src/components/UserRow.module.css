@@ -1,0 +1,6 @@
+.row { display: flex; align-items: center; gap: 18px; width: 100%; padding: 18px 0; border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; cursor: pointer; }
+.row:last-child { border-bottom: 0; }
+.row:hover .name { color: var(--blue); }
+.texts { flex: 1; }
+.name { margin: 0; font-size: 20px; font-weight: 700; color: var(--ink); }
+.line { margin: 2px 0 0; font-size: 16px; color: var(--muted); }

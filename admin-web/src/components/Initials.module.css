@@ -1,0 +1,4 @@
+.circle { display: grid; place-items: center; flex: none; border-radius: 50%; font-weight: 800; background: var(--tint); color: var(--blue); }
+.frozen { background: var(--danger-bg); color: var(--danger-text); }
+.locked { background: #e8edf7; color: #33405f; }
+.strong { background: var(--blue); color: var(--white); }

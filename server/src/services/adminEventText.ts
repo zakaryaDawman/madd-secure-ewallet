@@ -26,5 +26,11 @@ export function adminEventText(e: EventFacts): { text: string; tone: EventTone }
       return { text: 'PIN locked', tone: 'danger' };
     case 'DEVICE_TRUSTED':
       return { text: 'Trusted a new device', tone: 'info' };
+    case 'ADMIN_FREEZE':
+      return { text: 'Frozen by an admin', tone: 'danger' };
+    case 'ADMIN_UNFREEZE':
+      return { text: 'Unfrozen by an admin', tone: 'info' };
+    case 'ADMIN_TRUST_DEVICE':
+      return { text: 'Device trusted by an admin', tone: 'info' };
   }
 }

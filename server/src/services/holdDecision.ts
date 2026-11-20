@@ -65,7 +65,7 @@ export async function rejectHold(user: { userId: number; deviceId: string }, tra
     if (held.status === 'COMPLETED') return { ok: false, error: 'already_handled' };
 
     await logSecurityEvent({ userId, type: 'HOLD_REJECTED', transactionId: held.id, reason: 'The owner said the held transfer was not them.' }, client);
-    await freezeAccount(client, userId, 'Account frozen by the owner. Every session was ended.');
+    await freezeAccount(client, userId, 'Account frozen by the owner. Every session was ended.', { source: 'held_transfer', transactionId: held.id });
     return { ok: true, cancelledAmountSen: Number(held.amount_sen) };
   });
 }

@@ -94,8 +94,12 @@ CREATE INDEX IF NOT EXISTS idx_security_events_transaction ON security_events (t
 -- The kinds of security event. Kept as a named constraint so new kinds can be added later.
 ALTER TABLE security_events DROP CONSTRAINT IF EXISTS security_events_type_check;
 ALTER TABLE security_events ADD CONSTRAINT security_events_type_check CHECK (type IN (
-  'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED', 'DEVICE_TRUSTED'
+  'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED', 'DEVICE_TRUSTED',
+  'ADMIN_FREEZE', 'ADMIN_UNFREEZE', 'ADMIN_TRUST_DEVICE'
 ));
+
+-- Task E4: which admin did it (empty for things users and rules do). The admin's written reason goes in `reason`.
+ALTER TABLE security_events ADD COLUMN IF NOT EXISTS actor_id INT REFERENCES users(id);
 
 -- Task E2: the numbers a rule used (e.g. amount, average, limit), so the admin sees the exact calculation.
 ALTER TABLE security_events ADD COLUMN IF NOT EXISTS details JSONB;

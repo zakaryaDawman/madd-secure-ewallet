@@ -1,0 +1,18 @@
+.backdrop { position: fixed; inset: 0; background: rgba(11, 27, 63, 0.5); display: grid; place-items: center; padding: 24px; z-index: 10; }
+.dialog { width: 100%; max-width: 560px; background: var(--white); border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 18px; }
+.title { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+.facts { background: var(--background); border-radius: var(--radius-card); padding: 4px 22px; }
+.fact { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
+.fact:last-child { border-bottom: 0; }
+.factLabel { color: var(--muted); }
+.factValue { font-weight: 700; text-align: right; }
+.label { font-weight: 700; font-size: 17px; }
+.reason { min-height: 120px; padding: 16px 18px; border: 1.5px solid var(--line); border-radius: 18px; font-size: 17px; resize: vertical; }
+.reason:focus { outline: none; border-color: var(--blue); }
+.note { margin: 0; font-size: 14px; color: var(--muted); }
+.error { margin: 0; color: var(--danger-text); font-weight: 600; }
+.confirm { padding: 16px; border: 0; border-radius: 999px; color: var(--white); font-weight: 700; font-size: 17px; cursor: pointer; }
+.primary { background: var(--blue); }
+.danger { background: var(--danger); }
+.confirm:disabled { opacity: 0.5; cursor: default; }
+.cancel { padding: 8px; border: 0; background: none; color: var(--blue); font-weight: 700; font-size: 17px; cursor: pointer; }

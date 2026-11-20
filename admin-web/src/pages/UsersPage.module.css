@@ -1,0 +1,4 @@
+.list { margin: 28px 40px 40px; max-width: 900px; background: var(--white); border-radius: var(--radius-card); padding: 4px 28px; }
+.total { color: var(--sky); font-weight: 700; font-size: 17px; }
+.status { color: var(--muted); padding: 18px 0; }
+.error { color: var(--danger-text); font-weight: 600; padding: 18px 0; }

@@ -8,12 +8,15 @@ import { FlaggedDetailPage } from './pages/FlaggedDetailPage';
 import { FlaggedPage } from './pages/FlaggedPage';
 import { LoginPage } from './pages/LoginPage';
 import { LogsPage } from './pages/LogsPage';
+import { UserDetailPage } from './pages/UserDetailPage';
+import { UsersPage } from './pages/UsersPage';
 
 /** The admin console: the login page until an admin signs in, then the admin area. */
 export default function App() {
   const [adminName, setAdminName] = useState<string | null>(null);
   const [page, setPage] = useState<AdminPage>('dashboard');
   const [openEvent, setOpenEvent] = useState<number | null>(null); // a flagged event open in detail
+  const [openUser, setOpenUser] = useState<number | null>(null); // a customer open in detail
 
   // If the server ends the session (30 minutes, logout, freeze), go back to the login page.
   useEffect(() => whenSessionEnds(() => setAdminName(null)), []);
@@ -26,11 +29,13 @@ export default function App() {
 
   if (!adminName) return <LoginPage onLoggedIn={setAdminName} />;
   return (
-    <AdminLayout page={page} adminName={adminName} onSelect={(next) => { setPage(next); setOpenEvent(null); }} onLogout={onLogout}>
+    <AdminLayout page={page} adminName={adminName} onSelect={(next) => { setPage(next); setOpenEvent(null); setOpenUser(null); }} onLogout={onLogout}>
       {page === 'dashboard' && <DashboardPage />}
       {page === 'flagged' && openEvent === null && <FlaggedPage onOpen={setOpenEvent} />}
       {page === 'flagged' && openEvent !== null && <FlaggedDetailPage id={openEvent} onBack={() => setOpenEvent(null)} />}
       {page === 'logs' && <LogsPage />}
+      {page === 'users' && openUser === null && <UsersPage onOpen={setOpenUser} />}
+      {page === 'users' && openUser !== null && <UserDetailPage id={openUser} onBack={() => setOpenUser(null)} />}
     </AdminLayout>
   );
 }

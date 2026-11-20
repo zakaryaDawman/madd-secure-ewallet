@@ -79,3 +79,48 @@ export function getLogs(search: string, before: number | null): Promise<LogPage>
   if (before !== null) query.set('before', String(before));
   return api(`/admin/logs?${query}`);
 }
+
+export type UserStatus = 'active' | 'frozen' | 'locked';
+export type UserFilter = 'all' | 'frozen' | 'locked';
+
+/** One row of the Users list (design 24). */
+export type UserListItem = { id: number; fullName: string; status: UserStatus; line: string };
+export type UserList = { users: UserListItem[]; counts: { total: number; frozen: number; locked: number } };
+
+/** One customer's details (design 23). */
+export type UserDetail = {
+  id: number;
+  fullName: string;
+  email: string;
+  phone: string;
+  status: UserStatus;
+  balanceSen: number;
+  devices: { deviceId: string; name: string; trusted: boolean; firstSeen: string; lastSeen: string }[];
+  events: { id: number; text: string; tone: EventTone; at: string }[];
+  freeze: { by: string; at: string; trigger: string } | null;
+};
+
+/** The Users list, searched by name, email or phone, and filtered by status. */
+export function getUsers(search: string, filter: UserFilter): Promise<UserList> {
+  const query = new URLSearchParams({ filter });
+  if (search) query.set('q', search);
+  return api(`/admin/users?${query}`);
+}
+
+/** One customer's details. */
+export function getUser(id: number): Promise<UserDetail> {
+  return api(`/admin/users/${id}`);
+}
+
+/** The three admin actions. Each needs a written reason; the server logs it with this admin's name. */
+export function unfreezeUser(id: number, reason: string): Promise<void> {
+  return api(`/admin/users/${id}/unfreeze`, { method: 'POST', body: { reason } });
+}
+
+export function freezeUser(id: number, reason: string): Promise<void> {
+  return api(`/admin/users/${id}/freeze`, { method: 'POST', body: { reason } });
+}
+
+export function trustDevice(id: number, deviceId: string, reason: string): Promise<void> {
+  return api(`/admin/users/${id}/devices/${deviceId}/trust`, { method: 'POST', body: { reason } });
+}

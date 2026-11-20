@@ -1,0 +1,8 @@
+.card { background: var(--white); border-radius: var(--radius-card); padding: 4px 28px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: 0; }
+.name { margin: 0; font-size: 19px; font-weight: 700; }
+.when { margin: 2px 0 0; font-size: 15px; color: var(--muted); }
+.trust { padding: 10px 22px; border: 2px solid var(--blue); border-radius: 999px; background: none; color: var(--blue); font-weight: 700; font-size: 16px; cursor: pointer; }
+.trusted { padding: 6px 16px; border-radius: 999px; background: #dff5e7; color: #15803d; font-weight: 700; }
+.empty { padding: 18px 0; color: var(--muted); }

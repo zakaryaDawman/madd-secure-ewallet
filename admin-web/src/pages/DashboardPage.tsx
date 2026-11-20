@@ -46,7 +46,7 @@ export function DashboardPage() {
             </div>
             <div className={styles.lower}>
               <RuleBars rules={stats.byRule} total={stats.byRuleTotal} />
-              <EventList events={stats.latest} />
+              <EventList events={stats.latest} title="Latest events" />
             </div>
           </>
         )}

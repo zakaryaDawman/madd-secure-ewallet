@@ -3,12 +3,12 @@ import styles from './SideNav.module.css';
 
 export type AdminPage = 'dashboard' | 'flagged' | 'logs' | 'users';
 
-/** The four admin areas. Users arrives in task E4. */
+/** The four admin areas. */
 const ITEMS: { page: AdminPage; label: string; icon: IconName; ready: boolean }[] = [
   { page: 'dashboard', label: 'Dashboard', icon: 'dashboard', ready: true },
   { page: 'flagged', label: 'Flagged', icon: 'flag', ready: true },
   { page: 'logs', label: 'Logs', icon: 'logs', ready: true },
-  { page: 'users', label: 'Users', icon: 'users', ready: false },
+  { page: 'users', label: 'Users', icon: 'users', ready: true },
 ];
 
 type Props = { active: AdminPage; adminName: string; onSelect: (page: AdminPage) => void; onLogout: () => void };

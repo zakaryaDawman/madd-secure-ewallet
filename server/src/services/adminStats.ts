@@ -1,8 +1,7 @@
 import { pool } from '../db/pool';
-import { ruleConfig } from '../rules/config';
 import { shortName } from '../utils/mask';
 import { adminEventText, EventTone } from './adminEventText';
-import { currentLoginLock } from './loginLock';
+import { lockedEmails } from './loginLock';
 import type { SecurityEventType } from './securityLog';
 
 const TIME_ZONE = 'Asia/Kuala_Lumpur'; // "today" means today in Malaysia
@@ -21,8 +20,8 @@ export type AdminStats = {
 
 /** Everything the admin dashboard (design 20) shows, read from the database. Never includes hashes, PINs or tokens. */
 export async function adminStats(): Promise<AdminStats> {
-  const [counters, byRule, latest, lockedSignIns] = await Promise.all([counts(), alertsByRule(), latestEvents(), countLockedSignIns()]);
-  return { ...counters, lockedSignIns, byRule, byRuleTotal: byRule.reduce((sum, r) => sum + r.count, 0), latest };
+  const [counters, byRule, latest, locked] = await Promise.all([counts(), alertsByRule(), latestEvents(), lockedEmails()]);
+  return { ...counters, lockedSignIns: locked.size, byRule, byRuleTotal: byRule.reduce((sum, r) => sum + r.count, 0), latest };
 }
 
 /** Alerts today (rules that fired since midnight in Malaysia), transfers held right now, frozen accounts. */
@@ -63,12 +62,3 @@ async function latestEvents(): Promise<AdminStats['latest']> {
   }));
 }
 
-/** How many emails have sign-in locked right now (rule R4), worked out with the same lock rule as the login. */
-async function countLockedSignIns(): Promise<number> {
-  const { rows } = await pool.query<{ email: string }>(
-    `SELECT DISTINCT email FROM login_attempts WHERE NOT success AND created_at > now() - make_interval(mins => $1)`,
-    [ruleConfig.lockMinutes + ruleConfig.failedLoginWindowMinutes],
-  );
-  const locks = await Promise.all(rows.map((r) => currentLoginLock(r.email)));
-  return locks.filter((lock) => lock.locked).length;
-}

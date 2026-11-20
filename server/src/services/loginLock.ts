@@ -37,6 +37,20 @@ export async function lockAfterFailure(email: string, deviceId: string): Promise
   return lock;
 }
 
+/** The emails whose sign-in is locked right now (rule R4), worked out with the same lock rule as the login. */
+export async function lockedEmails(): Promise<Map<string, Date>> {
+  const { rows } = await pool.query<{ email: string }>(
+    'SELECT DISTINCT email FROM login_attempts WHERE NOT success AND created_at > now() - make_interval(mins => $1)',
+    [ruleConfig.lockMinutes + ruleConfig.failedLoginWindowMinutes],
+  );
+  const locked = new Map<string, Date>();
+  for (const { email } of rows) {
+    const lock = await currentLoginLock(email);
+    if (lock.locked) locked.set(email, lock.unlocksAt);
+  }
+  return locked;
+}
+
 /** The email's login attempts that can still matter (lock + window), oldest first. */
 async function recentAttempts(email: string): Promise<LoginAttempt[]> {
   const { rows } = await pool.query<{ success: boolean; created_at: Date }>(
