@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Response, Router } from 'express';
 import { registerSchema } from '../validation/register';
 import { createUserWithWallet, DuplicateAccountError } from '../services/users';
 import { loginSchema } from '../validation/login';
@@ -7,6 +7,7 @@ import { createToken } from '../auth/tokens';
 import { createSession, revokeSession } from '../services/sessions';
 import { recordLoginAttempt, rememberDevice } from '../services/devices';
 import { checkNewDeviceLogin } from '../services/loginRules';
+import { currentLoginLock, lockAfterFailure } from '../services/loginLock';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { fieldErrors } from './fieldErrors';
 
@@ -36,6 +37,7 @@ authRouter.post('/register', async (req, res, next) => {
 /**
  * POST /auth/login: checks email + password, records the attempt and the device, starts a session and returns its
  * 30-minute token (with the device id inside, so it can't be faked). One message for any wrong detail.
+ * After 5 wrong passwords in 15 minutes sign-in is locked for 15 minutes (rule R4), the same for any email.
  * A frozen account gets 423 and no session. A new phone is let in but untrusted (rule R3): its transfers wait.
  */
 authRouter.post('/login', async (req, res, next) => {
@@ -47,9 +49,15 @@ authRouter.post('/login', async (req, res, next) => {
 
   try {
     const { email, deviceId, deviceName } = parsed.data;
+    // Rule R4: while locked the password is not even checked, and the try is not recorded (it would stretch the lock).
+    const lock = await currentLoginLock(email);
+    if (lock.locked) return sendLoginLocked(res, lock.unlocksAt);
+
     const user = await checkCredentials(parsed.data);
     await recordLoginAttempt(email, deviceId, user !== null);
     if (!user) {
+      const after = await lockAfterFailure(email);
+      if (after.locked) return sendLoginLocked(res, after.unlocksAt);
       res.status(401).json({ error: 'invalid_login', message: 'Email or password is wrong' });
       return;
     }
@@ -77,3 +85,16 @@ authRouter.post('/logout', requireAuth, async (_req, res, next) => {
     next(err);
   }
 });
+
+/**
+ * 423 for a locked sign-in (design 27), with the time left from the server's clock. The reply is the same whether or
+ * not the email has an account, so the lock can't be used to find out who uses MADD.
+ */
+function sendLoginLocked(res: Response, unlocksAt: Date): void {
+  res.status(423).json({
+    error: 'login_locked',
+    message: 'Too many wrong passwords. Sign-in is paused for a few minutes.',
+    unlocksAt: unlocksAt.toISOString(),
+    secondsLeft: Math.ceil((unlocksAt.getTime() - Date.now()) / 1000),
+  });
+}

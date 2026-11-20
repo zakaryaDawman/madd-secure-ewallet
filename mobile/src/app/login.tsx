@@ -21,11 +21,16 @@ export default function LoginScreen() {
   const [sending, setSending] = useState(false);
   const passwordRef = useRef<TextInputHandle>(null);
 
-  /** Sends the details to the server; on success saves the session and opens Home. */
+  /** Sends the details to the server; on success saves the session and opens Home. After 5 wrong passwords: design 27. */
   async function onLogin() {
     setSending(true);
     const result = await login(email.trim(), password);
     setSending(false);
+    if (!result.ok && 'lockedSeconds' in result) {
+      setPassword('');
+      openScreen({ pathname: '/login-locked', params: { seconds: String(result.lockedSeconds) } });
+      return;
+    }
     if (!result.ok) {
       setErrors(result.errors);
       return;
