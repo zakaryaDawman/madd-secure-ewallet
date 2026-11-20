@@ -1,0 +1,12 @@
+node_modules/
+.env
+dist/
+coverage/
+.expo/
+mobile/android/
+mobile/ios/
+*.apk
+*.log
+.DS_Store
+*.zip
+mobile/.claude/
