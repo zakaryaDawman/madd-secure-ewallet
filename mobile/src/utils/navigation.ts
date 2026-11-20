@@ -16,6 +16,14 @@ export function openScreen(href: Href): void {
   if (!isTooSoon()) router.push(href);
 }
 
+/**
+ * Replaces the current screen because of something the app found out (not a tap), so it is never ignored as a double tap.
+ * E.g. Held finding out straight away that this phone must wait for the usual phone.
+ */
+export function redirectTo(href: Href): void {
+  router.replace(href);
+}
+
 /** Closes every screen above Home and shows Home again (e.g. "Done" after a transfer). */
 export function backToHome(): void {
   if (!isTooSoon()) router.dismissTo('/home');

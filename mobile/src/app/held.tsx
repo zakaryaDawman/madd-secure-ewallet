@@ -13,7 +13,7 @@ import { ReleasePinSheet } from '../components/hold/ReleasePinSheet';
 import { Icon } from '../components/icons';
 import { MaddButton } from '../components/MaddButton';
 import { formatRM } from '../utils/money';
-import { replaceScreen, restartAt } from '../utils/navigation';
+import { redirectTo, replaceScreen, restartAt } from '../utils/navigation';
 import { colors, fonts, spacing } from '../theme';
 
 /**
@@ -29,12 +29,13 @@ export default function HeldScreen() {
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState('');
 
-  /** Asks the server for the transfer; once it is no longer waiting, moves to the right screen. */
+  /** Asks the server for the transfer; once it is no longer waiting (or this phone can't decide), moves to the right screen. */
   const refresh = useCallback(() => {
     getTransaction(Number(id))
       .then((latest) => {
-        if (latest?.status === 'EXPIRED') replaceScreen({ pathname: '/hold-expired', params: { id, fromSend } });
-        else if (latest && latest.status !== 'PENDING') replaceScreen({ pathname: '/transaction', params: { id } });
+        if (latest?.status === 'EXPIRED') redirectTo({ pathname: '/hold-expired', params: { id, fromSend } });
+        else if (latest && latest.status !== 'PENDING') redirectTo({ pathname: '/transaction', params: { id } });
+        else if (latest?.hold && !latest.hold.canDecide) redirectTo({ pathname: '/new-device', params: { id } });
         else setTx(latest);
       })
       .catch(() => setTx(null));

@@ -94,7 +94,7 @@ CREATE INDEX IF NOT EXISTS idx_security_events_transaction ON security_events (t
 -- The kinds of security event. Kept as a named constraint so new kinds can be added later.
 ALTER TABLE security_events DROP CONSTRAINT IF EXISTS security_events_type_check;
 ALTER TABLE security_events ADD CONSTRAINT security_events_type_check CHECK (type IN (
-  'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED'
+  'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED', 'DEVICE_TRUSTED'
 ));
 
 -- Task D3: set when the account is frozen. Only an admin can clear it.

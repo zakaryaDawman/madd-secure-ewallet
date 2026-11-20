@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { pool } from '../db/pool';
 
 export type Device = {
@@ -41,4 +42,39 @@ export async function listDevices(userId: number): Promise<Device[]> {
     firstSeen: r.first_seen.toISOString(),
     lastSeen: r.last_seen.toISOString(),
   }));
+}
+
+/** Ids of the user's trusted phones (rule R3 checks a device against this list). */
+export async function trustedDeviceIds(userId: number, db: PoolClient | typeof pool = pool): Promise<string[]> {
+  const { rows } = await db.query<{ device_id: string }>('SELECT device_id FROM known_devices WHERE user_id = $1 AND trusted', [userId]);
+  return rows.map((r) => r.device_id);
+}
+
+/** True if this phone is one of the user's trusted devices. */
+export async function isTrustedDevice(userId: number, deviceId: string): Promise<boolean> {
+  return (await trustedDeviceIds(userId)).includes(deviceId);
+}
+
+/**
+ * The newest phone that logged in during the last 24 hours and is not trusted yet, or null.
+ * The trusted phone shows it in the "New device signed in" sheet (design 13).
+ */
+export async function pendingDevice(userId: number): Promise<Device | null> {
+  const { rows } = await pool.query<{ device_id: string; name: string; trusted: boolean; first_seen: Date; last_seen: Date }>(
+    `SELECT device_id, name, trusted, first_seen, last_seen FROM known_devices
+     WHERE user_id = $1 AND NOT trusted AND last_seen > now() - interval '24 hours'
+     ORDER BY last_seen DESC LIMIT 1`,
+    [userId],
+  );
+  const r = rows[0];
+  return r ? { deviceId: r.device_id, name: r.name, trusted: r.trusted, firstSeen: r.first_seen.toISOString(), lastSeen: r.last_seen.toISOString() } : null;
+}
+
+/** Marks one of the user's untrusted phones as trusted. Returns its name, or null if it isn't theirs or is already trusted. */
+export async function markTrusted(userId: number, deviceId: string): Promise<string | null> {
+  const { rows } = await pool.query<{ name: string }>(
+    'UPDATE known_devices SET trusted = true WHERE user_id = $1 AND device_id = $2 AND NOT trusted RETURNING name',
+    [userId, deviceId],
+  );
+  return rows[0]?.name ?? null;
 }

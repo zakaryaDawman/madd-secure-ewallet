@@ -2,6 +2,7 @@ import { pool } from '../db/pool';
 import { maskName, maskPhone } from '../utils/mask';
 import { makeReference } from './transfers';
 import { expireHolds, holdDetails, HoldDetails } from './holds';
+import { isTrustedDevice } from './devices';
 
 export const FILTERS = ['all', 'in', 'out', 'held'] as const;
 export type TransactionFilter = (typeof FILTERS)[number];
@@ -82,7 +83,7 @@ export async function getTransaction(userId: number, id: number, deviceId: strin
     otherPhone: maskPhone(row.other_phone),
     reference: makeReference(row.id, row.created_at),
     completedAt: row.completed_at ? row.completed_at.toISOString() : null,
-    hold: row.status === 'PENDING' && row.direction === 'out' ? await holdDetails(row.id, deviceId) : null,
+    hold: row.status === 'PENDING' && row.direction === 'out' ? await holdDetails(row.id, deviceId, await isTrustedDevice(userId, deviceId)) : null,
   };
 }
 

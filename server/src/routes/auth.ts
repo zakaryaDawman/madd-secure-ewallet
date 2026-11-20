@@ -6,6 +6,7 @@ import { checkCredentials } from '../services/login';
 import { createToken } from '../auth/tokens';
 import { createSession, revokeSession } from '../services/sessions';
 import { recordLoginAttempt, rememberDevice } from '../services/devices';
+import { checkNewDeviceLogin } from '../services/loginRules';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { fieldErrors } from './fieldErrors';
 
@@ -35,7 +36,7 @@ authRouter.post('/register', async (req, res, next) => {
 /**
  * POST /auth/login: checks email + password, records the attempt and the device, starts a session and returns its
  * 30-minute token (with the device id inside, so it can't be faked). One message for any wrong detail.
- * A frozen account gets 423 and no session.
+ * A frozen account gets 423 and no session. A new phone is let in but untrusted (rule R3): its transfers wait.
  */
 authRouter.post('/login', async (req, res, next) => {
   const parsed = loginSchema.safeParse(req.body);
@@ -58,9 +59,10 @@ authRouter.post('/login', async (req, res, next) => {
       return;
     }
     await rememberDevice(user.userId, deviceId, deviceName);
+    const deviceTrusted = await checkNewDeviceLogin(user.userId, deviceId, deviceName);
     const sessionId = await createSession(user.userId);
     const token = createToken({ userId: user.userId, role: user.role, sessionId, deviceId });
-    res.json({ token, user: { id: user.userId, fullName: user.fullName, role: user.role } });
+    res.json({ token, deviceTrusted, user: { id: user.userId, fullName: user.fullName, role: user.role } });
   } catch (err) {
     next(err);
   }

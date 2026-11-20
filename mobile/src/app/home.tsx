@@ -7,6 +7,7 @@ import { ActivityList } from '../components/home/ActivityList';
 import { BalanceBlock } from '../components/home/BalanceBlock';
 import { HomeHeader } from '../components/home/HomeHeader';
 import { HomeSkeleton } from '../components/home/HomeSkeleton';
+import { NewDeviceAlert } from '../components/home/NewDeviceAlert';
 import { QuickActions } from '../components/home/QuickActions';
 import { WelcomeCard } from '../components/home/WelcomeCard';
 import { MaddTabBar } from '../components/MaddTabBar';
@@ -16,7 +17,10 @@ import { colors, fonts, spacing } from '../theme';
 
 type LoadState = 'loading' | 'ready' | 'offline';
 
-/** Home screen (design 05): balance, Send/Receive/Scan, recent activity and the tab bar. Shows designs 39/40/46 for new, loading and offline. */
+/**
+ * Home screen (design 05): balance, Send/Receive/Scan, recent activity and the tab bar. Shows designs 39/40/46 for new,
+ * loading and offline, and the "New device signed in" sheet (design 13) when a new phone is waiting.
+ */
 export default function HomeScreen() {
   const { wallet, state, refreshing, reload } = useWallet();
   const [hidden, setHidden] = useState(false);
@@ -46,6 +50,7 @@ export default function HomeScreen() {
       </View>
       {/* Inbox opens its screen in task D6. */}
       <MaddTabBar active="home" onSelect={(tab) => tab !== 'home' && tab !== 'inbox' && openScreen(`/${tab}`)} />
+      {state === 'ready' && <NewDeviceAlert />}
     </SafeAreaView>
   );
 }

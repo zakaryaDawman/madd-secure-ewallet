@@ -80,3 +80,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] D1 Rules R1–R4 as pure functions (largeAmount, velocity, unknownDevice, failedLogins) returning { fired, reason }, with fires / not / on-the-limit tests
 - [x] D2 R1+R2 run in POST /transfers: held as PENDING (202, no money moves), security_events append-only (trigger), expiry on read after 5 min, Held (11) with reason + countdown, Transfer cancelled (35)
 - [x] D3 Yes (PIN sheet 29, row lock, balance re-check, sends once) / No (cancel, freeze, end every session, Frozen 14 on all phones); HOLD_CONFIRMED / HOLD_REJECTED / ACCOUNT_FROZEN / PIN_LOCKED logged
+- [x] D4 R3 at login and on transfers (new phone allowed but untrusted, its transfers held, only a trusted phone decides), Approve on usual phone (12), New device signed in (13), Trust this device with PIN (45) + Profile Trust button

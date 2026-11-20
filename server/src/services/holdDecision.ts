@@ -3,7 +3,8 @@ import { pool } from '../db/pool';
 import { maskName } from '../utils/mask';
 import { checkPin, PinCheck } from './pinCheck';
 import { lockWallets, makeReference, moveBalances, TransferReceipt } from './transfers';
-import { endAllSessions } from './sessions';
+import { freezeAccount } from './freeze';
+import { isTrustedDevice } from './devices';
 import { logSecurityEvent } from './securityLog';
 
 type HeldRow = {
@@ -17,15 +18,18 @@ type HeldRow = {
   created_at: Date;
 };
 
-export type DecisionError = 'not_found' | 'already_handled' | 'expired' | 'insufficient_funds';
+export type DecisionError = 'not_found' | 'already_handled' | 'expired' | 'insufficient_funds' | 'needs_trusted_device';
 export type ConfirmResult = { ok: true; receipt: TransferReceipt } | { ok: false; error: DecisionError } | Exclude<PinCheck, { ok: true }>;
-export type RejectResult = { ok: true; cancelledAmountSen: number } | { ok: false; error: 'not_found' | 'already_handled' };
+export type RejectResult = { ok: true; cancelledAmountSen: number } | { ok: false; error: 'not_found' | 'already_handled' | 'needs_trusted_device' };
 
 /**
  * "Yes, it was me": checks the PIN, then in ONE database transaction locks the held transfer, checks it is still waiting,
  * checks the balance again and moves the money. A second tap waits for the lock, then finds it already COMPLETED.
+ * Only a trusted phone may decide (rule R3), so a stolen password on a new phone can't approve its own transfer.
  */
-export async function confirmHold(userId: number, transactionId: number, pin: string): Promise<ConfirmResult> {
+export async function confirmHold(user: { userId: number; deviceId: string }, transactionId: number, pin: string): Promise<ConfirmResult> {
+  const { userId } = user;
+  if (!(await isTrustedDevice(userId, user.deviceId))) return { ok: false, error: 'needs_trusted_device' };
   const pinCheck = await checkPin(userId, pin);
   if (!pinCheck.ok) return pinCheck;
 
@@ -45,20 +49,20 @@ export async function confirmHold(userId: number, transactionId: number, pin: st
 }
 
 /**
- * "No, freeze my account": in ONE database transaction cancels the user's held transfers, freezes the account
+ * "No, freeze my account": in ONE database transaction logs the refusal, cancels the user's held transfers, freezes the account
  * and ends every session on every phone. Works even if the 5 minutes just ran out; only a completed transfer is refused.
+ * Only a trusted phone may decide (rule R3).
  */
-export async function rejectHold(userId: number, transactionId: number): Promise<RejectResult> {
+export async function rejectHold(user: { userId: number; deviceId: string }, transactionId: number): Promise<RejectResult> {
+  const { userId } = user;
+  if (!(await isTrustedDevice(userId, user.deviceId))) return { ok: false, error: 'needs_trusted_device' };
   return inTransaction(async (client) => {
     const held = await lockHeldTransfer(client, userId, transactionId);
     if (!held) return { ok: false, error: 'not_found' };
     if (held.status === 'COMPLETED') return { ok: false, error: 'already_handled' };
 
-    await client.query("UPDATE transactions SET status = 'CANCELLED' WHERE sender_id = $1 AND status = 'PENDING'", [userId]);
-    await client.query('UPDATE users SET frozen_at = now() WHERE id = $1 AND frozen_at IS NULL', [userId]);
-    await endAllSessions(client, userId, 'freeze');
     await logSecurityEvent({ userId, type: 'HOLD_REJECTED', transactionId: held.id, reason: 'The owner said the held transfer was not them.' }, client);
-    await logSecurityEvent({ userId, type: 'ACCOUNT_FROZEN', reason: 'Account frozen by the owner. Every session was ended.' }, client);
+    await freezeAccount(client, userId, 'Account frozen by the owner. Every session was ended.');
     return { ok: true, cancelledAmountSen: Number(held.amount_sen) };
   });
 }

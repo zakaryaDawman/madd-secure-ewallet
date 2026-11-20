@@ -5,10 +5,19 @@ import type { TransferInput } from '../validation/transfer';
 import type { FiredRule } from './transferRules';
 import { logSecurityEvent } from './securityLog';
 
+/** What an untrusted phone sees instead of the rule details, so a thief learns nothing about the limits. */
+const GENERAL_REASON = 'This transfer needs approval from your usual phone.';
+
 const EXPIRED_REASON = `Not confirmed within ${ruleConfig.holdMinutes} minutes, so it was cancelled. No money moved.`;
 
 /** What the Held screen (design 11) shows about a paused transfer. */
-export type HoldDetails = { reasons: string[]; expiresAt: string; secondsLeft: number; thisDevice: boolean };
+export type HoldDetails = {
+  reasons: string[];
+  expiresAt: string;
+  secondsLeft: number;
+  thisDevice: boolean;
+  canDecide: boolean; // false on an untrusted phone: it must wait for the usual phone (design 12)
+};
 
 /**
  * Saves a transfer as PENDING (no money moves) and writes one security_events row per rule that fired.
@@ -50,8 +59,11 @@ export async function expireHolds(userId: number): Promise<void> {
   );
 }
 
-/** Why a held transfer was paused, and how long is left. The time left comes from the database clock, not the phone's. */
-export async function holdDetails(transactionId: number, deviceId: string): Promise<HoldDetails> {
+/**
+ * Why a held transfer was paused, and how long is left. The time left comes from the database clock, not the phone's.
+ * An untrusted phone gets one general sentence instead of the rule details, and can't decide.
+ */
+export async function holdDetails(transactionId: number, deviceId: string, viewerTrusted: boolean): Promise<HoldDetails> {
   const { rows } = await pool.query<{ reasons: string[]; expires_at: Date; seconds_left: number; this_device: boolean }>(
     `SELECT t.expires_at,
             GREATEST(0, CEIL(EXTRACT(EPOCH FROM t.expires_at - now())))::int AS seconds_left,
@@ -62,5 +74,11 @@ export async function holdDetails(transactionId: number, deviceId: string): Prom
     [transactionId, deviceId],
   );
   const row = rows[0];
-  return { reasons: row.reasons, expiresAt: row.expires_at.toISOString(), secondsLeft: row.seconds_left, thisDevice: row.this_device };
+  return {
+    reasons: viewerTrusted ? row.reasons : [GENERAL_REASON],
+    expiresAt: row.expires_at.toISOString(),
+    secondsLeft: row.seconds_left,
+    thisDevice: row.this_device,
+    canDecide: viewerTrusted,
+  };
 }

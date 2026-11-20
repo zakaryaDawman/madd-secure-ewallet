@@ -20,5 +20,5 @@ export const transferSchema = z.object({
 
 export type TransferInput = z.infer<typeof transferSchema>;
 
-/** Input rules for POST /transfers/:id/confirm ("Yes, it was me"). */
-export const confirmHoldSchema = z.object({ pin: typedPin });
+/** Input rules for a PIN-only request: "Yes, it was me" and "Trust this device". */
+export const pinOnlySchema = z.object({ pin: typedPin });

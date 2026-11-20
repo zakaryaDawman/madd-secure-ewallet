@@ -26,7 +26,7 @@ export type TransferResult =
 /**
  * Sends money from one user to another.
  * Order: check PIN (with the wrong-PIN lock), find recipient, then inside ONE database transaction: check the balance,
- * run rules R1 + R2, and either hold the transfer (a rule fired, no money moves) or move the money.
+ * run rules R1, R2 + R3, and either hold the transfer (a rule fired, no money moves) or move the money.
  */
 export async function sendMoney(
   sender: { userId: number; deviceId: string },
@@ -49,7 +49,7 @@ export async function sendMoney(
       await client.query('ROLLBACK');
       return { ok: false, error: 'insufficient_funds' };
     }
-    const fired = await runTransferRules(client, senderId, input.amountSen);
+    const fired = await runTransferRules(client, sender, input.amountSen);
     if (fired.length > 0) {
       const id = await holdTransfer(client, sender, recipient.id, input, fired);
       await client.query('COMMIT');

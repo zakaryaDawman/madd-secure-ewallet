@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
-import { confirmHoldSchema } from '../validation/transfer';
+import { pinOnlySchema } from '../validation/transfer';
 import { confirmHold, DecisionError, rejectHold } from '../services/holdDecision';
 import { fieldErrors } from './fieldErrors';
 import { sendPinRefusal } from './pinRefusal';
@@ -13,6 +13,7 @@ const REFUSALS: Record<DecisionError, { status: number; message: string }> = {
   already_handled: { status: 409, message: 'This transfer was already handled.' },
   expired: { status: 410, message: "You didn't confirm within 5 minutes, so we cancelled it." },
   insufficient_funds: { status: 400, message: 'Not enough balance for this transfer.' },
+  needs_trusted_device: { status: 403, message: 'Approve this on your usual phone.' },
 };
 
 /** Reads the transfer id from the path; anything that isn't a positive whole number counts as not found. */
@@ -23,7 +24,7 @@ function transferId(raw: unknown): number | null {
 
 /** POST /transfers/:id/confirm: "Yes, it was me" (design 29). Needs the PIN; sends the held money exactly once. */
 holdDecisionsRouter.post('/:id/confirm', requireAuth, async (req, res, next) => {
-  const parsed = confirmHoldSchema.safeParse(req.body);
+  const parsed = pinOnlySchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
     return;
@@ -34,7 +35,7 @@ holdDecisionsRouter.post('/:id/confirm', requireAuth, async (req, res, next) => 
     return;
   }
   try {
-    const result = await confirmHold(currentUser(res).userId, id, parsed.data.pin);
+    const result = await confirmHold(currentUser(res), id, parsed.data.pin);
     if (result.ok) {
       res.status(201).json(result.receipt);
     } else if (result.error === 'wrong_pin' || result.error === 'pin_locked') {
@@ -55,7 +56,7 @@ holdDecisionsRouter.post('/:id/reject', requireAuth, async (req, res, next) => {
     return;
   }
   try {
-    const result = await rejectHold(currentUser(res).userId, id);
+    const result = await rejectHold(currentUser(res), id);
     if (result.ok) {
       res.json({ frozen: true, cancelledAmountSen: result.cancelledAmountSen });
     } else {

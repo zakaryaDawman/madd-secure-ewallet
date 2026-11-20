@@ -3,20 +3,24 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { postLogout } from '../api/client';
-import { getProfile, Profile } from '../api/me';
+import { getProfile, MyDevice, Profile } from '../api/me';
 import { clearSession } from '../auth/session';
 import { MaddTabBar, Tab } from '../components/MaddTabBar';
 import { BigAvatar } from '../components/profile/BigAvatar';
 import { DeviceRow } from '../components/profile/DeviceRow';
+import { TrustDeviceSheet } from '../components/devices/TrustDeviceSheet';
 import { ListCard } from '../components/profile/ListCard';
 import { MenuRow } from '../components/profile/MenuRow';
 import { formatPhone } from '../utils/qrPayload';
 import { backToHome, openScreen, restartAt } from '../utils/navigation';
 import { colors, fonts, spacing } from '../theme';
 
-/** Profile screen (design 19): me, My devices (this phone first), account links and Log out. */
+/** Profile screen (design 19): me, My devices (this phone first, with Trust for new phones), account links and Log out. */
 export default function ProfileScreen() {
-  const profile = useProfile();
+  const [profile, reload] = useProfile();
+  const [toTrust, setToTrust] = useState<MyDevice | null>(null);
+  // Only a trusted phone can trust another one (the server checks this too).
+  const thisPhoneTrusted = profile?.devices.some((d) => d.thisDevice && d.trusted) ?? false;
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -36,7 +40,11 @@ export default function ProfileScreen() {
             {[...profile.devices]
               .sort((a, b) => Number(b.thisDevice) - Number(a.thisDevice))
               .map((device) => (
-                <DeviceRow key={device.deviceId} device={device} />
+                <DeviceRow
+                  key={device.deviceId}
+                  device={device}
+                  onTrust={thisPhoneTrusted && !device.trusted ? () => setToTrust(device) : undefined}
+                />
               ))}
           </ListCard>
 
@@ -52,13 +60,30 @@ export default function ProfileScreen() {
         </ScrollView>
       )}
       <MaddTabBar active="profile" onSelect={onTabSelect} />
+      {toTrust && (
+        <TrustDeviceSheet
+          device={toTrust}
+          onCancel={() => setToTrust(null)}
+          onTrusted={() => {
+            setToTrust(null);
+            reload();
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
-/** Loads my profile each time the screen comes into view (so a new name shows after Personal details). */
-function useProfile(): Profile | null {
+/** Loads my profile each time the screen comes into view (so a new name shows after Personal details). `reload` loads it again. */
+function useProfile(): [Profile | null, () => void] {
   const [profile, setProfile] = useState<Profile | null>(null);
+
+  /** Asks the server for my profile again (e.g. after trusting a phone). */
+  const reload = useCallback(() => {
+    getProfile()
+      .then(setProfile)
+      .catch(() => {});
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -72,7 +97,7 @@ function useProfile(): Profile | null {
     }, []),
   );
 
-  return profile;
+  return [profile, reload];
 }
 
 /** Tab bar taps from Profile. Inbox arrives in task D6. */

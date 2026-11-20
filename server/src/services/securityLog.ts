@@ -1,7 +1,7 @@
 import type { PoolClient } from 'pg';
 import { pool } from '../db/pool';
 
-export type SecurityEventType = 'RULE_FIRED' | 'HOLD_EXPIRED' | 'HOLD_CONFIRMED' | 'HOLD_REJECTED' | 'ACCOUNT_FROZEN' | 'PIN_LOCKED';
+export type SecurityEventType = 'RULE_FIRED' | 'HOLD_EXPIRED' | 'HOLD_CONFIRMED' | 'HOLD_REJECTED' | 'ACCOUNT_FROZEN' | 'PIN_LOCKED' | 'DEVICE_TRUSTED';
 
 export type SecurityEvent = {
   userId: number;

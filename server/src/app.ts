@@ -8,6 +8,7 @@ import { transfersRouter } from './routes/transfers';
 import { holdDecisionsRouter } from './routes/holdDecisions';
 import { transactionsRouter } from './routes/transactions';
 import { meRouter } from './routes/me';
+import { devicesRouter } from './routes/devices';
 import { adminRouter } from './routes/admin';
 
 /** Builds the Express app with security headers, JSON parsing and all routes. */
@@ -23,6 +24,7 @@ export function createApp() {
   app.use('/transfers', transfersRouter);
   app.use('/transfers', holdDecisionsRouter);
   app.use('/transactions', transactionsRouter);
+  app.use('/me/devices', devicesRouter);
   app.use('/me', meRouter);
   app.use('/admin', adminRouter);
   app.use(handleUnexpectedError);

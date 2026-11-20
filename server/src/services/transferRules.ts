@@ -2,23 +2,32 @@ import type { PoolClient } from 'pg';
 import { ruleConfig } from '../rules/config';
 import { checkLargeAmount } from '../rules/largeAmount';
 import { checkVelocity } from '../rules/velocity';
+import { checkUnknownDevice } from '../rules/unknownDevice';
+import { trustedDeviceIds } from './devices';
 
 /** One rule that fired for a transfer, e.g. { rule: 'R1', reason: 'RM 800 is more than…' }. */
-export type FiredRule = { rule: 'R1' | 'R2'; reason: string };
+export type FiredRule = { rule: 'R1' | 'R2' | 'R3'; reason: string };
 
 /**
- * Runs R1 (large amount) and R2 (velocity) on a new transfer and returns the ones that fired.
+ * Runs R1 (large amount), R2 (velocity) and R3 (unknown device) on a new transfer and returns the ones that fired.
  * Reads the data the rules need, then lets the pure rule functions decide. Runs inside the transfer's database transaction.
  */
-export async function runTransferRules(client: PoolClient, senderId: number, amountSen: number): Promise<FiredRule[]> {
-  const [pastAmounts, recentTimes, now] = await Promise.all([
+export async function runTransferRules(
+  client: PoolClient,
+  sender: { userId: number; deviceId: string },
+  amountSen: number,
+): Promise<FiredRule[]> {
+  const senderId = sender.userId;
+  const [pastAmounts, recentTimes, now, trusted] = await Promise.all([
     pastCompletedAmounts(client, senderId),
     recentTransferTimes(client, senderId),
     databaseNow(client),
+    trustedDeviceIds(senderId, client),
   ]);
   const results = [
     { rule: 'R1' as const, ...checkLargeAmount(amountSen, pastAmounts) },
     { rule: 'R2' as const, ...checkVelocity(recentTimes, now) },
+    { rule: 'R3' as const, ...checkUnknownDevice(sender.deviceId, trusted) },
   ];
   return results.filter((r) => r.fired).map(({ rule, reason }) => ({ rule, reason }));
 }
