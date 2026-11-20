@@ -32,3 +32,14 @@ CREATE TABLE IF NOT EXISTS transactions (
 );
 CREATE INDEX IF NOT EXISTS idx_transactions_sender ON transactions (sender_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_transactions_receiver ON transactions (receiver_id, created_at);
+
+-- One row per login. The JWT carries this id, so the server can end a session before its 30 minutes are up.
+CREATE TABLE IF NOT EXISTS sessions (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at    TIMESTAMPTZ NOT NULL,
+  revoked_at    TIMESTAMPTZ,                    -- set when the session is cancelled (logout, later: freeze)
+  revoke_reason TEXT CHECK (revoke_reason IN ('logout', 'freeze'))
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions (user_id);

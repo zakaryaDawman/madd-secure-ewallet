@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getWallet, WalletSummary } from '../api/wallet';
-import { OfflineError } from '../api/client';
+import { OfflineError, postLogout } from '../api/client';
 import { clearSession } from '../auth/session';
 import { ActivityList } from '../components/home/ActivityList';
 import { BalanceBlock } from '../components/home/BalanceBlock';
@@ -95,7 +95,7 @@ function useWallet() {
   return { wallet, state, refreshing, reload };
 }
 
-/** Temporary way to log out (until the Profile screen in task C2): asks first, then clears the session. */
+/** Temporary way to log out (until the Profile screen in task C2): asks first, cancels the session on the server, then forgets it on the phone. */
 function confirmLogout() {
   Alert.alert('Log out?', 'You will need your password to log in again.', [
     { text: 'Cancel', style: 'cancel' },
@@ -103,6 +103,7 @@ function confirmLogout() {
       text: 'Log out',
       style: 'destructive',
       onPress: async () => {
+        await postLogout();
         await clearSession();
         replaceScreen('/');
       },

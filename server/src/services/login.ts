@@ -6,7 +6,7 @@ import type { TokenClaims } from '../auth/tokens';
 /** A real bcrypt hash of a random value. Checked when the email doesn't exist, so a wrong email takes as long as a wrong password. */
 const DUMMY_HASH = '$2b$12$C6UzMDM.H6dfI/f/IKcEeO5x0Pq4Gx2bEdzyzMOrM4vh1Y7MiG.Wy';
 
-export type LoggedInUser = TokenClaims & { fullName: string };
+export type LoggedInUser = { userId: number; role: TokenClaims['role']; fullName: string };
 
 /** Returns the user if the email and password match, otherwise null (without saying which one was wrong). */
 export async function checkCredentials(input: LoginInput): Promise<LoggedInUser | null> {

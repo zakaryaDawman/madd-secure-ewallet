@@ -1,5 +1,5 @@
 import { clearSession, getToken } from '../auth/session';
-import { replaceScreen } from '../utils/navigation';
+import { restartAt } from '../utils/navigation';
 
 /** Server address. On a USB phone, adb reverse makes localhost reach the laptop. */
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
@@ -9,6 +9,16 @@ export type ApiResult<T> = { ok: boolean; status: number; body: T };
 
 /** Thrown when the phone can't reach the server (no internet, server off). Screens show the offline view. */
 export class OfflineError extends Error {}
+
+/**
+ * Called when the server refuses the session token (expired, logged out, cancelled): forgets the token on the phone
+ * and shows the "You were logged out" screen (design 28). Throws so the screen that asked stops what it was doing.
+ */
+async function endSession(): Promise<never> {
+  await clearSession();
+  restartAt('/session-expired');
+  throw new Error('Session ended');
+}
 
 /** Sends a GET request to the server and returns the JSON body. Throws if the server answers with an error. */
 export async function apiGet<T>(path: string): Promise<T> {
@@ -30,7 +40,7 @@ export async function apiPost<T>(path: string, data: unknown): Promise<ApiResult
 
 /**
  * GET for logged-in screens that need the server's error messages: returns status + body.
- * If the server says the session is no longer valid, logs out on the phone and opens Login.
+ * If the server says the session is no longer valid, logs out on the phone and opens Session expired.
  * Throws OfflineError if the server can't be reached.
  */
 export async function authGetResult<T>(path: string): Promise<ApiResult<T>> {
@@ -41,11 +51,7 @@ export async function authGetResult<T>(path: string): Promise<ApiResult<T>> {
   } catch {
     throw new OfflineError();
   }
-  if (res.status === 401) {
-    await clearSession();
-    replaceScreen('/login');
-    throw new Error('Session ended');
-  }
+  if (res.status === 401) await endSession();
   const body = (await res.json().catch(() => ({}))) as T;
   return { ok: res.ok, status: res.status, body };
 }
@@ -63,11 +69,7 @@ export async function authPost<T>(path: string, data: unknown): Promise<ApiResul
   } catch {
     throw new OfflineError();
   }
-  if (res.status === 401) {
-    await clearSession();
-    replaceScreen('/login');
-    throw new Error('Session ended');
-  }
+  if (res.status === 401) await endSession();
   const body = (await res.json().catch(() => ({}))) as T;
   return { ok: res.ok, status: res.status, body };
 }
@@ -77,4 +79,11 @@ export async function authGet<T>(path: string): Promise<T> {
   const res = await authGetResult<T>(path);
   if (!res.ok) throw new Error(`Request failed: ${res.status}`);
   return res.body;
+}
+
+/** Tells the server to cancel this session (logout). Never throws: the phone forgets the token either way. */
+export async function postLogout(): Promise<void> {
+  const token = await getToken();
+  if (!token) return;
+  await fetch(`${API_URL}/auth/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
 }

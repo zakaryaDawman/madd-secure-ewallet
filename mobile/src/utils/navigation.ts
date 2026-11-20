@@ -25,3 +25,10 @@ export function backToHome(): void {
 export function replaceScreen(href: Href): void {
   if (!isTooSoon()) router.replace(href);
 }
+
+/** Closes every open screen and shows this one alone, so Back can't return to a logged-in screen (session ended). */
+export function restartAt(href: Href): void {
+  if (isTooSoon()) return;
+  if (router.canDismiss()) router.dismissAll();
+  router.replace(href);
+}

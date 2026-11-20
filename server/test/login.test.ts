@@ -31,8 +31,8 @@ describe('POST /auth/login', () => {
     expect(res.status).toBe(200);
     expect(res.body.user).toEqual({ id: expect.any(Number), fullName: 'Zakarya Dawman', role: 'customer' });
 
-    const claims = verifyToken(res.body.token);
-    expect(claims).toEqual({ userId: res.body.user.id, role: 'customer' });
+    const check = verifyToken(res.body.token);
+    expect(check).toEqual({ ok: true, claims: { userId: res.body.user.id, role: 'customer', sessionId: expect.any(String) } });
 
     const payload = JSON.parse(Buffer.from(res.body.token.split('.')[1], 'base64url').toString());
     expect(payload.exp - payload.iat).toBe(30 * 60);
@@ -64,10 +64,10 @@ describe('verifyToken', () => {
     const res = await login('zakarya@email.com', 'password12');
     const [head, body, sig] = res.body.token.split('.');
     const forged = Buffer.from(JSON.stringify({ ...JSON.parse(Buffer.from(body, 'base64url').toString()), role: 'admin' })).toString('base64url');
-    expect(verifyToken(`${head}.${forged}.${sig}`)).toBeNull();
+    expect(verifyToken(`${head}.${forged}.${sig}`)).toEqual({ ok: false, reason: 'invalid' });
   });
 
   it('rejects garbage', () => {
-    expect(verifyToken('not-a-token')).toBeNull();
+    expect(verifyToken('not-a-token')).toEqual({ ok: false, reason: 'invalid' });
   });
 });
