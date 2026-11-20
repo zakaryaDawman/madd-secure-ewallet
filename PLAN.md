@@ -89,3 +89,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] E2 Flagged activity (21) + read-only event details (48): GET /admin/flagged (rule + status filters) and /admin/flagged/:id; rules save their numbers (security_events.details) for the exact calculation; timeline; severity R1/R2 Medium, R3/R4 High
 - [x] E3 Security log (22): GET /admin/logs, search by user or rule (SQL-safe), cursor paging 50 at a time, read-only (no edit routes + append-only trigger), day headings and Load older in the console
 - [x] E4 Users list (24), User details (23), Unfreeze with required reason (25); admin freeze, unfreeze and trust device, each logged with the admin (actor_id) and reason; admins still cannot move money, change balances or see PINs
+- [x] F1 Results tables (280/280 tests, by FR), performance measurements (all pass, suggested targets), screen check 01–48 with B1, B2, D1–D7 fixed

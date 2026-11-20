@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { MaddAppBar } from '../components/MaddAppBar';
+import { MaddButton } from '../components/MaddButton';
+import { FreezeAccountSheet } from '../components/profile/FreezeAccountSheet';
+import { getProfile } from '../api/me';
 import { FaqItem } from '../components/profile/FaqItem';
 import { colors, fonts, radius, spacing } from '../theme';
 
@@ -25,10 +29,20 @@ const FAQ = [
   },
 ];
 
-/** Help and support screen (design 44): common questions and how to reach MADD support. */
+/** Help and support screen (design 44): common questions, how to reach MADD support, and "Freeze my account now" (design 30). */
 export default function HelpScreen() {
+  const insets = useSafeAreaInsets();
+  const [freezing, setFreezing] = useState<{ pinLocked: boolean } | null>(null);
+
+  /** Opens the freeze sheet; asks the server first whether the PIN is locked (then no PIN is needed). */
+  function openFreeze() {
+    getProfile()
+      .then((p) => setFreezing({ pinLocked: p.pinLocked }))
+      .catch(() => setFreezing({ pinLocked: false }));
+  }
+
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.bar}>
         <MaddAppBar title="Help and support" onBack={() => router.back()} />
       </View>
@@ -45,6 +59,10 @@ export default function HelpScreen() {
           <Text style={styles.cardText}>+60 3-1234 5678 · 9am to 6pm</Text>
         </View>
       </ScrollView>
+      <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>
+        <MaddButton label="Freeze my account now" variant="danger" onPress={openFreeze} />
+      </View>
+      {freezing && <FreezeAccountSheet pinLocked={freezing.pinLocked} onCancel={() => setFreezing(null)} />}
     </SafeAreaView>
   );
 }
@@ -57,4 +75,5 @@ const styles = StyleSheet.create({
   card: { backgroundColor: colors.background, borderRadius: radius.card, padding: 20, gap: 6, marginTop: 12 },
   cardTitle: { fontFamily: fonts.bold, fontSize: 17, color: colors.ink },
   cardText: { fontFamily: fonts.regular, fontSize: 15, color: '#2E3A59' },
+  actions: { paddingHorizontal: spacing.xl, paddingTop: spacing.md },
 });

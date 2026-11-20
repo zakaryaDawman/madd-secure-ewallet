@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { MaddWordmark } from './MaddWordmark';
+import { QrLogo } from './qr/QrLogo';
 import { colors, fonts, radius } from '../theme';
 
 /** The light-blue picture on design 47: a "Was this you?" alert on top of a "Money received" one. */
@@ -7,9 +7,7 @@ export function NotificationPreviewArt() {
   return (
     <View style={styles.panel}>
       <View style={[styles.alert, styles.front]}>
-        <View style={styles.appIcon}>
-          <MaddWordmark width={30} />
-        </View>
+        <QrLogo size={44} />
         <View style={styles.texts}>
           <Text style={styles.title}>Was this you?</Text>
           <Text style={styles.body}>RM 800 transfer is waiting for you</Text>

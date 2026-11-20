@@ -11,6 +11,7 @@ export type TransactionDetail = RecentTransaction & {
   otherPhone: string;
   reference: string;
   completedAt: string | null;
+  sentFrom: { name: string; thisDevice: boolean } | null;
   hold: HoldDetails | null;
 };
 

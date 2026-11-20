@@ -18,12 +18,11 @@ export async function runTransferRules(
   amountSen: number,
 ): Promise<FiredRule[]> {
   const senderId = sender.userId;
-  const [pastAmounts, recentTimes, now, trusted] = await Promise.all([
-    pastCompletedAmounts(client, senderId),
-    recentTransferTimes(client, senderId),
-    databaseNow(client),
-    trustedDeviceIds(senderId, client),
-  ]);
+  // One after another: a transaction has a single database connection, which runs one query at a time.
+  const pastAmounts = await pastCompletedAmounts(client, senderId);
+  const recentTimes = await recentTransferTimes(client, senderId);
+  const now = await databaseNow(client);
+  const trusted = await trustedDeviceIds(senderId, client);
   const results = [
     { rule: 'R1' as const, ...checkLargeAmount(amountSen, pastAmounts) },
     { rule: 'R2' as const, ...checkVelocity(recentTimes, now) },

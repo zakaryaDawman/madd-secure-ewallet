@@ -20,4 +20,6 @@ export const colors = {
   danger: '#DC2626',
   dangerBg: '#FDECEC',
   dangerText: '#B91C1C',
+  dangerBorder: '#F5C2C2', // "Freeze my account" card border (design 19)
+  dangerSurface: '#FFF6F6', // "Freeze my account" card background
 } as const;

@@ -59,7 +59,7 @@ export async function sendMoney(
       alertTrustedPhones(senderId, heldTransferAlert(input.amountSen)); // only after COMMIT: never alert about a hold that wasn't saved
       return { ok: true, status: 'held', id };
     }
-    const receipt = await moveMoney(client, senderId, recipient, input);
+    const receipt = await moveMoney(client, sender, recipient, input);
     await client.query('COMMIT');
     return { ok: true, status: 'sent', receipt };
   } catch (err) {
@@ -92,16 +92,17 @@ export async function lockWallets(client: PoolClient, senderId: number, recipien
 /** Records a normal (not held) transfer, moves the money and tells both people. Must run inside lockWallets' transaction. */
 async function moveMoney(
   client: PoolClient,
-  senderId: number,
+  sender: { userId: number; deviceId: string },
   recipient: { id: number; fullName: string },
   input: TransferInput,
 ): Promise<TransferReceipt> {
+  const senderId = sender.userId;
   const newBalanceSen = await moveBalances(client, senderId, recipient.id, input.amountSen);
   const note = input.note || null;
   const { rows } = await client.query<{ id: number; created_at: Date }>(
-    `INSERT INTO transactions (sender_id, receiver_id, amount_sen, note, status, completed_at)
-     VALUES ($1, $2, $3, $4, 'COMPLETED', now()) RETURNING id, created_at`,
-    [senderId, recipient.id, input.amountSen, note],
+    `INSERT INTO transactions (sender_id, receiver_id, amount_sen, note, status, completed_at, device_id)
+     VALUES ($1, $2, $3, $4, 'COMPLETED', now(), $5) RETURNING id, created_at`,
+    [senderId, recipient.id, input.amountSen, note, sender.deviceId],
   );
   await notify({ userId: senderId, kind: 'MONEY_SENT', transactionId: rows[0].id }, client);
   await notify({ userId: recipient.id, kind: 'MONEY_RECEIVED', transactionId: rows[0].id }, client);

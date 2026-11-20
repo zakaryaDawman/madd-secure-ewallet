@@ -10,6 +10,7 @@ import { BigAvatar } from '../components/profile/BigAvatar';
 import { DeviceRow } from '../components/profile/DeviceRow';
 import { TrustDeviceSheet } from '../components/devices/TrustDeviceSheet';
 import { FreezeAccountSheet } from '../components/profile/FreezeAccountSheet';
+import { FreezeCard } from '../components/profile/FreezeCard';
 import { ListCard } from '../components/profile/ListCard';
 import { MenuRow } from '../components/profile/MenuRow';
 import { formatPhone } from '../utils/qrPayload';
@@ -59,8 +60,9 @@ export default function ProfileScreen() {
             <MenuRow label="Personal details" onPress={() => openScreen('/personal-details')} />
             <MenuRow label="Change PIN" onPress={() => openScreen('/change-pin')} />
             <MenuRow label="Help and support" onPress={() => openScreen('/help')} />
-            <MenuRow label="Freeze my account" danger onPress={() => setFreezing(true)} />
           </ListCard>
+
+          <FreezeCard onPress={() => setFreezing(true)} />
 
           <Pressable accessibilityRole="button" onPress={confirmLogout} hitSlop={8} style={styles.logout}>
             <Text style={styles.logoutText}>Log out</Text>

@@ -22,6 +22,7 @@ export type TransactionDetail = TransactionItem & {
   otherPhone: string;
   reference: string;
   completedAt: string | null;
+  sentFrom: { name: string; thisDevice: boolean } | null; // the phone a sent transfer came from (design 26)
   hold: HoldDetails | null; // only for my own transfer while it waits for me (PENDING)
 };
 
@@ -83,8 +84,19 @@ export async function getTransaction(userId: number, id: number, deviceId: strin
     otherPhone: maskPhone(row.other_phone),
     reference: makeReference(row.id, row.created_at),
     completedAt: row.completed_at ? row.completed_at.toISOString() : null,
+    sentFrom: row.direction === 'out' ? await sentFrom(userId, id, deviceId) : null,
     hold: row.status === 'PENDING' && row.direction === 'out' ? await holdDetails(row.id, deviceId, await isTrustedDevice(userId, deviceId)) : null,
   };
+}
+
+/** The name of the phone this transfer was sent from, and whether it is the phone asking. Null for older transfers. */
+async function sentFrom(userId: number, id: number, deviceId: string): Promise<TransactionDetail['sentFrom']> {
+  const { rows } = await pool.query<{ name: string; device_id: string }>(
+    `SELECT d.name, d.device_id FROM transactions t JOIN known_devices d ON d.user_id = $1 AND d.device_id = t.device_id
+     WHERE t.id = $2 AND t.sender_id = $1`,
+    [userId, id],
+  );
+  return rows[0] ? { name: rows[0].name, thisDevice: rows[0].device_id === deviceId } : null;
 }
 
 /** Turns a database row into the shape the app receives (sen as a number, dates as ISO text). */

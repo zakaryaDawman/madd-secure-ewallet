@@ -14,3 +14,6 @@ mobile/.claude/
 # Firebase (task D7): the server key is secret; google-services.json stays local too
 server/secrets/
 mobile/google-services.json
+
+# F1 raw Jest output (the tables in docs/F1 are built from it)
+docs/F1/jest-results.json

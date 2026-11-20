@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getWallet, WalletSummary } from '../api/wallet';
 import { OfflineError } from '../api/client';
@@ -7,6 +7,8 @@ import { ActivityList } from '../components/home/ActivityList';
 import { BalanceBlock } from '../components/home/BalanceBlock';
 import { HomeHeader } from '../components/home/HomeHeader';
 import { HomeSkeleton } from '../components/home/HomeSkeleton';
+import { HeldBanner } from '../components/home/HeldBanner';
+import { useHeldTransfer } from '../utils/useHeldTransfer';
 import { NewDeviceAlert } from '../components/home/NewDeviceAlert';
 import { QuickActions } from '../components/home/QuickActions';
 import { WelcomeCard } from '../components/home/WelcomeCard';
@@ -20,12 +22,13 @@ type LoadState = 'loading' | 'ready' | 'offline';
 
 /**
  * Home screen (design 05): balance, Send/Receive/Scan, recent activity and the tab bar. Shows designs 39/40/46 for new,
- * loading and offline, and the "New device signed in" sheet (design 13) when a new phone is waiting.
+ * loading and offline, "Confirm your transfer" when one is held, and the "New device signed in" sheet (design 13).
  */
 export default function HomeScreen() {
   const { wallet, state, refreshing, reload } = useWallet();
   const [hidden, setHidden] = useState(false);
   const hasUnread = useInboxDot();
+  const { held, recheck } = useHeldTransfer();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -41,11 +44,21 @@ export default function HomeScreen() {
             contentContainerStyle={styles.content}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={reload} colors={[colors.blue]} />}
           >
-            <HomeHeader fullName={wallet.fullName} onAvatarPress={() => openScreen('/profile')} onBellPress={() => openScreen('/inbox')} />
+            <HomeHeader fullName={wallet.fullName} hasUnread={hasUnread} onAvatarPress={() => openScreen('/profile')} onBellPress={() => openScreen('/inbox')} />
             <BalanceBlock balanceSen={wallet.balanceSen} hidden={hidden} onToggleHidden={() => setHidden((h) => !h)} />
             <QuickActions onPress={(action) => openScreen(action === 'send' ? '/recipient' : `/${action}`)} />
+            {held && (
+              <HeldBanner card={held} onTimeUp={recheck} onPress={() => openScreen({ pathname: '/held', params: { id: String(held.transactionId) } })} />
+            )}
             {wallet.recent.length === 0 && <WelcomeCard />}
-            <Text style={styles.sectionTitle}>Recent activity</Text>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionTitle}>Recent activity</Text>
+              {wallet.recent.length > 0 && (
+                <Pressable accessibilityRole="link" onPress={() => openScreen('/history')} hitSlop={8}>
+                  <Text style={styles.seeAll}>See all</Text>
+                </Pressable>
+              )}
+            </View>
             <ActivityList items={wallet.recent} onSendPress={() => openScreen('/recipient')} />
           </ScrollView>
         )}
@@ -104,5 +117,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
   body: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: spacing.md, paddingBottom: spacing.xl, gap: 22 },
-  sectionTitle: { fontFamily: fonts.extrabold, fontSize: 20, letterSpacing: -0.4, color: colors.ink, marginBottom: -10 },
+  sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: -10 },
+  sectionTitle: { fontFamily: fonts.extrabold, fontSize: 20, letterSpacing: -0.4, color: colors.ink },
+  seeAll: { fontFamily: fonts.bold, fontSize: 15, color: colors.blue },
 });

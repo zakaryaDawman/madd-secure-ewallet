@@ -8,7 +8,9 @@
     "start": "node dist/server.js",
     "test": "jest",
     "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed-admin": "tsx src/db/seedAdmin.ts"
+    "db:seed-admin": "tsx src/db/seedAdmin.ts",
+    "report:tests": "tsx scripts/testReport.ts",
+    "report:measure": "tsx scripts/measure.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

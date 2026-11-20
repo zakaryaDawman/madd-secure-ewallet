@@ -114,3 +114,14 @@ describe('privacy: a user only ever sees their own transactions', () => {
     expect((await detail(ahmad, id)).status).toBe(404);
   });
 });
+
+describe('GET /transactions/:id: Sent from (design 26)', () => {
+  it('names the phone a transfer was sent from, and marks it as this phone', async () => {
+    const sent = await request(app)
+      .post('/transfers')
+      .set('Authorization', `Bearer ${zak.token}`)
+      .send({ recipientPhone: '012 345 4521', amountSen: 1_000, note: '', pin: '482913' });
+    const res = await request(app).get(`/transactions/${sent.body.id}`).set('Authorization', `Bearer ${zak.token}`);
+    expect(res.body.sentFrom).toEqual({ name: 'Test Phone', thisDevice: true });
+  });
+});

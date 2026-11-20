@@ -44,6 +44,7 @@ export default function TransactionScreen() {
               <Row label="For" value={tx.note || '—'} />
               <Row label={tx.direction === 'out' ? 'Recipient phone' : 'Sender phone'} value={tx.otherPhone} />
               <Row label="Date" value={fullDate(tx.createdAt)} />
+              {tx.sentFrom && <Row label="Sent from" value={`${tx.sentFrom.name}${tx.sentFrom.thisDevice ? ' (this phone)' : ''}`} />}
               <Row label="Reference" value={tx.reference} last />
             </View>
             <TxTimeline tx={tx} />
