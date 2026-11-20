@@ -9,6 +9,7 @@ services:
     ports: ["5433:5432"]
     volumes:
       - madd_pgdata:/var/lib/postgresql/data
+      - ./server/src/db/create-test-db.sql:/docker-entrypoint-initdb.d/00-test-db.sql:ro
       - ./server/src/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
   adminer:
     image: adminer
