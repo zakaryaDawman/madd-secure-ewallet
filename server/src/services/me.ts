@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { pool } from '../db/pool';
 import { Device, listDevices } from './devices';
-import { pinMatches } from './transfers';
+import { checkPin, PinCheck } from './pinCheck';
 import { BCRYPT_ROUNDS } from './users';
 import type { ChangePinInput } from '../validation/profile';
 
@@ -35,10 +35,11 @@ export async function updateName(userId: number, fullName: string): Promise<void
   await pool.query('UPDATE users SET full_name = $2 WHERE id = $1', [userId, fullName]);
 }
 
-/** Changes the PIN if the current one is right. Returns false (and changes nothing) for a wrong current PIN. */
-export async function changePin(userId: number, input: ChangePinInput): Promise<boolean> {
-  if (!(await pinMatches(userId, input.currentPin))) return false;
+/** Changes the PIN if the current one is right. Wrong tries count towards the same lock as transfers. */
+export async function changePin(userId: number, input: ChangePinInput): Promise<PinCheck> {
+  const check = await checkPin(userId, input.currentPin);
+  if (!check.ok) return check;
   const hash = await bcrypt.hash(input.newPin, BCRYPT_ROUNDS);
   await pool.query('UPDATE users SET pin_hash = $2 WHERE id = $1', [userId, hash]);
-  return true;
+  return check;
 }

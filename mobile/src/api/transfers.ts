@@ -11,7 +11,7 @@ export type TransferReceipt = {
 };
 
 /** Why a transfer didn't go through. `offline` means no answer came back, so we can't be sure whether the money moved. */
-export type TransferFailure = 'wrong_pin' | 'insufficient_funds' | 'offline' | 'other';
+export type TransferFailure = 'wrong_pin' | 'pin_locked' | 'insufficient_funds' | 'offline' | 'other';
 
 export type SendResult = { ok: true; receipt: TransferReceipt } | { ok: false; reason: TransferFailure; message: string };
 
@@ -22,7 +22,7 @@ export async function sendTransfer(data: { recipientPhone: string; amountSen: nu
   try {
     const res = await authPost<Reply>('/transfers', data);
     if (res.ok) return { ok: true, receipt: res.body };
-    const reason: TransferFailure = res.body.error === 'wrong_pin' || res.body.error === 'insufficient_funds' ? res.body.error : 'other';
+    const reason = knownFailure(res.body.error);
     return { ok: false, reason, message: res.body.message ?? 'The transfer could not be completed.' };
   } catch (err) {
     if (err instanceof OfflineError) {
@@ -30,4 +30,9 @@ export async function sendTransfer(data: { recipientPhone: string; amountSen: nu
     }
     throw err;
   }
+}
+
+/** Turns the server's error code into a reason the screens handle; anything else is 'other'. */
+function knownFailure(error: string | undefined): TransferFailure {
+  return error === 'wrong_pin' || error === 'pin_locked' || error === 'insufficient_funds' ? error : 'other';
 }

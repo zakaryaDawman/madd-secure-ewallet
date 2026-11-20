@@ -4,12 +4,12 @@ import { normalisePhone } from '../validation/register';
 import { transferSchema } from '../validation/transfer';
 import { sendMoney, TransferError } from '../services/transfers';
 import { fieldErrors } from './fieldErrors';
+import { sendPinRefusal } from './pinRefusal';
 
 export const transfersRouter = Router();
 
 /** HTTP status and message for each reason a transfer can be refused. */
 const REFUSALS: Record<TransferError, { status: number; message: string }> = {
-  wrong_pin: { status: 403, message: 'Wrong PIN. Please try again.' },
   recipient_not_found: { status: 404, message: "We couldn't find a MADD user with this number." },
   self: { status: 400, message: "You can't send money to yourself." },
   insufficient_funds: { status: 400, message: 'Not enough balance for this transfer.' },
@@ -32,6 +32,10 @@ transfersRouter.post('/', requireAuth, async (req, res, next) => {
     const result = await sendMoney(currentUser(res).userId, parsed.data, phone);
     if (result.ok) {
       res.status(201).json(result.receipt);
+      return;
+    }
+    if (result.error === 'wrong_pin' || result.error === 'pin_locked') {
+      sendPinRefusal(res, result);
       return;
     }
     const refusal = REFUSALS[result.error];

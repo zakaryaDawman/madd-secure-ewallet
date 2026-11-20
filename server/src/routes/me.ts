@@ -3,6 +3,7 @@ import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { changePinSchema, updateProfileSchema } from '../validation/profile';
 import { changePin, getProfile, updateName } from '../services/me';
 import { fieldErrors } from './fieldErrors';
+import { sendPinRefusal } from './pinRefusal';
 
 export const meRouter = Router();
 
@@ -36,7 +37,7 @@ meRouter.patch('/', requireAuth, async (req, res, next) => {
   }
 });
 
-/** POST /me/pin: changes my PIN after checking the current one. */
+/** POST /me/pin: changes my PIN after checking the current one (wrong tries count towards the PIN lock). */
 meRouter.post('/pin', requireAuth, async (req, res, next) => {
   const parsed = changePinSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -44,8 +45,9 @@ meRouter.post('/pin', requireAuth, async (req, res, next) => {
     return;
   }
   try {
-    if (!(await changePin(currentUser(res).userId, parsed.data))) {
-      res.status(403).json({ error: 'wrong_pin', message: 'Your current PIN is wrong.' });
+    const check = await changePin(currentUser(res).userId, parsed.data);
+    if (!check.ok) {
+      sendPinRefusal(res, check);
       return;
     }
     res.status(204).end();

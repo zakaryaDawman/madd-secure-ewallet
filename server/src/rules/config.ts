@@ -7,5 +7,6 @@ export const ruleConfig = {
   failedLoginMax: 5, // R4: 5 failed logins...
   failedLoginWindowMinutes: 15, // R4: ...within 15 minutes
   lockMinutes: 15, // R4 + PIN lock duration
+  pinMaxTries: 5, // 5 wrong PINs in a row lock transfers
   holdMinutes: 5, // held transfer expires after 5 minutes
 };

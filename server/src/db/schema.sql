@@ -55,6 +55,15 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 );
 CREATE INDEX IF NOT EXISTS idx_login_attempts_user ON login_attempts (user_id, created_at);
 
+-- Every PIN check (transfers, Change PIN), right or wrong. 5 wrong in a row lock transfers for 15 minutes (task C4).
+CREATE TABLE IF NOT EXISTS pin_attempts (
+  id          SERIAL PRIMARY KEY,
+  user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  success     BOOLEAN NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_pin_attempts_user ON pin_attempts (user_id, created_at);
+
 -- Phones each user has logged in from. The first one is trusted; later ones wait for rule R3 (task D4).
 CREATE TABLE IF NOT EXISTS known_devices (
   user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,

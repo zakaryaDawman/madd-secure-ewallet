@@ -1,8 +1,8 @@
-import bcrypt from 'bcrypt';
 import type { PoolClient } from 'pg';
 import { pool } from '../db/pool';
 import { maskName } from '../utils/mask';
 import type { TransferInput } from '../validation/transfer';
+import { checkPin, PinCheck } from './pinCheck';
 
 export type TransferReceipt = {
   id: number;
@@ -14,16 +14,20 @@ export type TransferReceipt = {
   createdAt: string;
 };
 
-export type TransferError = 'wrong_pin' | 'recipient_not_found' | 'self' | 'insufficient_funds';
-export type TransferResult = { ok: true; receipt: TransferReceipt } | { ok: false; error: TransferError };
+export type TransferError = 'recipient_not_found' | 'self' | 'insufficient_funds';
+export type TransferResult =
+  | { ok: true; receipt: TransferReceipt }
+  | { ok: false; error: TransferError }
+  | Exclude<PinCheck, { ok: true }>;
 
 /**
  * Sends money from one user to another.
- * Order: check PIN, find recipient, then move the money inside ONE database transaction
+ * Order: check PIN (with the wrong-PIN lock), find recipient, then move the money inside ONE database transaction
  * so it is either fully done or not done at all.
  */
 export async function sendMoney(senderId: number, input: TransferInput, recipientPhone: string): Promise<TransferResult> {
-  if (!(await pinMatches(senderId, input.pin))) return { ok: false, error: 'wrong_pin' };
+  const pin = await checkPin(senderId, input.pin);
+  if (!pin.ok) return pin;
 
   const recipient = await findUserByPhone(recipientPhone);
   if (!recipient) return { ok: false, error: 'recipient_not_found' };
@@ -46,12 +50,6 @@ export async function sendMoney(senderId: number, input: TransferInput, recipien
   } finally {
     client.release();
   }
-}
-
-/** True if the PIN matches the one saved (as a bcrypt hash) for this user. */
-export async function pinMatches(userId: number, pin: string): Promise<boolean> {
-  const { rows } = await pool.query<{ pin_hash: string }>('SELECT pin_hash FROM users WHERE id = $1', [userId]);
-  return rows.length > 0 && bcrypt.compare(pin, rows[0].pin_hash);
 }
 
 /** Finds a user by their +60 phone number. */

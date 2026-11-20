@@ -50,7 +50,7 @@ export async function changePin(currentPin: string, newPin: string): Promise<Sav
   try {
     const res = await authPost<ErrorReply & { error?: string }>('/me/pin', { currentPin, newPin });
     if (res.ok) return { ok: true };
-    return { ...failure(res.body), wrongPin: res.body.error === 'wrong_pin' };
+    return { ...failure(res.body), wrongPin: res.body.error === 'wrong_pin' || res.body.error === 'pin_locked' };
   } catch (err) {
     if (err instanceof OfflineError) return failure(null);
     throw err;

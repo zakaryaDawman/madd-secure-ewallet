@@ -40,6 +40,8 @@ export default function CheckingScreen() {
         } else if (result.reason === 'wrong_pin') {
           updateTransferDraft({ pinError: result.message });
           router.back();
+        } else if (result.reason === 'pin_locked') {
+          replaceScreen('/pin-locked');
         } else {
           setMessage(result.message);
           setStep('failed');
