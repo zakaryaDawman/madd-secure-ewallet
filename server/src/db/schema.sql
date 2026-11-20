@@ -83,13 +83,22 @@ CREATE TABLE IF NOT EXISTS known_devices (
 CREATE TABLE IF NOT EXISTS security_events (
   id             SERIAL PRIMARY KEY,
   user_id        INT NOT NULL REFERENCES users(id),
-  type           TEXT NOT NULL CHECK (type IN ('RULE_FIRED', 'HOLD_EXPIRED')),
+  type           TEXT NOT NULL,
   rule           TEXT CHECK (rule IN ('R1', 'R2', 'R3', 'R4')),
   transaction_id INT REFERENCES transactions(id),
   reason         TEXT NOT NULL,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_security_events_transaction ON security_events (transaction_id);
+
+-- The kinds of security event. Kept as a named constraint so new kinds can be added later.
+ALTER TABLE security_events DROP CONSTRAINT IF EXISTS security_events_type_check;
+ALTER TABLE security_events ADD CONSTRAINT security_events_type_check CHECK (type IN (
+  'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED'
+));
+
+-- Task D3: set when the account is frozen. Only an admin can clear it.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS frozen_at TIMESTAMPTZ;
 
 -- Refuses any change: rows can be added, never edited, deleted or emptied, not even by the server's own code.
 CREATE OR REPLACE FUNCTION refuse_security_event_change() RETURNS trigger AS $$

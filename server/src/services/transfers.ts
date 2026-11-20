@@ -77,7 +77,7 @@ async function findUserByPhone(phone: string): Promise<{ id: number; fullName: s
  * Always locks the lower user id first: two people paying each other at once can't block each other forever.
  * Returns the sender's balance.
  */
-async function lockWallets(client: PoolClient, senderId: number, recipientId: number): Promise<number> {
+export async function lockWallets(client: PoolClient, senderId: number, recipientId: number): Promise<number> {
   const { rows } = await client.query<{ user_id: number; balance_sen: string }>(
     'SELECT user_id, balance_sen FROM wallets WHERE user_id = ANY($1) ORDER BY user_id FOR UPDATE',
     [[senderId, recipientId]],
@@ -85,18 +85,14 @@ async function lockWallets(client: PoolClient, senderId: number, recipientId: nu
   return Number(rows.find((r) => r.user_id === senderId)?.balance_sen ?? 0);
 }
 
-/** Takes the money from the sender, gives it to the recipient, and records the transfer. Must run inside lockWallets' transaction. */
+/** Records a normal (not held) transfer and moves the money. Must run inside lockWallets' transaction. */
 async function moveMoney(
   client: PoolClient,
   senderId: number,
   recipient: { id: number; fullName: string },
   input: TransferInput,
 ): Promise<TransferReceipt> {
-  const debited = await client.query<{ balance_sen: string }>(
-    'UPDATE wallets SET balance_sen = balance_sen - $2, updated_at = now() WHERE user_id = $1 RETURNING balance_sen',
-    [senderId, input.amountSen],
-  );
-  await client.query('UPDATE wallets SET balance_sen = balance_sen + $2, updated_at = now() WHERE user_id = $1', [recipient.id, input.amountSen]);
+  const newBalanceSen = await moveBalances(client, senderId, recipient.id, input.amountSen);
   const note = input.note || null;
   const { rows } = await client.query<{ id: number; created_at: Date }>(
     `INSERT INTO transactions (sender_id, receiver_id, amount_sen, note, status, completed_at)
@@ -109,9 +105,22 @@ async function moveMoney(
     amountSen: input.amountSen,
     note,
     recipientName: maskName(recipient.fullName),
-    newBalanceSen: Number(debited.rows[0].balance_sen),
+    newBalanceSen,
     createdAt: rows[0].created_at.toISOString(),
   };
+}
+
+/**
+ * Takes the amount from the sender and gives it to the recipient. Returns the sender's new balance.
+ * Must run inside lockWallets' transaction. Used by normal transfers and by "Yes, it was me".
+ */
+export async function moveBalances(client: PoolClient, senderId: number, recipientId: number, amountSen: number): Promise<number> {
+  const debited = await client.query<{ balance_sen: string }>(
+    'UPDATE wallets SET balance_sen = balance_sen - $2, updated_at = now() WHERE user_id = $1 RETURNING balance_sen',
+    [senderId, amountSen],
+  );
+  await client.query('UPDATE wallets SET balance_sen = balance_sen + $2, updated_at = now() WHERE user_id = $1', [recipientId, amountSen]);
+  return Number(debited.rows[0].balance_sen);
 }
 
 /** Human-readable receipt number, e.g. "MD-20261120-0042". */

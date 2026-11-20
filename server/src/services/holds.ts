@@ -3,6 +3,7 @@ import { pool } from '../db/pool';
 import { ruleConfig } from '../rules/config';
 import type { TransferInput } from '../validation/transfer';
 import type { FiredRule } from './transferRules';
+import { logSecurityEvent } from './securityLog';
 
 const EXPIRED_REASON = `Not confirmed within ${ruleConfig.holdMinutes} minutes, so it was cancelled. No money moved.`;
 
@@ -27,10 +28,7 @@ export async function holdTransfer(
   );
   const id = rows[0].id;
   for (const { rule, reason } of fired) {
-    await client.query(
-      "INSERT INTO security_events (user_id, type, rule, transaction_id, reason) VALUES ($1, 'RULE_FIRED', $2, $3, $4)",
-      [sender.userId, rule, id, reason],
-    );
+    await logSecurityEvent({ userId: sender.userId, type: 'RULE_FIRED', rule, transactionId: id, reason }, client);
   }
   return id;
 }

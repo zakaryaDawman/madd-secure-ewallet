@@ -35,6 +35,7 @@ authRouter.post('/register', async (req, res, next) => {
 /**
  * POST /auth/login: checks email + password, records the attempt and the device, starts a session and returns its
  * 30-minute token (with the device id inside, so it can't be faked). One message for any wrong detail.
+ * A frozen account gets 423 and no session.
  */
 authRouter.post('/login', async (req, res, next) => {
   const parsed = loginSchema.safeParse(req.body);
@@ -49,6 +50,11 @@ authRouter.post('/login', async (req, res, next) => {
     await recordLoginAttempt(email, deviceId, user !== null);
     if (!user) {
       res.status(401).json({ error: 'invalid_login', message: 'Email or password is wrong' });
+      return;
+    }
+    if (user.frozen) {
+      // Only told after the right password, so this reveals nothing to someone guessing.
+      res.status(423).json({ error: 'account_frozen', message: 'Your account is frozen. Contact MADD support.' });
       return;
     }
     await rememberDevice(user.userId, deviceId, deviceName);

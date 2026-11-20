@@ -5,6 +5,7 @@ import { authRouter } from './routes/auth';
 import { walletRouter } from './routes/wallet';
 import { createUsersRouter } from './routes/users';
 import { transfersRouter } from './routes/transfers';
+import { holdDecisionsRouter } from './routes/holdDecisions';
 import { transactionsRouter } from './routes/transactions';
 import { meRouter } from './routes/me';
 import { adminRouter } from './routes/admin';
@@ -20,6 +21,7 @@ export function createApp() {
   app.use('/wallet', walletRouter);
   app.use('/users', createUsersRouter());
   app.use('/transfers', transfersRouter);
+  app.use('/transfers', holdDecisionsRouter);
   app.use('/transactions', transactionsRouter);
   app.use('/me', meRouter);
   app.use('/admin', adminRouter);

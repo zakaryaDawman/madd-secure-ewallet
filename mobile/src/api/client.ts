@@ -11,12 +11,14 @@ export type ApiResult<T> = { ok: boolean; status: number; body: T };
 export class OfflineError extends Error {}
 
 /**
- * Called when the server refuses the session token (expired, logged out, cancelled): forgets the token on the phone
- * and shows the "You were logged out" screen (design 28). Throws so the screen that asked stops what it was doing.
+ * Called when the server refuses the session token: forgets the token on the phone and shows "Your account is frozen"
+ * (design 14) if the account was frozen, otherwise "You were logged out" (design 28).
+ * Throws so the screen that asked stops what it was doing.
  */
-async function endSession(): Promise<never> {
+async function endSession(res: Response): Promise<never> {
+  const body = (await res.json().catch(() => ({}))) as { error?: string };
   await clearSession();
-  restartAt('/session-expired');
+  restartAt(body.error === 'account_frozen' ? '/frozen' : '/session-expired');
   throw new Error('Session ended');
 }
 
@@ -51,7 +53,7 @@ export async function authGetResult<T>(path: string): Promise<ApiResult<T>> {
   } catch {
     throw new OfflineError();
   }
-  if (res.status === 401) await endSession();
+  if (res.status === 401) await endSession(res);
   const body = (await res.json().catch(() => ({}))) as T;
   return { ok: res.ok, status: res.status, body };
 }
@@ -69,7 +71,7 @@ async function authSend<T>(method: 'POST' | 'PATCH', path: string, data: unknown
   } catch {
     throw new OfflineError();
   }
-  if (res.status === 401) await endSession();
+  if (res.status === 401) await endSession(res);
   const body = (await res.json().catch(() => ({}))) as T;
   return { ok: res.ok, status: res.status, body };
 }

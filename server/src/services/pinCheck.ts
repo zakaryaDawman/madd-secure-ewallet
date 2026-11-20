@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { pool } from '../db/pool';
 import { PinAttempt, pinLockState } from '../rules/pinLock';
 import { ruleConfig } from '../rules/config';
+import { logSecurityEvent } from './securityLog';
 
 /** Result of checking a PIN with the wrong-PIN lock. */
 export type PinCheck =
@@ -24,7 +25,7 @@ export async function checkPin(userId: number, pin: string): Promise<PinCheck> {
 
   const after = pinLockState([...attempts, { success, at }], at);
   if (!after.locked) return { ok: false, error: 'wrong_pin', triesLeft: after.triesLeft };
-  logPinLock(userId);
+  await logSecurityEvent({ userId, type: 'PIN_LOCKED', reason: `${ruleConfig.pinMaxTries} wrong PINs in a row. Transfers locked for ${ruleConfig.lockMinutes} minutes.` });
   return { ok: false, error: 'pin_locked', unlocksAt: after.unlocksAt };
 }
 
@@ -50,9 +51,4 @@ async function recordPinAttempt(userId: number, success: boolean): Promise<Date>
     [userId, success],
   );
   return rows[0].created_at;
-}
-
-/** Logs the lock on the server. Moves into the security_events table in task D2. */
-function logPinLock(userId: number): void {
-  if (process.env.NODE_ENV !== 'test') console.warn(`PIN_LOCKED user=${userId} minutes=${ruleConfig.lockMinutes}`);
 }
