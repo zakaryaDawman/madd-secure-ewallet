@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { openScreen } from '../utils/navigation';
+import { openScreen, replaceScreen } from '../utils/navigation';
+import { getToken } from '../auth/session';
 import { StatusBar } from 'expo-status-bar';
 import { BlueGradient } from '../components/BlueGradient';
 import { MaddWordmark } from '../components/MaddWordmark';
@@ -13,6 +14,7 @@ type ServerState = 'checking' | 'up' | 'down';
 /** Splash screen (design 01-Main): logo, tagline, and the Create account / Log in buttons. */
 export default function SplashScreen() {
   const serverState = useServerState();
+  useOpenHomeIfLoggedIn();
 
   return (
     <View style={styles.root}>
@@ -35,6 +37,15 @@ export default function SplashScreen() {
       </SafeAreaView>
     </View>
   );
+}
+
+/** If a session is saved on the phone, skips the splash and opens Home (the server still checks the token there). */
+function useOpenHomeIfLoggedIn() {
+  useEffect(() => {
+    getToken().then((token) => {
+      if (token) replaceScreen('/home');
+    });
+  }, []);
 }
 
 /** Checks the server once when the screen opens and reports checking / up / down. */

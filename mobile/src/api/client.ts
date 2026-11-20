@@ -1,8 +1,14 @@
+import { clearSession, getToken } from '../auth/session';
+import { replaceScreen } from '../utils/navigation';
+
 /** Server address. On a USB phone, adb reverse makes localhost reach the laptop. */
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
 
 /** What every POST returns: the HTTP status and the parsed JSON body. */
 export type ApiResult<T> = { ok: boolean; status: number; body: T };
+
+/** Thrown when the phone can't reach the server (no internet, server off). Screens show the offline view. */
+export class OfflineError extends Error {}
 
 /** Sends a GET request to the server and returns the JSON body. Throws if the server answers with an error. */
 export async function apiGet<T>(path: string): Promise<T> {
@@ -20,4 +26,26 @@ export async function apiPost<T>(path: string, data: unknown): Promise<ApiResult
   });
   const body = (await res.json().catch(() => ({}))) as T;
   return { ok: res.ok, status: res.status, body };
+}
+
+/**
+ * GET for logged-in screens: sends the saved session token.
+ * If the server says the session is no longer valid, logs out on the phone and opens Login.
+ * Throws OfflineError if the server can't be reached.
+ */
+export async function authGet<T>(path: string): Promise<T> {
+  const token = await getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, { headers: { Authorization: `Bearer ${token ?? ''}` } });
+  } catch {
+    throw new OfflineError();
+  }
+  if (res.status === 401) {
+    await clearSession();
+    replaceScreen('/login');
+    throw new Error('Session ended');
+  }
+  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  return (await res.json()) as T;
 }
