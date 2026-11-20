@@ -72,3 +72,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] B5 Choose recipient: masked lookup (rate-limited), recent recipients
 - [x] B6 Send money: POST /transfers (PIN check, one DB transaction with FOR UPDATE), Amount, Review + PIN, Checking, Sent, low-balance state
 - [x] B7 History (All/In/Out/Held, date groups) and Transfer details; GET /transactions, GET /transactions/:id, own-transactions-only test
+- [x] B8 Receive (my QR = phone number only, copy, share, save) and Scan (camera, flash, gallery) into the normal Amount flow

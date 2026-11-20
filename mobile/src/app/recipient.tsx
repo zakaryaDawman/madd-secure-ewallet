@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { getRecentRecipients, lookupRecipient, Recipient, RecentRecipient } from '../api/recipients';
 import { startTransfer } from '../auth/transferDraft';
 import { Icon } from '../components/icons';
-import { openScreen } from '../utils/navigation';
+import { openScreen, replaceScreen } from '../utils/navigation';
 import { RecentRecipients } from '../components/send/RecentRecipients';
 import { RecipientRow } from '../components/send/RecipientRow';
 import { colors, fonts, radius, spacing } from '../theme';
@@ -31,8 +31,7 @@ export default function RecipientScreen() {
           <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={() => router.back()} style={styles.close} hitSlop={8}>
             <Icon name="close" size={20} strokeWidth={2.2} />
           </Pressable>
-          {/* Scan opens the camera in task B8. */}
-          <Pressable accessibilityRole="button" style={styles.scanPill}>
+          <Pressable accessibilityRole="button" onPress={() => replaceScreen('/scan')} style={styles.scanPill}>
             <Icon name="scan" size={18} color={colors.blueDark} strokeWidth={2.2} />
             <Text style={styles.scanText}>Scan QR</Text>
           </Pressable>

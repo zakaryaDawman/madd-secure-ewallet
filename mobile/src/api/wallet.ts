@@ -12,11 +12,12 @@ export type RecentTransaction = {
 
 export type WalletSummary = {
   fullName: string;
+  phone: string;
   balanceSen: number;
   recent: RecentTransaction[];
 };
 
-/** Gets the logged-in user's name, balance and last 3 transactions. */
+/** Gets the logged-in user's name, own phone number, balance and last 3 transactions. */
 export function getWallet(): Promise<WalletSummary> {
   return authGet<WalletSummary>('/wallet');
 }

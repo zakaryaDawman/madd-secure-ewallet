@@ -38,16 +38,15 @@ export default function HomeScreen() {
           >
             <HomeHeader fullName={wallet.fullName} onAvatarPress={confirmLogout} onBellPress={() => {}} />
             <BalanceBlock balanceSen={wallet.balanceSen} hidden={hidden} onToggleHidden={() => setHidden((h) => !h)} />
-            {/* Receive and Scan open their screens in task B8. */}
-            <QuickActions onPress={(action) => action === 'send' && openScreen('/recipient')} />
+            <QuickActions onPress={(action) => openScreen(action === 'send' ? '/recipient' : `/${action}`)} />
             {wallet.recent.length === 0 && <WelcomeCard />}
             <Text style={styles.sectionTitle}>Recent activity</Text>
             <ActivityList items={wallet.recent} onSendPress={() => openScreen('/recipient')} />
           </ScrollView>
         )}
       </View>
-      {/* Other tabs open their screens in later tasks (Scan B8, Profile C2, Inbox D6). */}
-      <MaddTabBar active="home" onSelect={(tab) => tab === 'history' && openScreen('/history')} />
+      {/* Profile (C2) and Inbox (D6) open their screens in later tasks. */}
+      <MaddTabBar active="home" onSelect={(tab) => (tab === 'history' || tab === 'scan') && openScreen(`/${tab}`)} />
     </SafeAreaView>
   );
 }

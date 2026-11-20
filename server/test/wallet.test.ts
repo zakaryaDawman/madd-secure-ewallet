@@ -44,11 +44,11 @@ describe('GET /wallet: protection', () => {
 });
 
 describe('GET /wallet: data', () => {
-  it('returns a new user with RM 1,000 and no activity', async () => {
+  it('returns a new user with their phone, RM 1,000 and no activity', async () => {
     const zak = await signUp('Zakarya Dawman', 'zak@email.com', '0123456789');
     const res = await getWallet(zak.token);
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ fullName: 'Zakarya Dawman', balanceSen: 100_000, recent: [] });
+    expect(res.body).toEqual({ fullName: 'Zakarya Dawman', phone: '+60123456789', balanceSen: 100_000, recent: [] });
   });
 
   it("only ever shows the token owner's wallet", async () => {
