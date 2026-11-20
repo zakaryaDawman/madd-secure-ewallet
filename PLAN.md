@@ -64,4 +64,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] A1 Project rules and plan (approved 20 Nov 2026)
 - [x] A2 Server skeleton and database (Docker Postgres + Adminer, GET /health, 1 passing test)
 - [x] A3 App skeleton on the phone (Splash 01-Main shows "Server connected" on the Honor phone)
-- [ ] A4 Shared components
+- [x] A4 Shared components (MaddButton, MaddAppBar, MaddKeypad, MaddTabBar + temporary preview screen)
