@@ -50,7 +50,9 @@ describe('POST /transfers: success', () => {
   });
 
   it('can send the whole balance', async () => {
-    expect((await send({ amountSen: 100_000 })).status).toBe(201);
+    // RM 400 first, so RM 600 is within 3 x the usual transfer and rule R1 does not hold it
+    expect((await send({ amountSen: 40_000 })).status).toBe(201);
+    expect((await send({ amountSen: 60_000 })).status).toBe(201);
     expect(await balanceOf(zak.id)).toBe(0);
   });
 });
@@ -110,10 +112,11 @@ describe('POST /transfers: refused', () => {
 
 describe('POST /transfers: safe under pressure', () => {
   it('lets only one of two simultaneous transfers through when both cannot fit', async () => {
-    const [a, b] = await Promise.all([send({ amountSen: 60_000 }), send({ amountSen: 60_000 })]);
+    await send({ amountSen: 30_000 }); // balance RM 700; amounts stay under RM 500 so rule R1 does not hold them
+    const [a, b] = await Promise.all([send({ amountSen: 40_000 }), send({ amountSen: 40_000 })]);
     expect([a.status, b.status].sort()).toEqual([201, 400]);
-    expect(await balanceOf(zak.id)).toBe(40_000);
-    expect(await balanceOf(ahmad.id)).toBe(160_000);
+    expect(await balanceOf(zak.id)).toBe(30_000);
+    expect(await balanceOf(ahmad.id)).toBe(170_000);
   });
 
   it('never loses or creates money when two people pay each other at once', async () => {

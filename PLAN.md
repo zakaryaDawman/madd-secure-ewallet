@@ -78,3 +78,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] C3 Roles: requireRole (role read from DB each request), /admin router (403 for customers), GET /admin/me, npm run db:seed-admin
 - [x] C4 Wrong PIN lock: pin_attempts table, pure rule pinLock (5 wrong in a row = 15 min lock), 403 tries left / 423 locked on transfers and Change PIN, Transfers locked screen (31)
 - [x] D1 Rules R1–R4 as pure functions (largeAmount, velocity, unknownDevice, failedLogins) returning { fired, reason }, with fires / not / on-the-limit tests
+- [x] D2 R1+R2 run in POST /transfers: held as PENDING (202, no money moves), security_events append-only (trigger), expiry on read after 5 min, Held (11) with reason + countdown, Transfer cancelled (35)

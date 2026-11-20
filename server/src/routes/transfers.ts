@@ -15,7 +15,7 @@ const REFUSALS: Record<TransferError, { status: number; message: string }> = {
   insufficient_funds: { status: 400, message: 'Not enough balance for this transfer.' },
 };
 
-/** POST /transfers: sends money to another MADD user after checking the PIN. */
+/** POST /transfers: sends money after checking the PIN, or holds it (202) if rule R1 or R2 fires. */
 transfersRouter.post('/', requireAuth, async (req, res, next) => {
   const parsed = transferSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -29,7 +29,11 @@ transfersRouter.post('/', requireAuth, async (req, res, next) => {
   }
 
   try {
-    const result = await sendMoney(currentUser(res).userId, parsed.data, phone);
+    const result = await sendMoney(currentUser(res), parsed.data, phone);
+    if (result.ok && result.status === 'held') {
+      res.status(202).json({ held: true, id: result.id }); // a rule fired: no money moved, the owner must confirm
+      return;
+    }
     if (result.ok) {
       res.status(201).json(result.receipt);
       return;

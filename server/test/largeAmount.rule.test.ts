@@ -2,7 +2,14 @@ import { checkLargeAmount } from '../src/rules/largeAmount';
 
 describe('R1 checkLargeAmount', () => {
   it('fires above RM 500 for a new user with no past transfers', () => {
-    expect(checkLargeAmount(80_000, [])).toEqual({ fired: true, reason: 'RM 800.00 is much larger than your usual transfers.' });
+    expect(checkLargeAmount(80_000, [])).toEqual({ fired: true, reason: 'RM 800 is above your safe limit of RM 500.' });
+  });
+
+  it('fires for RM 800 when the usual transfer is RM 96, with the reason shown on the Held screen', () => {
+    expect(checkLargeAmount(80_000, [9_600, 9_600])).toEqual({
+      fired: true,
+      reason: 'RM 800 is more than 3 times your usual transfer, and above your safe limit of RM 500.',
+    });
   });
 
   it('does not fire for a small amount', () => {

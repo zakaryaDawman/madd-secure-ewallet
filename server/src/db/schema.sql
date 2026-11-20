@@ -33,6 +33,10 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE INDEX IF NOT EXISTS idx_transactions_sender ON transactions (sender_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_transactions_receiver ON transactions (receiver_id, created_at);
 
+-- Task D2: the phone that sent each transfer, and when a held (PENDING) transfer runs out.
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS device_id UUID;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+
 -- One row per login. The JWT carries this id, so the server can end a session before its 30 minutes are up.
 CREATE TABLE IF NOT EXISTS sessions (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -74,3 +78,27 @@ CREATE TABLE IF NOT EXISTS known_devices (
   last_seen   TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (user_id, device_id)
 );
+
+-- Security log (FR-16): every rule that fired and every hold that ran out. Append-only: see the triggers below.
+CREATE TABLE IF NOT EXISTS security_events (
+  id             SERIAL PRIMARY KEY,
+  user_id        INT NOT NULL REFERENCES users(id),
+  type           TEXT NOT NULL CHECK (type IN ('RULE_FIRED', 'HOLD_EXPIRED')),
+  rule           TEXT CHECK (rule IN ('R1', 'R2', 'R3', 'R4')),
+  transaction_id INT REFERENCES transactions(id),
+  reason         TEXT NOT NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_security_events_transaction ON security_events (transaction_id);
+
+-- Refuses any change: rows can be added, never edited, deleted or emptied, not even by the server's own code.
+CREATE OR REPLACE FUNCTION refuse_security_event_change() RETURNS trigger AS $$
+BEGIN
+  RAISE EXCEPTION 'security_events is append-only: % is not allowed', TG_OP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER security_events_no_edit
+  BEFORE UPDATE OR DELETE ON security_events FOR EACH ROW EXECUTE FUNCTION refuse_security_event_change();
+CREATE OR REPLACE TRIGGER security_events_no_truncate
+  BEFORE TRUNCATE ON security_events FOR EACH STATEMENT EXECUTE FUNCTION refuse_security_event_change();

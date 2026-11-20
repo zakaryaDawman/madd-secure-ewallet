@@ -3,6 +3,8 @@ import { pool } from '../db/pool';
 import { maskName } from '../utils/mask';
 import type { TransferInput } from '../validation/transfer';
 import { checkPin, PinCheck } from './pinCheck';
+import { runTransferRules } from './transferRules';
+import { holdTransfer } from './holds';
 
 export type TransferReceipt = {
   id: number;
@@ -16,16 +18,22 @@ export type TransferReceipt = {
 
 export type TransferError = 'recipient_not_found' | 'self' | 'insufficient_funds';
 export type TransferResult =
-  | { ok: true; receipt: TransferReceipt }
+  | { ok: true; status: 'sent'; receipt: TransferReceipt }
+  | { ok: true; status: 'held'; id: number }
   | { ok: false; error: TransferError }
   | Exclude<PinCheck, { ok: true }>;
 
 /**
  * Sends money from one user to another.
- * Order: check PIN (with the wrong-PIN lock), find recipient, then move the money inside ONE database transaction
- * so it is either fully done or not done at all.
+ * Order: check PIN (with the wrong-PIN lock), find recipient, then inside ONE database transaction: check the balance,
+ * run rules R1 + R2, and either hold the transfer (a rule fired, no money moves) or move the money.
  */
-export async function sendMoney(senderId: number, input: TransferInput, recipientPhone: string): Promise<TransferResult> {
+export async function sendMoney(
+  sender: { userId: number; deviceId: string },
+  input: TransferInput,
+  recipientPhone: string,
+): Promise<TransferResult> {
+  const senderId = sender.userId;
   const pin = await checkPin(senderId, input.pin);
   if (!pin.ok) return pin;
 
@@ -41,9 +49,15 @@ export async function sendMoney(senderId: number, input: TransferInput, recipien
       await client.query('ROLLBACK');
       return { ok: false, error: 'insufficient_funds' };
     }
+    const fired = await runTransferRules(client, senderId, input.amountSen);
+    if (fired.length > 0) {
+      const id = await holdTransfer(client, sender, recipient.id, input, fired);
+      await client.query('COMMIT');
+      return { ok: true, status: 'held', id };
+    }
     const receipt = await moveMoney(client, senderId, recipient, input);
     await client.query('COMMIT');
-    return { ok: true, receipt };
+    return { ok: true, status: 'sent', receipt };
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;

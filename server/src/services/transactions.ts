@@ -1,6 +1,7 @@
 import { pool } from '../db/pool';
-import { maskPhone } from '../utils/mask';
+import { maskName, maskPhone } from '../utils/mask';
 import { makeReference } from './transfers';
+import { expireHolds, holdDetails, HoldDetails } from './holds';
 
 export const FILTERS = ['all', 'in', 'out', 'held'] as const;
 export type TransactionFilter = (typeof FILTERS)[number];
@@ -16,9 +17,11 @@ export type TransactionItem = {
 };
 
 export type TransactionDetail = TransactionItem & {
+  otherNameMasked: string; // e.g. "Ahm*** Ali", for the Held and Cancelled screens
   otherPhone: string;
   reference: string;
   completedAt: string | null;
+  hold: HoldDetails | null; // only for my own transfer while it waits for me (PENDING)
 };
 
 type TransactionRow = {
@@ -54,8 +57,9 @@ const FILTER_SQL: Record<TransactionFilter, string> = {
   held: "AND t.status = 'PENDING'",
 };
 
-/** The user's transactions, newest first, narrowed by a filter (All / In / Out / Held). */
+/** The user's transactions, newest first, narrowed by a filter (All / In / Out / Held). Ran-out holds are cancelled first. */
 export async function listTransactions(userId: number, filter: TransactionFilter, limit = 200): Promise<TransactionItem[]> {
+  await expireHolds(userId);
   const { rows } = await pool.query<TransactionRow>(
     `${VISIBLE_TO_USER} ${FILTER_SQL[filter]} ORDER BY t.created_at DESC, t.id DESC LIMIT $2`,
     [userId, limit],
@@ -63,16 +67,22 @@ export async function listTransactions(userId: number, filter: TransactionFilter
   return rows.map(toItem);
 }
 
-/** One transaction with its details, or null if it doesn't exist or isn't the user's. */
-export async function getTransaction(userId: number, id: number): Promise<TransactionDetail | null> {
+/**
+ * One transaction with its details, or null if it doesn't exist or isn't the user's. A ran-out hold is cancelled first;
+ * a hold still waiting comes with its reasons and time left. `deviceId` (from the token) marks "This phone".
+ */
+export async function getTransaction(userId: number, id: number, deviceId: string): Promise<TransactionDetail | null> {
+  await expireHolds(userId);
   const { rows } = await pool.query<TransactionRow>(`${VISIBLE_TO_USER} AND t.id = $2`, [userId, id]);
   if (rows.length === 0) return null;
   const row = rows[0];
   return {
     ...toItem(row),
+    otherNameMasked: maskName(row.other_name),
     otherPhone: maskPhone(row.other_phone),
     reference: makeReference(row.id, row.created_at),
     completedAt: row.completed_at ? row.completed_at.toISOString() : null,
+    hold: row.status === 'PENDING' && row.direction === 'out' ? await holdDetails(row.id, deviceId) : null,
   };
 }
 

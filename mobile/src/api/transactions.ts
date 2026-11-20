@@ -3,10 +3,15 @@ import type { RecentTransaction } from './wallet';
 
 export type TransactionFilter = 'all' | 'in' | 'out' | 'held';
 
+/** Why a transfer was paused and how long the owner has left to decide (design 11). */
+export type HoldDetails = { reasons: string[]; expiresAt: string; secondsLeft: number; thisDevice: boolean };
+
 export type TransactionDetail = RecentTransaction & {
+  otherNameMasked: string;
   otherPhone: string;
   reference: string;
   completedAt: string | null;
+  hold: HoldDetails | null;
 };
 
 /** Gets the logged-in user's transactions, newest first, for one History filter. */

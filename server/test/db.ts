@@ -6,7 +6,13 @@ export async function prepareTestDatabase(): Promise<void> {
   await migrate(pool);
 }
 
-/** Empties every table so each test starts from a clean database. */
+/**
+ * Empties every table so each test starts from a clean database. security_events refuses to be emptied,
+ * so its guard triggers are switched off just for this, and only ever in the test database.
+ */
 export async function clearTables(): Promise<void> {
-  await pool.query('TRUNCATE pin_attempts, login_attempts, known_devices, sessions, transactions, wallets, users RESTART IDENTITY CASCADE');
+  await pool.query(`
+    ALTER TABLE security_events DISABLE TRIGGER USER;
+    TRUNCATE security_events, pin_attempts, login_attempts, known_devices, sessions, transactions, wallets, users RESTART IDENTITY CASCADE;
+    ALTER TABLE security_events ENABLE TRIGGER USER;`);
 }

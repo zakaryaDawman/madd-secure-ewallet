@@ -15,6 +15,8 @@ export const colors = {
   warning: '#F59E0B',
   warningBg: '#FFF1DC',
   warningText: '#9A4A06',
+  warningBorder: '#FCD9A0', // "Why we paused it" box border (design 11)
+  warningSurface: '#FFFAF1', // "Why we paused it" box background
   danger: '#DC2626',
   dangerBg: '#FDECEC',
   dangerText: '#B91C1C',

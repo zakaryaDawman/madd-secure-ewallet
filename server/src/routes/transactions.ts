@@ -33,7 +33,8 @@ transactionsRouter.get('/:id', requireAuth, async (req, res, next) => {
     return;
   }
   try {
-    const transaction = await getTransaction(currentUser(res).userId, id);
+    const { userId, deviceId } = currentUser(res);
+    const transaction = await getTransaction(userId, id, deviceId);
     if (!transaction) {
       res.status(404).json(NOT_FOUND);
       return;

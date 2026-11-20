@@ -13,14 +13,18 @@ export type TransferReceipt = {
 /** Why a transfer didn't go through. `offline` means no answer came back, so we can't be sure whether the money moved. */
 export type TransferFailure = 'wrong_pin' | 'pin_locked' | 'insufficient_funds' | 'offline' | 'other';
 
-export type SendResult = { ok: true; receipt: TransferReceipt } | { ok: false; reason: TransferFailure; message: string };
+export type SendResult =
+  | { ok: true; receipt: TransferReceipt }
+  | { ok: true; heldId: number }
+  | { ok: false; reason: TransferFailure; message: string };
 
-type Reply = TransferReceipt & { error?: string; message?: string };
+type Reply = TransferReceipt & { held?: boolean; error?: string; message?: string };
 
-/** Asks the server to send money. The server checks the PIN and the balance; the phone decides nothing. */
+/** Asks the server to send money. The server checks the PIN, the balance and the rules; the phone decides nothing. */
 export async function sendTransfer(data: { recipientPhone: string; amountSen: number; note: string; pin: string }): Promise<SendResult> {
   try {
     const res = await authPost<Reply>('/transfers', data);
+    if (res.ok && res.body.held) return { ok: true, heldId: res.body.id }; // 202: a rule paused it, no money moved
     if (res.ok) return { ok: true, receipt: res.body };
     const reason = knownFailure(res.body.error);
     return { ok: false, reason, message: res.body.message ?? 'The transfer could not be completed.' };

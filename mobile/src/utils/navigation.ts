@@ -32,3 +32,8 @@ export function restartAt(href: Href): void {
   if (router.canDismiss()) router.dismissAll();
   router.replace(href);
 }
+
+/** Closes screens until this one is on top again (e.g. "Try again" back to Amount). */
+export function backTo(href: Href): void {
+  if (!isTooSoon()) router.dismissTo(href);
+}

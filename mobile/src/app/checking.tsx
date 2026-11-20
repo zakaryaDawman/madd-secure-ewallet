@@ -32,7 +32,9 @@ export default function CheckingScreen() {
       .then(async (result) => {
         await wait(Math.max(0, MIN_SHOW_MS - (Date.now() - started)));
         if (!active) return;
-        if (result.ok) {
+        if (result.ok && 'heldId' in result) {
+          replaceScreen({ pathname: '/held', params: { id: String(result.heldId), fromSend: '1' } });
+        } else if (result.ok) {
           updateTransferDraft({ receipt: result.receipt });
           setPassed(true);
           await wait(TICKS_SHOW_MS);

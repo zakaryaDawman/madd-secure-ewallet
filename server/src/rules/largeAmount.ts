@@ -12,8 +12,13 @@ export function checkLargeAmount(amountSen: number, pastAmountsSen: number[]): R
   const aboveFloor = amountSen > ruleConfig.largeAmountFloorSen;
   const aboveAverage = count === 0 || amountSen * count > ruleConfig.largeAmountMultiplier * sum;
 
-  if (aboveFloor && aboveAverage) {
-    return { fired: true, reason: `${formatRM(amountSen)} is much larger than your usual transfers.` };
+  if (!aboveFloor || !aboveAverage) {
+    return { fired: false, reason: `${formatRM(amountSen)} is within your usual range.` };
   }
-  return { fired: false, reason: `${formatRM(amountSen)} is within your usual range.` };
+  const floor = formatRM(ruleConfig.largeAmountFloorSen);
+  if (count === 0) return { fired: true, reason: `${formatRM(amountSen)} is above your safe limit of ${floor}.` };
+  return {
+    fired: true,
+    reason: `${formatRM(amountSen)} is more than ${ruleConfig.largeAmountMultiplier} times your usual transfer, and above your safe limit of ${floor}.`,
+  };
 }

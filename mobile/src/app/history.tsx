@@ -47,7 +47,7 @@ export default function HistoryScreen() {
               <View key={group.title}>
                 <DateGroupHeader title={group.title} />
                 {group.items.map((item) => (
-                  <TxRow key={item.id} item={item} onPress={() => openScreen({ pathname: '/transaction', params: { id: String(item.id) } })} />
+                  <TxRow key={item.id} item={item} onPress={() => openTransaction(item)} />
                 ))}
               </View>
             ))}
@@ -112,3 +112,9 @@ const styles = StyleSheet.create({
   list: { paddingHorizontal: 20, paddingBottom: spacing.xl },
   empty: { fontFamily: fonts.regular, fontSize: 14, color: colors.muted, textAlign: 'center', marginTop: 48 },
 });
+
+/** Opens a transaction: my own held transfer goes to "Was this you?" (design 11), anything else to its details. */
+function openTransaction(item: RecentTransaction) {
+  const pathname = item.status === 'PENDING' && item.direction === 'out' ? '/held' : '/transaction';
+  openScreen({ pathname, params: { id: String(item.id) } });
+}
