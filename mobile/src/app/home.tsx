@@ -12,7 +12,7 @@ import { QuickActions } from '../components/home/QuickActions';
 import { WelcomeCard } from '../components/home/WelcomeCard';
 import { MaddTabBar } from '../components/MaddTabBar';
 import { OfflineView } from '../components/OfflineView';
-import { replaceScreen } from '../utils/navigation';
+import { openScreen, replaceScreen } from '../utils/navigation';
 import { colors, fonts, spacing } from '../theme';
 
 type LoadState = 'loading' | 'ready' | 'offline';
@@ -38,11 +38,11 @@ export default function HomeScreen() {
           >
             <HomeHeader fullName={wallet.fullName} onAvatarPress={confirmLogout} onBellPress={() => {}} />
             <BalanceBlock balanceSen={wallet.balanceSen} hidden={hidden} onToggleHidden={() => setHidden((h) => !h)} />
-            {/* Send, Receive and Scan open their screens in tasks B5, B6 and B8. */}
-            <QuickActions onPress={() => {}} />
+            {/* Receive and Scan open their screens in task B8. */}
+            <QuickActions onPress={(action) => action === 'send' && openScreen('/recipient')} />
             {wallet.recent.length === 0 && <WelcomeCard />}
             <Text style={styles.sectionTitle}>Recent activity</Text>
-            <ActivityList items={wallet.recent} />
+            <ActivityList items={wallet.recent} onSendPress={() => openScreen('/recipient')} />
           </ScrollView>
         )}
       </View>

@@ -1,21 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { RecentTransaction } from '../../api/wallet';
 import { Icon } from '../icons';
 import { formatRM } from '../../utils/money';
-import { initials, shortDate } from '../../utils/dates';
-import { colors, fonts, radius } from '../../theme';
-
-/** Avatar colour pairs used for people in lists, picked by name so each person keeps the same colour. */
-const AVATAR_COLORS = [
-  { bg: colors.tint, fg: colors.blueDark },
-  { bg: colors.successBg, fg: '#15803D' },
-  { bg: '#F1E6FF', fg: '#6B21A8' },
-  { bg: colors.warningBg, fg: colors.warningText },
-];
+import { shortDate } from '../../utils/dates';
+import { PersonAvatar } from '../PersonAvatar';
+import { colors, fonts } from '../../theme';
 
 /** "Recent activity" rows (design 05), or the "No activity yet" message for a new user (design 39). */
-export function ActivityList({ items }: { items: RecentTransaction[] }) {
-  if (items.length === 0) return <EmptyActivity />;
+export function ActivityList({ items, onSendPress }: { items: RecentTransaction[]; onSendPress: () => void }) {
+  if (items.length === 0) return <EmptyActivity onSendPress={onSendPress} />;
   return (
     <View>
       {items.map((t) => (
@@ -27,14 +20,11 @@ export function ActivityList({ items }: { items: RecentTransaction[] }) {
 
 /** One person row: coloured initials, name, note and date, and the signed amount (green for money in). */
 function ActivityRow({ item }: { item: RecentTransaction }) {
-  const color = AVATAR_COLORS[item.otherName.length % AVATAR_COLORS.length];
   const isIn = item.direction === 'in';
   const detail = [item.note, shortDate(item.createdAt)].filter(Boolean).join(' · ');
   return (
     <View style={styles.row}>
-      <View style={[styles.avatar, { backgroundColor: color.bg }]}>
-        <Text style={[styles.avatarText, { color: color.fg }]}>{initials(item.otherName)}</Text>
-      </View>
+      <PersonAvatar name={item.otherName} />
       <View style={styles.middle}>
         <Text style={styles.name} numberOfLines={1}>{item.otherName}</Text>
         <Text style={styles.detail} numberOfLines={1}>{detail}</Text>
@@ -47,8 +37,8 @@ function ActivityRow({ item }: { item: RecentTransaction }) {
   );
 }
 
-/** Message shown when the user hasn't sent or received anything yet (design 39). */
-function EmptyActivity() {
+/** Message shown when the user hasn't sent or received anything yet (design 39), with a "Send money" link. */
+function EmptyActivity({ onSendPress }: { onSendPress: () => void }) {
   return (
     <View style={styles.empty}>
       <View style={styles.emptyIcon}>
@@ -56,14 +46,15 @@ function EmptyActivity() {
       </View>
       <Text style={styles.emptyTitle}>No activity yet</Text>
       <Text style={styles.emptyText}>Your transfers will show up here. Send your first one to a friend.</Text>
+      <Pressable accessibilityRole="link" onPress={onSendPress} hitSlop={8}>
+        <Text style={styles.emptyLink}>Send money</Text>
+      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 11 },
-  avatar: { width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontFamily: fonts.bold, fontSize: 14 },
   middle: { flex: 1 },
   name: { fontFamily: fonts.bold, fontSize: 15, color: colors.ink },
   detail: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted },
@@ -71,5 +62,6 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', gap: 10, paddingVertical: 24, paddingHorizontal: 16 },
   emptyIcon: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   emptyTitle: { fontFamily: fonts.bold, fontSize: 17, color: colors.ink },
+  emptyLink: { fontFamily: fonts.bold, fontSize: 15, color: colors.blue, padding: 6 },
   emptyText: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 21, color: colors.muted, textAlign: 'center', maxWidth: 260 },
 });

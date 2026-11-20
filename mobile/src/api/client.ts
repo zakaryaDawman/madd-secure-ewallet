@@ -29,11 +29,11 @@ export async function apiPost<T>(path: string, data: unknown): Promise<ApiResult
 }
 
 /**
- * GET for logged-in screens: sends the saved session token.
+ * GET for logged-in screens that need the server's error messages: returns status + body.
  * If the server says the session is no longer valid, logs out on the phone and opens Login.
  * Throws OfflineError if the server can't be reached.
  */
-export async function authGet<T>(path: string): Promise<T> {
+export async function authGetResult<T>(path: string): Promise<ApiResult<T>> {
   const token = await getToken();
   let res: Response;
   try {
@@ -46,6 +46,13 @@ export async function authGet<T>(path: string): Promise<T> {
     replaceScreen('/login');
     throw new Error('Session ended');
   }
+  const body = (await res.json().catch(() => ({}))) as T;
+  return { ok: res.ok, status: res.status, body };
+}
+
+/** GET for logged-in screens: sends the saved session token and returns the body. Throws on any error. */
+export async function authGet<T>(path: string): Promise<T> {
+  const res = await authGetResult<T>(path);
   if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-  return (await res.json()) as T;
+  return res.body;
 }

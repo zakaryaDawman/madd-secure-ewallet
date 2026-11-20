@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import { healthRouter } from './routes/health';
 import { authRouter } from './routes/auth';
 import { walletRouter } from './routes/wallet';
+import { createUsersRouter } from './routes/users';
 
 /** Builds the Express app with security headers, JSON parsing and all routes. */
 export function createApp() {
@@ -13,6 +14,7 @@ export function createApp() {
   app.use('/health', healthRouter);
   app.use('/auth', authRouter);
   app.use('/wallet', walletRouter);
+  app.use('/users', createUsersRouter());
   app.use(handleUnexpectedError);
   return app;
 }
