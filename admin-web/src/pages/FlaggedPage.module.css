@@ -1,0 +1,3 @@
+.list { padding: 32px 40px; display: flex; flex-direction: column; gap: 18px; max-width: 980px; }
+.status { color: var(--muted); }
+.error { color: var(--danger-text); font-weight: 600; }

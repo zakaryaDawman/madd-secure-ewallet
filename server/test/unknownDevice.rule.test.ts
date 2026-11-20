@@ -5,7 +5,11 @@ const OTHER_PHONE = '22222222-2222-4222-8222-222222222222';
 
 describe('R3 checkUnknownDevice', () => {
   it('fires for a phone that is not trusted', () => {
-    expect(checkUnknownDevice(OTHER_PHONE, [PHONE])).toEqual({ fired: true, reason: 'This phone is not one of your trusted devices.' });
+    expect(checkUnknownDevice(OTHER_PHONE, [PHONE])).toEqual({
+      fired: true,
+      reason: 'This phone is not one of your trusted devices.',
+      details: { deviceId: OTHER_PHONE, trustedDevices: 1 },
+    });
   });
 
   it('does not fire for a trusted phone', () => {

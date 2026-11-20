@@ -9,4 +9,6 @@ export const ruleConfig = {
   lockMinutes: 15, // R4 + PIN lock duration
   pinMaxTries: 5, // 5 wrong PINs in a row lock transfers
   holdMinutes: 5, // held transfer expires after 5 minutes
+  // How serious each rule's alert is, shown to the admin (task E2): a new phone or password guessing is riskier.
+  severity: { R1: 'Medium', R2: 'Medium', R3: 'High', R4: 'High' } as const,
 };

@@ -9,6 +9,7 @@ export type SecurityEvent = {
   reason: string;
   rule?: 'R1' | 'R2' | 'R3' | 'R4';
   transactionId?: number;
+  details?: object; // the numbers a rule used (task E2)
 };
 
 /**
@@ -16,11 +17,12 @@ export type SecurityEvent = {
  * Pass the transfer's database client to save it in the same transaction as the change it describes.
  */
 export async function logSecurityEvent(event: SecurityEvent, db: PoolClient | typeof pool = pool): Promise<void> {
-  await db.query('INSERT INTO security_events (user_id, type, rule, transaction_id, reason) VALUES ($1, $2, $3, $4, $5)', [
+  await db.query('INSERT INTO security_events (user_id, type, rule, transaction_id, reason, details) VALUES ($1, $2, $3, $4, $5, $6)', [
     event.userId,
     event.type,
     event.rule ?? null,
     event.transactionId ?? null,
     event.reason,
+    event.details ?? null,
   ]);
 }

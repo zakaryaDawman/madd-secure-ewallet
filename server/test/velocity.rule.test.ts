@@ -10,7 +10,11 @@ function minutesAgo(minutes: number): Date {
 describe('R2 checkVelocity', () => {
   it('fires for the 5th transfer in 5 minutes', () => {
     const result = checkVelocity([minutesAgo(1), minutesAgo(2), minutesAgo(3), minutesAgo(4)], NOW);
-    expect(result).toEqual({ fired: true, reason: '5 transfers in 5 minutes is faster than usual.' });
+    expect(result).toEqual({
+      fired: true,
+      reason: '5 transfers in 5 minutes is faster than usual.',
+      details: { count: 5, maxTransfers: 3, windowMinutes: 5, spanSeconds: 240 }, // the first was 4 minutes ago
+    });
   });
 
   it('does not fire for the first transfer', () => {

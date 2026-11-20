@@ -97,6 +97,9 @@ ALTER TABLE security_events ADD CONSTRAINT security_events_type_check CHECK (typ
   'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED', 'DEVICE_TRUSTED'
 ));
 
+-- Task E2: the numbers a rule used (e.g. amount, average, limit), so the admin sees the exact calculation.
+ALTER TABLE security_events ADD COLUMN IF NOT EXISTS details JSONB;
+
 -- Task D3: set when the account is frozen. Only an admin can clear it.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS frozen_at TIMESTAMPTZ;
 

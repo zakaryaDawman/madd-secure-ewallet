@@ -13,7 +13,7 @@ import { newDeviceAlert } from './pushAlerts';
 export async function checkNewDeviceLogin(userId: number, deviceId: string, deviceName: string): Promise<boolean> {
   const result = checkUnknownDevice(deviceId, await trustedDeviceIds(userId));
   if (result.fired) {
-    await logSecurityEvent({ userId, type: 'RULE_FIRED', rule: 'R3', reason: `New login from ${deviceName}. ${result.reason}` });
+    await logSecurityEvent({ userId, type: 'RULE_FIRED', rule: 'R3', reason: `New login from ${deviceName}. ${result.reason}`, details: result.details });
     await notify({ userId, kind: 'NEW_DEVICE', deviceId });
     alertTrustedPhones(userId, newDeviceAlert(deviceName));
   }

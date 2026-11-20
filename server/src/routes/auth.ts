@@ -56,7 +56,7 @@ authRouter.post('/login', async (req, res, next) => {
     const user = await checkCredentials(parsed.data);
     await recordLoginAttempt(email, deviceId, user !== null);
     if (!user) {
-      const after = await lockAfterFailure(email);
+      const after = await lockAfterFailure(email, deviceId);
       if (after.locked) return sendLoginLocked(res, after.unlocksAt);
       res.status(401).json({ error: 'invalid_login', message: 'Email or password is wrong' });
       return;

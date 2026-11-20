@@ -14,7 +14,11 @@ function failures(count: number): LoginAttempt[] {
 
 describe('R4 checkFailedLogins', () => {
   it('fires at 6 wrong logins in 15 minutes', () => {
-    expect(checkFailedLogins(failures(6), NOW)).toEqual({ fired: true, reason: '6 wrong logins in 15 minutes.' });
+    expect(checkFailedLogins(failures(6), NOW)).toEqual({
+      fired: true,
+      reason: '6 wrong logins in 15 minutes.',
+      details: { failures: 6, maxFailures: 5, windowMinutes: 15, spanSeconds: 360 }, // the first was 6 minutes ago
+    });
   });
 
   it('does not fire with no wrong logins', () => {

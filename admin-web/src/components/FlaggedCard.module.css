@@ -1,0 +1,6 @@
+.card { display: block; width: 100%; text-align: left; border: 0; background: var(--white); border-radius: var(--radius-card); padding: 22px 28px; cursor: pointer; }
+.card:hover { box-shadow: 0 0 0 2px var(--tint); }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.name { margin: 0; font-size: 20px; font-weight: 700; color: var(--ink); }
+.summary { margin: 10px 0 6px; font-size: 17px; color: #33405f; }
+.facts { margin: 0; font-size: 15px; color: var(--muted); }

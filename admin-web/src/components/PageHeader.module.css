@@ -1,3 +1,6 @@
 .header { background: var(--ink); color: var(--white); padding: 36px 40px 32px; }
-.eyebrow { margin: 0 0 6px; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--sky); }
+.back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px; padding: 0; border: 0; background: none; color: #c9d3ec; font-size: 17px; font-weight: 600; cursor: pointer; }
+.back:hover { color: var(--white); }
+.topLine { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.eyebrow { margin: 0 0 6px; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--sky); text-transform: uppercase; }
 .title { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -1.2px; }

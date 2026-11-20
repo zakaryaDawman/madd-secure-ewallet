@@ -1,0 +1,8 @@
+.card { background: var(--white); border-radius: var(--radius-card); padding: 6px 28px; }
+.row { display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 17px; }
+.row:last-child { border-bottom: 0; }
+.label { color: var(--muted); }
+.value { font-weight: 700; text-align: right; }
+.blue { color: var(--blue); }
+.warning { color: var(--warning-text); }
+.danger { color: var(--danger-text); }

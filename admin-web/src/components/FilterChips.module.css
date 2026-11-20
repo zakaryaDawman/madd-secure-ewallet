@@ -1,0 +1,4 @@
+.row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.chip { padding: 10px 22px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: var(--white); font-weight: 700; font-size: 16px; cursor: pointer; }
+.chip:hover { background: rgba(255, 255, 255, 0.2); }
+.selected, .selected:hover { background: var(--white); color: var(--ink); }

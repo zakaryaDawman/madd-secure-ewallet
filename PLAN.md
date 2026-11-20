@@ -86,3 +86,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] D7 Push code: trusted phones only (held transfer, new device, sign-in lock), sent after commit, push_log timing, Allow notifications (47). **Still to do later: Firebase project + app build, then check a push arrives with the app closed (before F1).**
 - [x] D8 Freeze my account in Profile (30): PIN, or confirmation only while the PIN is locked; reuses the D3 freeze; Not you? Freeze account on Transfers locked
 - [x] E1 Admin web console (admin-web/, React + Vite): staff sign-in (token in memory only), side menu, Dashboard (20) from GET /admin/stats; CORS for the console only; admins blocked from wallet routes and from the phone app
+- [x] E2 Flagged activity (21) + read-only event details (48): GET /admin/flagged (rule + status filters) and /admin/flagged/:id; rules save their numbers (security_events.details) for the exact calculation; timeline; severity R1/R2 Medium, R3/R4 High

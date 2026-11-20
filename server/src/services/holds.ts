@@ -38,8 +38,8 @@ export async function holdTransfer(
     [sender.userId, recipientId, input.amountSen, input.note || null, sender.deviceId, ruleConfig.holdMinutes],
   );
   const id = rows[0].id;
-  for (const { rule, reason } of fired) {
-    await logSecurityEvent({ userId: sender.userId, type: 'RULE_FIRED', rule, transactionId: id, reason }, client);
+  for (const { rule, reason, details } of fired) {
+    await logSecurityEvent({ userId: sender.userId, type: 'RULE_FIRED', rule, transactionId: id, reason, details }, client);
   }
   await notify({ userId: sender.userId, kind: 'TRANSFER_HELD', transactionId: id }, client);
   return id;

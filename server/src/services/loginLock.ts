@@ -1,7 +1,7 @@
 import { pool } from '../db/pool';
 import { ruleConfig } from '../rules/config';
 import { loginLockState, LoginLockState } from '../rules/loginLock';
-import type { LoginAttempt } from '../rules/failedLogins';
+import { checkFailedLogins, type LoginAttempt } from '../rules/failedLogins';
 import { logSecurityEvent } from './securityLog';
 import { notify } from './notify';
 import { alertTrustedPhones } from './push';
@@ -16,8 +16,10 @@ export async function currentLoginLock(email: string): Promise<LoginLockState> {
  * Called right after a wrong password was recorded: if it was the one that made rule R4 fire, logs it for the account
  * and tells the owner in the Inbox and by push (an email with no account has no one to tell). Returns the lock state.
  */
-export async function lockAfterFailure(email: string): Promise<LoginLockState> {
-  const lock = await currentLoginLock(email);
+export async function lockAfterFailure(email: string, deviceId: string): Promise<LoginLockState> {
+  const attempts = await recentAttempts(email);
+  const now = new Date();
+  const lock = loginLockState(attempts, now);
   if (lock.locked) {
     const { rows } = await pool.query<{ id: number }>('SELECT id FROM users WHERE email = $1', [email]);
     if (rows[0]) {
@@ -26,6 +28,7 @@ export async function lockAfterFailure(email: string): Promise<LoginLockState> {
         type: 'RULE_FIRED',
         rule: 'R4',
         reason: `${ruleConfig.failedLoginMax} wrong passwords in ${ruleConfig.failedLoginWindowMinutes} minutes. Sign-in locked for ${ruleConfig.lockMinutes} minutes.`,
+        details: { ...checkFailedLogins(attempts, now).details, deviceId },
       });
       await notify({ userId: rows[0].id, kind: 'LOGIN_LOCKED' });
       alertTrustedPhones(rows[0].id, loginLockedAlert());

@@ -6,7 +6,7 @@ import { checkUnknownDevice } from '../rules/unknownDevice';
 import { trustedDeviceIds } from './devices';
 
 /** One rule that fired for a transfer, e.g. { rule: 'R1', reason: 'RM 800 is more than…' }. */
-export type FiredRule = { rule: 'R1' | 'R2' | 'R3'; reason: string };
+export type FiredRule = { rule: 'R1' | 'R2' | 'R3'; reason: string; details: object };
 
 /**
  * Runs R1 (large amount), R2 (velocity) and R3 (unknown device) on a new transfer and returns the ones that fired.
@@ -29,7 +29,7 @@ export async function runTransferRules(
     { rule: 'R2' as const, ...checkVelocity(recentTimes, now) },
     { rule: 'R3' as const, ...checkUnknownDevice(sender.deviceId, trusted) },
   ];
-  return results.filter((r) => r.fired).map(({ rule, reason }) => ({ rule, reason }));
+  return results.filter((r) => r.fired).map(({ rule, reason, details }) => ({ rule, reason, details }));
 }
 
 /** Amounts of the user's completed transfers: R1 works out their "usual" transfer from these. */
