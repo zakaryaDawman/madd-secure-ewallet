@@ -1,4 +1,4 @@
-/** Detection rule thresholds (R1–R4). The rules themselves are added in task D1. */
+/** Detection rule thresholds (R1–R4) and the PIN lock. Change a number here and every rule and test follows. */
 export const ruleConfig = {
   largeAmountFloorSen: 500_00, // R1: never flag below RM 500
   largeAmountMultiplier: 3, // R1: flag above 3x the user's average transfer
