@@ -5,6 +5,7 @@ import type { TransferInput } from '../validation/transfer';
 import { checkPin, PinCheck } from './pinCheck';
 import { runTransferRules } from './transferRules';
 import { holdTransfer } from './holds';
+import { notify } from './notify';
 
 export type TransferReceipt = {
   id: number;
@@ -85,7 +86,7 @@ export async function lockWallets(client: PoolClient, senderId: number, recipien
   return Number(rows.find((r) => r.user_id === senderId)?.balance_sen ?? 0);
 }
 
-/** Records a normal (not held) transfer and moves the money. Must run inside lockWallets' transaction. */
+/** Records a normal (not held) transfer, moves the money and tells both people. Must run inside lockWallets' transaction. */
 async function moveMoney(
   client: PoolClient,
   senderId: number,
@@ -99,6 +100,8 @@ async function moveMoney(
      VALUES ($1, $2, $3, $4, 'COMPLETED', now()) RETURNING id, created_at`,
     [senderId, recipient.id, input.amountSen, note],
   );
+  await notify({ userId: senderId, kind: 'MONEY_SENT', transactionId: rows[0].id }, client);
+  await notify({ userId: recipient.id, kind: 'MONEY_RECEIVED', transactionId: rows[0].id }, client);
   return {
     id: rows[0].id,
     reference: makeReference(rows[0].id, rows[0].created_at),

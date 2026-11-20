@@ -13,6 +13,7 @@ import { WelcomeCard } from '../components/home/WelcomeCard';
 import { MaddTabBar } from '../components/MaddTabBar';
 import { OfflineView } from '../components/OfflineView';
 import { openScreen } from '../utils/navigation';
+import { useInboxDot } from '../utils/useInboxDot';
 import { colors, fonts, spacing } from '../theme';
 
 type LoadState = 'loading' | 'ready' | 'offline';
@@ -24,6 +25,7 @@ type LoadState = 'loading' | 'ready' | 'offline';
 export default function HomeScreen() {
   const { wallet, state, refreshing, reload } = useWallet();
   const [hidden, setHidden] = useState(false);
+  const hasUnread = useInboxDot();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -39,7 +41,7 @@ export default function HomeScreen() {
             contentContainerStyle={styles.content}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={reload} colors={[colors.blue]} />}
           >
-            <HomeHeader fullName={wallet.fullName} onAvatarPress={() => openScreen('/profile')} onBellPress={() => {}} />
+            <HomeHeader fullName={wallet.fullName} onAvatarPress={() => openScreen('/profile')} onBellPress={() => openScreen('/inbox')} />
             <BalanceBlock balanceSen={wallet.balanceSen} hidden={hidden} onToggleHidden={() => setHidden((h) => !h)} />
             <QuickActions onPress={(action) => openScreen(action === 'send' ? '/recipient' : `/${action}`)} />
             {wallet.recent.length === 0 && <WelcomeCard />}
@@ -48,8 +50,7 @@ export default function HomeScreen() {
           </ScrollView>
         )}
       </View>
-      {/* Inbox opens its screen in task D6. */}
-      <MaddTabBar active="home" onSelect={(tab) => tab !== 'home' && tab !== 'inbox' && openScreen(`/${tab}`)} />
+      <MaddTabBar active="home" hasUnread={hasUnread} onSelect={(tab) => tab !== 'home' && openScreen(`/${tab}`)} />
       {state === 'ready' && <NewDeviceAlert />}
     </SafeAreaView>
   );

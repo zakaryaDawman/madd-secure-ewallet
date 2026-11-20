@@ -82,3 +82,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] D3 Yes (PIN sheet 29, row lock, balance re-check, sends once) / No (cancel, freeze, end every session, Frozen 14 on all phones); HOLD_CONFIRMED / HOLD_REJECTED / ACCOUNT_FROZEN / PIN_LOCKED logged
 - [x] D4 R3 at login and on transfers (new phone allowed but untrusted, its transfers held, only a trusted phone decides), Approve on usual phone (12), New device signed in (13), Trust this device with PIN (45) + Profile Trust button
 - [x] D5 R4 in /auth/login: 5 wrong passwords in 15 min lock sign-in for 15 min (pure loginLock rule, same reply for unknown emails, admin too), R4 logged, Too many wrong passwords (27) with countdown
+- [x] D6 Inbox: notifications table (money received/sent, held, confirmed, new device, login + PIN lock, welcome), GET /notifications, All (32) + Security (18) tabs, waiting-transfer card with Yes/No, unread dot, Freeze my account

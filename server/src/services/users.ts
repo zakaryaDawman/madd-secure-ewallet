@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { pool } from '../db/pool';
 import type { RegisterInput } from '../validation/register';
+import { notify } from './notify';
 
 export const BCRYPT_ROUNDS = 12;
 export const STARTING_BALANCE_SEN = 100_000; // RM 1,000 demo money
@@ -8,7 +9,7 @@ export const STARTING_BALANCE_SEN = 100_000; // RM 1,000 demo money
 /** Thrown when the email or phone number is already registered. */
 export class DuplicateAccountError extends Error {}
 
-/** Hashes the password and PIN, then creates the user and their wallet together. Returns the new user's id. */
+/** Hashes the password and PIN, then creates the user, their wallet and a "Welcome" Inbox item together. Returns the new user's id. */
 export async function createUserWithWallet(input: RegisterInput): Promise<number> {
   const [passwordHash, pinHash] = await Promise.all([
     bcrypt.hash(input.password, BCRYPT_ROUNDS),
@@ -25,6 +26,7 @@ export async function createUserWithWallet(input: RegisterInput): Promise<number
     );
     const userId = rows[0].id;
     await client.query('INSERT INTO wallets (user_id, balance_sen) VALUES ($1, $2)', [userId, STARTING_BALANCE_SEN]);
+    await notify({ userId, kind: 'WELCOME' }, client);
     await client.query('COMMIT');
     return userId;
   } catch (err) {

@@ -6,6 +6,7 @@ import { lockWallets, makeReference, moveBalances, TransferReceipt } from './tra
 import { freezeAccount } from './freeze';
 import { isTrustedDevice } from './devices';
 import { logSecurityEvent } from './securityLog';
+import { notify } from './notify';
 
 type HeldRow = {
   id: number;
@@ -44,6 +45,8 @@ export async function confirmHold(user: { userId: number; deviceId: string }, tr
     const newBalanceSen = await moveBalances(client, userId, held.receiver_id, amountSen);
     await client.query("UPDATE transactions SET status = 'COMPLETED', completed_at = now() WHERE id = $1", [held.id]);
     await logSecurityEvent({ userId, type: 'HOLD_CONFIRMED', transactionId: held.id, reason: 'The owner confirmed the held transfer with their PIN.' }, client);
+    await notify({ userId, kind: 'HOLD_CONFIRMED', transactionId: held.id }, client);
+    await notify({ userId: held.receiver_id, kind: 'MONEY_RECEIVED', transactionId: held.id }, client);
     return { ok: true, receipt: toReceipt(held, newBalanceSen) };
   });
 }

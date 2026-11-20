@@ -4,6 +4,7 @@ import { ruleConfig } from '../rules/config';
 import type { TransferInput } from '../validation/transfer';
 import type { FiredRule } from './transferRules';
 import { logSecurityEvent } from './securityLog';
+import { notify } from './notify';
 
 /** What an untrusted phone sees instead of the rule details, so a thief learns nothing about the limits. */
 const GENERAL_REASON = 'This transfer needs approval from your usual phone.';
@@ -20,7 +21,8 @@ export type HoldDetails = {
 };
 
 /**
- * Saves a transfer as PENDING (no money moves) and writes one security_events row per rule that fired.
+ * Saves a transfer as PENDING (no money moves), writes one security_events row per rule that fired, and puts
+ * "Transfer waiting for you" in the sender's Inbox (the recipient hears nothing until the money really moves).
  * Must run inside the transfer's database transaction, so the hold and its log rows are saved together. Returns the id.
  */
 export async function holdTransfer(
@@ -39,6 +41,7 @@ export async function holdTransfer(
   for (const { rule, reason } of fired) {
     await logSecurityEvent({ userId: sender.userId, type: 'RULE_FIRED', rule, transactionId: id, reason }, client);
   }
+  await notify({ userId: sender.userId, kind: 'TRANSFER_HELD', transactionId: id }, client);
   return id;
 }
 

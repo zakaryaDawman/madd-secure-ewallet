@@ -3,6 +3,7 @@ import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { changePinSchema, updateProfileSchema } from '../validation/profile';
 import { changePin, getProfile, updateName } from '../services/me';
 import { fieldErrors } from './fieldErrors';
+import { freezeByOwner } from '../services/freeze';
 import { sendPinRefusal } from './pinRefusal';
 
 export const meRouter = Router();
@@ -51,6 +52,17 @@ meRouter.post('/pin', requireAuth, async (req, res, next) => {
       return;
     }
     res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /me/freeze: "Freeze my account" from a lock item in the Inbox, on a trusted phone. Logs out every phone. */
+meRouter.post('/freeze', requireAuth, async (_req, res, next) => {
+  try {
+    const frozen = await freezeByOwner(currentUser(res), 'Account frozen by the owner from the Inbox. Every session was ended.');
+    if (frozen) res.json({ frozen: true });
+    else res.status(403).json({ error: 'needs_trusted_device', message: 'Do this on your usual phone.' });
   } catch (err) {
     next(err);
   }

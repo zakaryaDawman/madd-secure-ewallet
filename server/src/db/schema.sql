@@ -111,3 +111,18 @@ CREATE OR REPLACE TRIGGER security_events_no_edit
   BEFORE UPDATE OR DELETE ON security_events FOR EACH ROW EXECUTE FUNCTION refuse_security_event_change();
 CREATE OR REPLACE TRIGGER security_events_no_truncate
   BEFORE TRUNCATE ON security_events FOR EACH STATEMENT EXECUTE FUNCTION refuse_security_event_change();
+
+-- Inbox (task D6): one row per thing the user should be told about. The text is built when it is read,
+-- so it always matches the transfer or device as it is now.
+CREATE TABLE IF NOT EXISTS notifications (
+  id             SERIAL PRIMARY KEY,
+  user_id        INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  kind           TEXT NOT NULL CHECK (kind IN (
+    'MONEY_RECEIVED', 'MONEY_SENT', 'TRANSFER_HELD', 'HOLD_CONFIRMED', 'NEW_DEVICE', 'LOGIN_LOCKED', 'PIN_LOCKED', 'WELCOME'
+  )),
+  transaction_id INT REFERENCES transactions(id),
+  device_id      UUID,
+  read_at        TIMESTAMPTZ,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications (user_id, created_at);

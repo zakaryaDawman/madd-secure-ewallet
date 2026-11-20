@@ -13,11 +13,13 @@ import { ListCard } from '../components/profile/ListCard';
 import { MenuRow } from '../components/profile/MenuRow';
 import { formatPhone } from '../utils/qrPayload';
 import { backToHome, openScreen, restartAt } from '../utils/navigation';
+import { useInboxDot } from '../utils/useInboxDot';
 import { colors, fonts, spacing } from '../theme';
 
 /** Profile screen (design 19): me, My devices (this phone first, with Trust for new phones), account links and Log out. */
 export default function ProfileScreen() {
   const [profile, reload] = useProfile();
+  const hasUnread = useInboxDot();
   const [toTrust, setToTrust] = useState<MyDevice | null>(null);
   // Only a trusted phone can trust another one (the server checks this too).
   const thisPhoneTrusted = profile?.devices.some((d) => d.thisDevice && d.trusted) ?? false;
@@ -59,7 +61,7 @@ export default function ProfileScreen() {
           </Pressable>
         </ScrollView>
       )}
-      <MaddTabBar active="profile" onSelect={onTabSelect} />
+      <MaddTabBar active="profile" hasUnread={hasUnread} onSelect={onTabSelect} />
       {toTrust && (
         <TrustDeviceSheet
           device={toTrust}
@@ -100,10 +102,10 @@ function useProfile(): [Profile | null, () => void] {
   return [profile, reload];
 }
 
-/** Tab bar taps from Profile. Inbox arrives in task D6. */
+/** Tab bar taps from Profile. */
 function onTabSelect(tab: Tab) {
   if (tab === 'home') backToHome();
-  if (tab === 'history' || tab === 'scan') openScreen(`/${tab}`);
+  if (tab === 'history' || tab === 'scan' || tab === 'inbox') openScreen(`/${tab}`);
 }
 
 /** Asks first, then cancels this session on the server, forgets it on the phone and goes back to the start. */

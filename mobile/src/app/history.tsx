@@ -11,6 +11,7 @@ import { MaddTabBar, Tab } from '../components/MaddTabBar';
 import { OfflineView } from '../components/OfflineView';
 import { groupByDay } from '../utils/dateGroups';
 import { backToHome, openScreen } from '../utils/navigation';
+import { useInboxDot } from '../utils/useInboxDot';
 import { colors, fonts, spacing } from '../theme';
 
 type LoadState = 'loading' | 'ready' | 'offline';
@@ -27,6 +28,7 @@ const EMPTY_TEXT: Record<TransactionFilter, string> = {
 export default function HistoryScreen() {
   const [filter, setFilter] = useState<TransactionFilter>('all');
   const { items, state, refreshing, reload } = useTransactions(filter);
+  const hasUnread = useInboxDot();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -54,15 +56,15 @@ export default function HistoryScreen() {
           </ScrollView>
         )}
       </View>
-      <MaddTabBar active="history" onSelect={onTabSelect} />
+      <MaddTabBar active="history" hasUnread={hasUnread} onSelect={onTabSelect} />
     </SafeAreaView>
   );
 }
 
-/** Tab bar taps from History: Home goes back to Home; Scan and Profile open. Inbox arrives in task D6. */
+/** Tab bar taps from History: Home goes back to Home; Scan, Inbox and Profile open. */
 function onTabSelect(tab: Tab) {
   if (tab === 'home') backToHome();
-  if (tab === 'scan' || tab === 'profile') openScreen(`/${tab}`);
+  if (tab === 'scan' || tab === 'inbox' || tab === 'profile') openScreen(`/${tab}`);
 }
 
 /** Loads the transactions for the chosen filter and tracks loading / ready / offline. `reload()` refreshes (pull-down or Try again). */
