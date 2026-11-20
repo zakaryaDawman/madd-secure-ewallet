@@ -16,6 +16,11 @@ export function openScreen(href: Href): void {
   if (!isTooSoon()) router.push(href);
 }
 
+/** Closes every screen above Home and shows Home again (e.g. "Done" after a transfer). */
+export function backToHome(): void {
+  if (!isTooSoon()) router.dismissTo('/home');
+}
+
 /** Replaces the current screen (no going back), ignoring repeated taps. Use this instead of router.replace. */
 export function replaceScreen(href: Href): void {
   if (!isTooSoon()) router.replace(href);

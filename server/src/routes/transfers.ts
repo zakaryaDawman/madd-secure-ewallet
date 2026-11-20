@@ -1,0 +1,42 @@
+import { Router } from 'express';
+import { currentUser, requireAuth } from '../middleware/requireAuth';
+import { normalisePhone } from '../validation/register';
+import { transferSchema } from '../validation/transfer';
+import { sendMoney, TransferError } from '../services/transfers';
+import { fieldErrors } from './fieldErrors';
+
+export const transfersRouter = Router();
+
+/** HTTP status and message for each reason a transfer can be refused. */
+const REFUSALS: Record<TransferError, { status: number; message: string }> = {
+  wrong_pin: { status: 403, message: 'Wrong PIN. Please try again.' },
+  recipient_not_found: { status: 404, message: "We couldn't find a MADD user with this number." },
+  self: { status: 400, message: "You can't send money to yourself." },
+  insufficient_funds: { status: 400, message: 'Not enough balance for this transfer.' },
+};
+
+/** POST /transfers: sends money to another MADD user after checking the PIN. */
+transfersRouter.post('/', requireAuth, async (req, res, next) => {
+  const parsed = transferSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
+  const phone = normalisePhone(parsed.data.recipientPhone);
+  if (!phone) {
+    res.status(400).json({ error: 'validation', fields: { recipientPhone: 'Enter a Malaysian mobile number' } });
+    return;
+  }
+
+  try {
+    const result = await sendMoney(currentUser(res).userId, parsed.data, phone);
+    if (result.ok) {
+      res.status(201).json(result.receipt);
+      return;
+    }
+    const refusal = REFUSALS[result.error];
+    res.status(refusal.status).json({ error: result.error, message: refusal.message });
+  } catch (err) {
+    next(err);
+  }
+});

@@ -50,6 +50,28 @@ export async function authGetResult<T>(path: string): Promise<ApiResult<T>> {
   return { ok: res.ok, status: res.status, body };
 }
 
+/** POST for logged-in screens: sends JSON with the session token and returns status + body. Same 401 and offline handling as authGetResult. */
+export async function authPost<T>(path: string, data: unknown): Promise<ApiResult<T>> {
+  const token = await getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+      body: JSON.stringify(data),
+    });
+  } catch {
+    throw new OfflineError();
+  }
+  if (res.status === 401) {
+    await clearSession();
+    replaceScreen('/login');
+    throw new Error('Session ended');
+  }
+  const body = (await res.json().catch(() => ({}))) as T;
+  return { ok: res.ok, status: res.status, body };
+}
+
 /** GET for logged-in screens: sends the saved session token and returns the body. Throws on any error. */
 export async function authGet<T>(path: string): Promise<T> {
   const res = await authGetResult<T>(path);

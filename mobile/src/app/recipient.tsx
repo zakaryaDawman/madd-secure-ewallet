@@ -3,7 +3,9 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { getRecentRecipients, lookupRecipient, Recipient, RecentRecipient } from '../api/recipients';
+import { startTransfer } from '../auth/transferDraft';
 import { Icon } from '../components/icons';
+import { openScreen } from '../utils/navigation';
 import { RecentRecipients } from '../components/send/RecentRecipients';
 import { RecipientRow } from '../components/send/RecipientRow';
 import { colors, fonts, radius, spacing } from '../theme';
@@ -16,9 +18,10 @@ export default function RecipientScreen() {
   const { result, error, searching } = usePhoneLookup(phone);
   const recent = useRecentRecipients();
 
-  /** Continues to the amount step with the chosen person (the Amount screen arrives in task B6). */
+  /** Starts a new transfer to the chosen person and opens the Amount screen. */
   function choose(recipient: Recipient) {
-    void recipient;
+    startTransfer(recipient);
+    openScreen('/amount');
   }
 
   return (

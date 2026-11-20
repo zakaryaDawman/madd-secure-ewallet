@@ -70,3 +70,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] B3 Login (JWT 30 min, secure storage), Forgot password screen, double-tap-safe navigation
 - [x] B4 Home with balance (GET /wallet, requireAuth), new-user, loading and offline states
 - [x] B5 Choose recipient: masked lookup (rate-limited), recent recipients
+- [x] B6 Send money: POST /transfers (PIN check, one DB transaction with FOR UPDATE), Amount, Review + PIN, Checking, Sent, low-balance state
