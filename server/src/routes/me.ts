@@ -4,6 +4,8 @@ import { changePinSchema, updateProfileSchema } from '../validation/profile';
 import { changePin, getProfile, updateName } from '../services/me';
 import { fieldErrors } from './fieldErrors';
 import { freezeByOwner } from '../services/freeze';
+import { savePushToken } from '../services/devices';
+import { pushTokenSchema } from '../validation/profile';
 import { sendPinRefusal } from './pinRefusal';
 
 export const meRouter = Router();
@@ -63,6 +65,22 @@ meRouter.post('/freeze', requireAuth, async (_req, res, next) => {
     const frozen = await freezeByOwner(currentUser(res), 'Account frozen by the owner from the Inbox. Every session was ended.');
     if (frozen) res.json({ frozen: true });
     else res.status(403).json({ error: 'needs_trusted_device', message: 'Do this on your usual phone.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /me/push-token { token }: saves the push token of the phone making the request (task D7). */
+meRouter.post('/push-token', requireAuth, async (req, res, next) => {
+  const parsed = pushTokenSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
+  try {
+    const { userId, deviceId } = currentUser(res);
+    if (await savePushToken(userId, deviceId, parsed.data.token)) res.status(204).end();
+    else res.status(404).json({ error: 'not_found', message: 'This phone is not one of your devices.' });
   } catch (err) {
     next(err);
   }

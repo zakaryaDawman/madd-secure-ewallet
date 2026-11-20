@@ -11,3 +11,6 @@ export const changePinSchema = z.object({
 });
 
 export type ChangePinInput = z.infer<typeof changePinSchema>;
+
+/** Input rules for POST /me/push-token: the Firebase token the phone got from Android. */
+export const pushTokenSchema = z.object({ token: z.string().trim().min(10, 'Missing push token').max(4096) });

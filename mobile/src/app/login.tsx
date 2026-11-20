@@ -5,6 +5,7 @@ import { openScreen, replaceScreen } from '../utils/navigation';
 import { router } from 'expo-router';
 import { login } from '../api/auth';
 import { saveSession } from '../auth/session';
+import { notificationsNeverAsked, registerForPush } from '../utils/pushSetup';
 import { Icon } from '../components/icons';
 import { MaddAppBar } from '../components/MaddAppBar';
 import { MaddButton } from '../components/MaddButton';
@@ -21,7 +22,10 @@ export default function LoginScreen() {
   const [sending, setSending] = useState(false);
   const passwordRef = useRef<TextInputHandle>(null);
 
-  /** Sends the details to the server; on success saves the session and opens Home. After 5 wrong passwords: design 27. */
+  /**
+ * Sends the details to the server; on success saves the session and opens Home (or "Turn on alerts", design 47, if
+ * Android was never asked). After 5 wrong passwords: design 27.
+ */
   async function onLogin() {
     setSending(true);
     const result = await login(email.trim(), password);
@@ -37,6 +41,11 @@ export default function LoginScreen() {
     }
     await saveSession(result.token, result.fullName);
     setPassword('');
+    if (await notificationsNeverAsked().catch(() => false)) {
+      replaceScreen('/allow-notifications');
+      return;
+    }
+    registerForPush().catch(() => undefined); // refreshes this phone's push token in the background
     replaceScreen('/home');
   }
 

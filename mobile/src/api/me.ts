@@ -56,3 +56,8 @@ export async function changePin(currentPin: string, newPin: string): Promise<Sav
     throw err;
   }
 }
+
+/** Gives the server this phone's push token, so alerts can reach it once the phone is trusted. */
+export async function savePushToken(token: string): Promise<void> {
+  await authPost('/me/push-token', { token });
+}

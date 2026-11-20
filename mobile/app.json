@@ -14,7 +14,8 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "my.madd.wallet"
+      "package": "my.madd.wallet",
+      "googleServicesFile": "./google-services.json"
     },
     "plugins": [
       "expo-router",
@@ -40,6 +41,13 @@
           "granularPermissions": [
             "photo"
           ]
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#1E4FD8",
+          "defaultChannel": "security"
         }
       ]
     ],

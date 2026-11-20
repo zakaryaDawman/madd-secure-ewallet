@@ -6,6 +6,8 @@ import { checkPin, PinCheck } from './pinCheck';
 import { runTransferRules } from './transferRules';
 import { holdTransfer } from './holds';
 import { notify } from './notify';
+import { alertTrustedPhones } from './push';
+import { heldTransferAlert } from './pushAlerts';
 
 export type TransferReceipt = {
   id: number;
@@ -54,6 +56,7 @@ export async function sendMoney(
     if (fired.length > 0) {
       const id = await holdTransfer(client, sender, recipient.id, input, fired);
       await client.query('COMMIT');
+      alertTrustedPhones(senderId, heldTransferAlert(input.amountSen)); // only after COMMIT: never alert about a hold that wasn't saved
       return { ok: true, status: 'held', id };
     }
     const receipt = await moveMoney(client, senderId, recipient, input);

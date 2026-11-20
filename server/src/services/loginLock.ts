@@ -4,6 +4,8 @@ import { loginLockState, LoginLockState } from '../rules/loginLock';
 import type { LoginAttempt } from '../rules/failedLogins';
 import { logSecurityEvent } from './securityLog';
 import { notify } from './notify';
+import { alertTrustedPhones } from './push';
+import { loginLockedAlert } from './pushAlerts';
 
 /** Whether sign-in is paused for this email right now (rule R4). Works the same for emails with no account. */
 export async function currentLoginLock(email: string): Promise<LoginLockState> {
@@ -12,7 +14,7 @@ export async function currentLoginLock(email: string): Promise<LoginLockState> {
 
 /**
  * Called right after a wrong password was recorded: if it was the one that made rule R4 fire, logs it for the account
- * and tells the owner in the Inbox (an email with no account has no one to tell). Returns the lock state.
+ * and tells the owner in the Inbox and by push (an email with no account has no one to tell). Returns the lock state.
  */
 export async function lockAfterFailure(email: string): Promise<LoginLockState> {
   const lock = await currentLoginLock(email);
@@ -26,6 +28,7 @@ export async function lockAfterFailure(email: string): Promise<LoginLockState> {
         reason: `${ruleConfig.failedLoginMax} wrong passwords in ${ruleConfig.failedLoginWindowMinutes} minutes. Sign-in locked for ${ruleConfig.lockMinutes} minutes.`,
       });
       await notify({ userId: rows[0].id, kind: 'LOGIN_LOCKED' });
+      alertTrustedPhones(rows[0].id, loginLockedAlert());
     }
   }
   return lock;

@@ -44,6 +44,12 @@ export async function listDevices(userId: number): Promise<Device[]> {
   }));
 }
 
+/** Saves this phone's Firebase push token, so alerts can reach it once it is trusted. */
+export async function savePushToken(userId: number, deviceId: string, token: string): Promise<boolean> {
+  const { rowCount } = await pool.query('UPDATE known_devices SET push_token = $3 WHERE user_id = $1 AND device_id = $2', [userId, deviceId, token]);
+  return rowCount === 1;
+}
+
 /** Ids of the user's trusted phones (rule R3 checks a device against this list). */
 export async function trustedDeviceIds(userId: number, db: PoolClient | typeof pool = pool): Promise<string[]> {
   const { rows } = await db.query<{ device_id: string }>('SELECT device_id FROM known_devices WHERE user_id = $1 AND trusted', [userId]);

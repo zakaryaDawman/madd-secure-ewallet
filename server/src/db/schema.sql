@@ -126,3 +126,17 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications (user_id, created_at);
+
+-- Task D7: each phone's Firebase push token (only trusted phones are ever sent alerts).
+ALTER TABLE known_devices ADD COLUMN IF NOT EXISTS push_token TEXT;
+
+-- Task D7: one row per push alert, to measure how long it took from the event to sending the push (for Chapter 6).
+CREATE TABLE IF NOT EXISTS push_log (
+  id         SERIAL PRIMARY KEY,
+  user_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  kind       TEXT NOT NULL CHECK (kind IN ('TRANSFER_HELD', 'NEW_DEVICE', 'LOGIN_LOCKED')),
+  phones     INT NOT NULL,          -- how many trusted phones it was sent to
+  ok         BOOLEAN NOT NULL,      -- false if Firebase refused it (or push is not set up)
+  event_at   TIMESTAMPTZ NOT NULL,  -- when the held transfer / login happened
+  sent_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);

@@ -10,3 +10,7 @@ mobile/ios/
 .DS_Store
 *.zip
 mobile/.claude/
+
+# Firebase (task D7): the server key is secret; google-services.json stays local too
+server/secrets/
+mobile/google-services.json
