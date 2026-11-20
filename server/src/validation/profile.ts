@@ -14,3 +14,6 @@ export type ChangePinInput = z.infer<typeof changePinSchema>;
 
 /** Input rules for POST /me/push-token: the Firebase token the phone got from Android. */
 export const pushTokenSchema = z.object({ token: z.string().trim().min(10, 'Missing push token').max(4096) });
+
+/** Input rules for POST /me/freeze: the PIN is optional (not needed while it is locked). */
+export const freezeSchema = z.object({ pin: z.string().regex(/^\d{6}$/, 'Enter your 6-digit PIN').optional() });

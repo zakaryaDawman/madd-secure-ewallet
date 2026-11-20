@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { pool } from '../db/pool';
 import { Device, listDevices } from './devices';
-import { checkPin, PinCheck } from './pinCheck';
+import { checkPin, isPinLocked, PinCheck } from './pinCheck';
 import { BCRYPT_ROUNDS } from './users';
 import type { ChangePinInput } from '../validation/profile';
 
@@ -11,6 +11,7 @@ export type Profile = {
   phone: string;
   memberSince: string;
   devices: (Device & { thisDevice: boolean })[];
+  pinLocked: boolean; // design 30: freezing needs no PIN while it is locked
 };
 
 /** The logged-in user's details and devices. The device in the token is marked as "this phone". */
@@ -27,6 +28,7 @@ export async function getProfile(userId: number, deviceId: string): Promise<Prof
     phone: rows[0].phone,
     memberSince: rows[0].created_at.toISOString(),
     devices: devices.map((d) => ({ ...d, thisDevice: d.deviceId === deviceId })),
+    pinLocked: await isPinLocked(userId),
   };
 }
 

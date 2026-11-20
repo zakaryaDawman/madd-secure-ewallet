@@ -31,6 +31,11 @@ export async function checkPin(userId: number, pin: string): Promise<PinCheck> {
   return { ok: false, error: 'pin_locked', unlocksAt: after.unlocksAt };
 }
 
+/** True while the user's PIN is locked after 5 wrong tries (transfers paused; freezing needs no PIN then). */
+export async function isPinLocked(userId: number): Promise<boolean> {
+  return pinLockState(await latestPinAttempts(userId), new Date()).locked;
+}
+
 /** True if the PIN matches the one saved (as a bcrypt hash) for this user. */
 async function pinMatches(userId: number, pin: string): Promise<boolean> {
   const { rows } = await pool.query<{ pin_hash: string }>('SELECT pin_hash FROM users WHERE id = $1', [userId]);

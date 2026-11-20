@@ -3,7 +3,8 @@ import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { confirmHeldTransfer, rejectHeldTransfer } from '../api/holds';
-import { freezeMyAccount, getInbox, InboxPage, InboxTab, markTabRead, PendingCard } from '../api/notifications';
+import { freezeMyAccount } from '../api/me';
+import { getInbox, InboxPage, InboxTab, markTabRead, PendingCard } from '../api/notifications';
 import { clearSession } from '../auth/session';
 import { updateTransferDraft } from '../auth/transferDraft';
 import { ReleasePinSheet } from '../components/hold/ReleasePinSheet';

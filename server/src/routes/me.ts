@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
-import { changePinSchema, updateProfileSchema } from '../validation/profile';
+import { changePinSchema, freezeSchema, pushTokenSchema, updateProfileSchema } from '../validation/profile';
 import { changePin, getProfile, updateName } from '../services/me';
 import { fieldErrors } from './fieldErrors';
-import { freezeByOwner } from '../services/freeze';
+import { freezeFromProfile } from '../services/freeze';
 import { savePushToken } from '../services/devices';
-import { pushTokenSchema } from '../validation/profile';
 import { sendPinRefusal } from './pinRefusal';
 
 export const meRouter = Router();
@@ -59,12 +58,21 @@ meRouter.post('/pin', requireAuth, async (req, res, next) => {
   }
 });
 
-/** POST /me/freeze: "Freeze my account" from a lock item in the Inbox, on a trusted phone. Logs out every phone. */
-meRouter.post('/freeze', requireAuth, async (_req, res, next) => {
+/**
+ * POST /me/freeze { pin? }: "Freeze my account" (Profile, design 30; Inbox lock items). Logs out every phone.
+ * Needs the PIN, except while the PIN is locked or on a trusted phone.
+ */
+meRouter.post('/freeze', requireAuth, async (req, res, next) => {
+  const parsed = freezeSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
   try {
-    const frozen = await freezeByOwner(currentUser(res), 'Account frozen by the owner from the Inbox. Every session was ended.');
-    if (frozen) res.json({ frozen: true });
-    else res.status(403).json({ error: 'needs_trusted_device', message: 'Do this on your usual phone.' });
+    const result = await freezeFromProfile(currentUser(res), parsed.data.pin);
+    if (result.ok) res.json({ frozen: true });
+    else if (result.error === 'pin_required') res.status(403).json({ error: 'pin_required', message: 'Enter your PIN to freeze your account.' });
+    else sendPinRefusal(res, result);
   } catch (err) {
     next(err);
   }

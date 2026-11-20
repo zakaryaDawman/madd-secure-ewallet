@@ -84,3 +84,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] D5 R4 in /auth/login: 5 wrong passwords in 15 min lock sign-in for 15 min (pure loginLock rule, same reply for unknown emails, admin too), R4 logged, Too many wrong passwords (27) with countdown
 - [x] D6 Inbox: notifications table (money received/sent, held, confirmed, new device, login + PIN lock, welcome), GET /notifications, All (32) + Security (18) tabs, waiting-transfer card with Yes/No, unread dot, Freeze my account
 - [x] D7 Push code: trusted phones only (held transfer, new device, sign-in lock), sent after commit, push_log timing, Allow notifications (47). **Still to do later: Firebase project + app build, then check a push arrives with the app closed (before F1).**
+- [x] D8 Freeze my account in Profile (30): PIN, or confirmation only while the PIN is locked; reuses the D3 freeze; Not you? Freeze account on Transfers locked

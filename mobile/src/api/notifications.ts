@@ -36,8 +36,3 @@ export async function markTabRead(tab: InboxTab): Promise<void> {
   await authPost('/notifications/read', { tab });
 }
 
-/** "Freeze my account" from a lock item: the server freezes and logs out every phone (trusted phone only). */
-export async function freezeMyAccount(): Promise<{ ok: boolean; message: string }> {
-  const res = await authPost<{ message?: string }>('/me/freeze', {});
-  return { ok: res.ok, message: res.body.message ?? 'Something went wrong. Please try again.' };
-}

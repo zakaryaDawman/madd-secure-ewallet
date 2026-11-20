@@ -9,6 +9,7 @@ import { MaddTabBar, Tab } from '../components/MaddTabBar';
 import { BigAvatar } from '../components/profile/BigAvatar';
 import { DeviceRow } from '../components/profile/DeviceRow';
 import { TrustDeviceSheet } from '../components/devices/TrustDeviceSheet';
+import { FreezeAccountSheet } from '../components/profile/FreezeAccountSheet';
 import { ListCard } from '../components/profile/ListCard';
 import { MenuRow } from '../components/profile/MenuRow';
 import { formatPhone } from '../utils/qrPayload';
@@ -16,11 +17,15 @@ import { backToHome, openScreen, restartAt } from '../utils/navigation';
 import { useInboxDot } from '../utils/useInboxDot';
 import { colors, fonts, spacing } from '../theme';
 
-/** Profile screen (design 19): me, My devices (this phone first, with Trust for new phones), account links and Log out. */
+/**
+ * Profile screen (design 19): me, My devices (this phone first, with Trust for new phones), account links,
+ * "Freeze my account" (design 30) and Log out.
+ */
 export default function ProfileScreen() {
   const [profile, reload] = useProfile();
   const hasUnread = useInboxDot();
   const [toTrust, setToTrust] = useState<MyDevice | null>(null);
+  const [freezing, setFreezing] = useState(false);
   // Only a trusted phone can trust another one (the server checks this too).
   const thisPhoneTrusted = profile?.devices.some((d) => d.thisDevice && d.trusted) ?? false;
 
@@ -54,6 +59,7 @@ export default function ProfileScreen() {
             <MenuRow label="Personal details" onPress={() => openScreen('/personal-details')} />
             <MenuRow label="Change PIN" onPress={() => openScreen('/change-pin')} />
             <MenuRow label="Help and support" onPress={() => openScreen('/help')} />
+            <MenuRow label="Freeze my account" danger onPress={() => setFreezing(true)} />
           </ListCard>
 
           <Pressable accessibilityRole="button" onPress={confirmLogout} hitSlop={8} style={styles.logout}>
@@ -62,6 +68,7 @@ export default function ProfileScreen() {
         </ScrollView>
       )}
       <MaddTabBar active="profile" hasUnread={hasUnread} onSelect={onTabSelect} />
+      {freezing && profile && <FreezeAccountSheet pinLocked={profile.pinLocked} onCancel={() => setFreezing(false)} />}
       {toTrust && (
         <TrustDeviceSheet
           device={toTrust}

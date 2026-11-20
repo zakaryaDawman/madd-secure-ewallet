@@ -15,6 +15,7 @@ export type Profile = {
   phone: string;
   memberSince: string;
   devices: MyDevice[];
+  pinLocked: boolean; // design 30: freezing needs no PIN while it is locked
 };
 
 /** What saving a change returns: ok, or the message to show. */
@@ -60,4 +61,29 @@ export async function changePin(currentPin: string, newPin: string): Promise<Sav
 /** Gives the server this phone's push token, so alerts can reach it once the phone is trusted. */
 export async function savePushToken(token: string): Promise<void> {
   await authPost('/me/push-token', { token });
+}
+
+/** What freezing returned: frozen, or why not (PIN wrong / locked / needed) with the server's message. */
+export type FreezeResult = { ok: true } | { ok: false; reason: 'pin_locked' | 'pin_required' | 'other'; message: string };
+
+/**
+ * "Freeze my account" (design 30, Inbox lock items). The server freezes and logs out every phone. The PIN is left out
+ * while it is locked (or on a trusted phone from the Inbox); the server decides whether that is allowed.
+ */
+export async function freezeMyAccount(pin?: string): Promise<FreezeResult> {
+  try {
+    const res = await authPost<ErrorReply & { error?: string }>('/me/freeze', pin === undefined ? {} : { pin });
+    if (res.ok) return { ok: true };
+    const reason = res.body.error === 'pin_locked' || res.body.error === 'pin_required' ? res.body.error : 'other';
+    return { ok: false, reason, message: failureMessage(res.body) };
+  } catch (err) {
+    if (err instanceof OfflineError) return { ok: false, reason: 'other', message: failureMessage(null) };
+    throw err;
+  }
+}
+
+/** The message to show for a failed request. */
+function failureMessage(body: ErrorReply | null): string {
+  const result = failure(body);
+  return result.ok ? '' : result.message;
 }

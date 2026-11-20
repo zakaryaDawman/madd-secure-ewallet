@@ -1,7 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 import { colors, fonts, fontSizes, radius } from '../theme';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'dark';
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'dangerSolid' | 'dark';
 
 type Props = {
   label: string;
@@ -16,6 +16,7 @@ const variantColors: Record<ButtonVariant, { bg: string; fg: string }> = {
   primary: { bg: colors.blue, fg: colors.white },
   secondary: { bg: colors.tint, fg: colors.blueDark },
   danger: { bg: colors.dangerBg, fg: colors.dangerText },
+  dangerSolid: { bg: colors.danger, fg: colors.white }, // "Freeze now" (design 30)
   dark: { bg: colors.ink, fg: colors.white },
 };
 
