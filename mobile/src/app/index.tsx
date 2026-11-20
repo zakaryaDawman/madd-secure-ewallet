@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import { BlueGradient } from '../components/BlueGradient';
 import { MaddWordmark } from '../components/MaddWordmark';
 import { checkServer } from '../api/health';
@@ -25,17 +25,13 @@ export default function SplashScreen() {
           <Text style={styles.tagline}>Your money, watched over.</Text>
         </View>
         <View style={styles.actions}>
-          {/* Buttons are connected to real screens in tasks B2 and B3. */}
-          <Pressable style={[styles.button, styles.buttonWhite]} accessibilityRole="button">
+          <Pressable style={[styles.button, styles.buttonWhite]} accessibilityRole="button" onPress={() => router.push('/welcome/1')}>
             <Text style={[styles.buttonText, { color: colors.blueDark }]}>Create account</Text>
           </Pressable>
+          {/* Log in is connected in task B3. */}
           <Pressable style={[styles.button, styles.buttonGlass]} accessibilityRole="button">
             <Text style={[styles.buttonText, { color: colors.white }]}>Log in</Text>
           </Pressable>
-          {/* TEMPORARY (task A4): opens the components preview. Removed in task B2. */}
-          <Link href="/preview" style={styles.previewLink}>
-            Components preview
-          </Link>
         </View>
       </SafeAreaView>
     </View>
@@ -72,9 +68,7 @@ const styles = StyleSheet.create({
   button: { borderRadius: radius.pill, paddingVertical: 17, alignItems: 'center' },
   buttonWhite: { backgroundColor: colors.white },
   buttonGlass: { backgroundColor: 'rgba(255,255,255,0.14)' },
-  buttonText: { fontFamily: fonts.bold, fontSize: fontSizes.button },
-  previewLink: { alignSelf: 'center', fontFamily: fonts.semibold, fontSize: fontSizes.small, color: colors.sky, padding: spacing.sm },
-  badge: {
+  buttonText: { fontFamily: fonts.bold, fontSize: fontSizes.button },  badge: {
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',

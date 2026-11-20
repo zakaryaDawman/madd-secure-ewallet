@@ -66,3 +66,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] A3 App skeleton on the phone (Splash 01-Main shows "Server connected" on the Honor phone)
 - [x] A4 Shared components (MaddButton, MaddAppBar, MaddKeypad, MaddTabBar + temporary preview screen)
 - [x] B1 Database tables + POST /auth/register (20 tests)
+- [x] B2 Welcome slides, Create account, Create PIN (connected to /auth/register)
