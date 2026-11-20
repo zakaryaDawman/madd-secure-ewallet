@@ -109,3 +109,12 @@ describe('helpers', () => {
     expect(isWeakPin('482913')).toBe(false);
   });
 });
+
+describe('POST /auth/register: roles', () => {
+  it('ignores "role": "admin" and always creates a customer', async () => {
+    const res = await register({ role: 'admin' } as Partial<Record<keyof typeof valid, unknown>>);
+    expect(res.status).toBe(201);
+    const { rows } = await pool.query('SELECT role FROM users WHERE id = $1', [res.body.userId]);
+    expect(rows[0].role).toBe('customer');
+  });
+});

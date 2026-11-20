@@ -40,3 +40,9 @@ export async function createUserWithWallet(input: RegisterInput): Promise<number
 function isUniqueViolation(err: unknown): boolean {
   return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23505';
 }
+
+/** The user's current role from the database, or null if the account no longer exists. */
+export async function userRole(userId: number): Promise<'customer' | 'admin' | null> {
+  const { rows } = await pool.query<{ role: 'customer' | 'admin' }>('SELECT role FROM users WHERE id = $1', [userId]);
+  return rows[0]?.role ?? null;
+}

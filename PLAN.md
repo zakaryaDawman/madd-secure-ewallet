@@ -75,3 +75,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] B8 Receive (my QR = phone number only, copy, share, save) and Scan (camera, flash, gallery) into the normal Amount flow
 - [x] C1 Sessions table (sid in JWT), POST /auth/logout cancels one session, 401 for missing/invalid/expired/cancelled tokens, Session expired screen
 - [x] C2 Device id (secure storage, inside the JWT), login_attempts + known_devices, Profile with My devices, Personal details, Change PIN, Help
+- [x] C3 Roles: requireRole (role read from DB each request), /admin router (403 for customers), GET /admin/me, npm run db:seed-admin
