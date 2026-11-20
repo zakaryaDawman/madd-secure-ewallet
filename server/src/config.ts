@@ -14,4 +14,6 @@ export const config = {
   jwtSecret: required('JWT_SECRET'),
   // Path to the Firebase service-account key (task D7). Empty = push alerts are switched off.
   firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT ?? '',
+  // The only web page allowed to call the API from a browser: the admin console (Phase E).
+  adminWebOrigin: process.env.ADMIN_WEB_ORIGIN ?? 'http://localhost:5173',
 };

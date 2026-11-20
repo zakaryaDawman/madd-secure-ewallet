@@ -1,0 +1,37 @@
+/* MADD colours, font and sizes: the same values as mobile/src/theme, so the console looks like the app. */
+:root {
+  --blue: #1e4fd8;
+  --blue-dark: #1440b8;
+  --sky: #b9ccff;
+  --tint: #e3ecff;
+  --ink: #0b1b3f;
+  --muted: #5a6788;
+  --line: #dce4f3;
+  --background: #f4f7fc;
+  --white: #ffffff;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --warning-text: #9a4a06;
+  --danger: #dc2626;
+  --danger-bg: #fdecec;
+  --danger-text: #b91c1c;
+  --radius-card: 20px;
+  --radius-field: 14px;
+  --font: 'Inter', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--background);
+}
+
+button,
+input {
+  font: inherit;
+}

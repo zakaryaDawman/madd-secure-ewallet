@@ -17,3 +17,9 @@ export function maskPhone(phone: string): string {
 export function firstName(fullName: string): string {
   return fullName.trim().split(/\s+/)[0];
 }
+
+/** First name and the last name's initial, for admin lists, e.g. "Zakarya Dawman" -> "Zakarya D.". */
+export function shortName(fullName: string): string {
+  const words = fullName.trim().split(/\s+/);
+  return words.length === 1 ? words[0] : `${words[0]} ${words[words.length - 1][0]}.`;
+}

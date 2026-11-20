@@ -7,6 +7,7 @@ MADD is a secure Android e-wallet (Final Year Project, APU). It checks every tra
 - `mobile/`: React Native, Expo, TypeScript, Expo Router. **Android only.** Screens in `mobile/src/app/` (one file per screen), shared UI in `src/components/`, server calls in `src/api/`, design tokens in `src/theme/`. Add packages with `npx expo install`, and check the versioned Expo docs (see `mobile/AGENTS.md`).
 - `server/`: routes in `src/routes/`, rules in `src/rules/`, DB in `src/db/`, tests in `test/`.
 - `server/`: Node.js, Express, TypeScript.
+- `admin-web/`: the admin console (Phase E), a separate web app: React, TypeScript, Vite. Pages in `src/pages/`, one component per file in `src/components/` (each with its own `.module.css`), server calls in `src/api/`, colours in `src/theme.css` (same values as `mobile/src/theme/`). The admin token is kept in memory only, never in browser storage. Admins never use the phone app; customers never reach `/admin` (server-enforced).
 - Database: PostgreSQL 16 in Docker (`docker-compose.yml`). Adminer viewer on http://localhost:8080.
 - Push: Firebase Cloud Messaging (from task D7).
 - Tests: Jest + Supertest (server).
@@ -41,6 +42,7 @@ MADD is a secure Android e-wallet (Final Year Project, APU). It checks every tra
 ## Design
 
 - Follow the MADD design exactly: `design/app-screens/01-Main.png` … `48-AdminFlagDetail.png` (canvas: https://claude.ai/artifact/JQc31UKX2krdVjffjEtHxB).
+- Admin screens (20–25, 48) are built as the web console: the phone bottom bar becomes a left side menu; content, wording and colours stay as designed.
 - Colours, font and spacing come from `mobile/src/theme/`. Don't hard-code new colours.
 - Shared components: `MaddButton`, `MaddAppBar`, `MaddKeypad`, `MaddTabBar`.
 
@@ -50,5 +52,6 @@ MADD is a secure Android e-wallet (Final Year Project, APU). It checks every tra
 docker compose up -d          # database + Adminer
 cd server && npm run dev      # API on :3000
 cd mobile && npm run android  # opens MADD in Expo Go on the USB phone
+cd admin-web && npm run dev   # admin console on http://localhost:5173
 ```
 The phone reaches the server through `adb reverse tcp:3000 tcp:3000` (run by `npm run android`).

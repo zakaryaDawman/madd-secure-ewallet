@@ -11,15 +11,24 @@ import { meRouter } from './routes/me';
 import { devicesRouter } from './routes/devices';
 import { notificationsRouter } from './routes/notifications';
 import { adminRouter } from './routes/admin';
+import { allowAdminConsole } from './middleware/allowAdminConsole';
+import { requireAuth } from './middleware/requireAuth';
+import { requireRole } from './middleware/requireRole';
+
+/** Paths only customers may use. */
+const CUSTOMER_ONLY = ['/wallet', '/users', '/transfers', '/transactions', '/notifications'];
 
 /** Builds the Express app with security headers, JSON parsing and all routes. */
 export function createApp() {
   const app = express();
   app.use(helmet());
+  app.use(allowAdminConsole);
   app.use(express.json({ limit: '10kb' }));
   app.use(logRequests);
   app.use('/health', healthRouter);
   app.use('/auth', authRouter);
+  // Wallet routes are for customers only: an admin can never see a wallet or move money (Phase E goal).
+  app.use(CUSTOMER_ONLY, requireAuth, requireRole('customer'));
   app.use('/wallet', walletRouter);
   app.use('/users', createUsersRouter());
   app.use('/transfers', transfersRouter);

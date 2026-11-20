@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { requireRole } from '../middleware/requireRole';
 import { adminName } from '../services/admin';
+import { adminStats } from '../services/adminStats';
 
 export const adminRouter = Router();
 
@@ -12,6 +13,15 @@ adminRouter.use(requireAuth, requireRole('admin'));
 adminRouter.get('/me', async (_req, res, next) => {
   try {
     res.json({ fullName: await adminName(currentUser(res).userId) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** GET /admin/stats: the dashboard numbers (design 20): 4 counters, alerts by rule for 7 days, latest events. */
+adminRouter.get('/stats', async (_req, res, next) => {
+  try {
+    res.json(await adminStats());
   } catch (err) {
     next(err);
   }

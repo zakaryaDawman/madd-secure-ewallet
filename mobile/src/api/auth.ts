@@ -19,13 +19,13 @@ export type RegisterResult =
 type ServerReply = { userId?: number; fields?: Record<string, string>; message?: string };
 
 export type LoginResult =
-  | { ok: true; token: string; fullName: string }
+  | { ok: true; token: string; fullName: string; role: 'customer' | 'admin' }
   | { ok: false; lockedSeconds: number } // too many wrong passwords: sign-in paused (design 27)
   | { ok: false; errors: { email?: string; password?: string; form?: string } };
 
 type LoginReply = {
   token?: string;
-  user?: { fullName: string };
+  user?: { fullName: string; role: 'customer' | 'admin' };
   fields?: Record<string, string>;
   message?: string;
   error?: string;
@@ -37,7 +37,7 @@ export async function login(email: string, password: string): Promise<LoginResul
   try {
     const deviceId = await getDeviceId();
     const res = await apiPost<LoginReply>('/auth/login', { email, password, deviceId, deviceName: getDeviceName() });
-    if (res.ok && res.body.token && res.body.user) return { ok: true, token: res.body.token, fullName: res.body.user.fullName };
+    if (res.ok && res.body.token && res.body.user) return { ok: true, token: res.body.token, fullName: res.body.user.fullName, role: res.body.user.role };
     if (res.body.error === 'login_locked') return { ok: false, lockedSeconds: res.body.secondsLeft ?? 0 };
     if (res.body.fields) return { ok: false, errors: res.body.fields };
     return { ok: false, errors: { form: res.body.message ?? 'Something went wrong. Please try again.' } };

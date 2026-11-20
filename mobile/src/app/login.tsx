@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { openScreen, replaceScreen } from '../utils/navigation';
 import { router } from 'expo-router';
 import { login } from '../api/auth';
-import { saveSession } from '../auth/session';
+import { clearSession, saveSession } from '../auth/session';
+import { postLogout } from '../api/client';
 import { notificationsNeverAsked, registerForPush } from '../utils/pushSetup';
 import { Icon } from '../components/icons';
 import { MaddAppBar } from '../components/MaddAppBar';
@@ -41,6 +42,13 @@ export default function LoginScreen() {
     }
     await saveSession(result.token, result.fullName);
     setPassword('');
+    if (result.role === 'admin') {
+      // Staff use the admin web console, never the wallet: end this session at once (the server blocks it too).
+      await postLogout();
+      await clearSession();
+      setErrors({ form: 'Admin accounts use the MADD admin console, not the app.' });
+      return;
+    }
     if (await notificationsNeverAsked().catch(() => false)) {
       replaceScreen('/allow-notifications');
       return;

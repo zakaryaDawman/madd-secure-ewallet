@@ -56,7 +56,7 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 | B · Core wallet (Inc 1) | B1–B8 | FR-1 to FR-6 |
 | C · Sessions and devices (Inc 2) | C1–C4 | FR-7 to FR-10 |
 | D · Detection and alerts (Inc 3) | D1–D8 | FR-11 to FR-16 |
-| E · Admin (Inc 4) | E1–E4 | FR-17 to FR-20 |
+| E · Admin (Inc 4) | E1–E4 | FR-17 to FR-20, as a separate web console (`admin-web/`, decided 20 Nov 2026) |
 | F · Test and release | F1–F4 | Results, demo, APK, UAT |
 
 ## Progress
@@ -85,3 +85,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] D6 Inbox: notifications table (money received/sent, held, confirmed, new device, login + PIN lock, welcome), GET /notifications, All (32) + Security (18) tabs, waiting-transfer card with Yes/No, unread dot, Freeze my account
 - [x] D7 Push code: trusted phones only (held transfer, new device, sign-in lock), sent after commit, push_log timing, Allow notifications (47). **Still to do later: Firebase project + app build, then check a push arrives with the app closed (before F1).**
 - [x] D8 Freeze my account in Profile (30): PIN, or confirmation only while the PIN is locked; reuses the D3 freeze; Not you? Freeze account on Transfers locked
+- [x] E1 Admin web console (admin-web/, React + Vite): staff sign-in (token in memory only), side menu, Dashboard (20) from GET /admin/stats; CORS for the console only; admins blocked from wallet routes and from the phone app
