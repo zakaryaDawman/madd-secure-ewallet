@@ -1,0 +1,90 @@
+import { pool } from '../db/pool';
+import { maskPhone } from '../utils/mask';
+import { makeReference } from './transfers';
+
+export const FILTERS = ['all', 'in', 'out', 'held'] as const;
+export type TransactionFilter = (typeof FILTERS)[number];
+
+export type TransactionItem = {
+  id: number;
+  direction: 'in' | 'out';
+  amountSen: number;
+  otherName: string;
+  note: string | null;
+  status: string;
+  createdAt: string;
+};
+
+export type TransactionDetail = TransactionItem & {
+  otherPhone: string;
+  reference: string;
+  completedAt: string | null;
+};
+
+type TransactionRow = {
+  id: number;
+  direction: 'in' | 'out';
+  amount_sen: string;
+  other_name: string;
+  other_phone: string;
+  note: string | null;
+  status: string;
+  created_at: Date;
+  completed_at: Date | null;
+};
+
+/**
+ * Rows the user is allowed to see: everything they sent, and money they received once it has arrived.
+ * $1 is always the logged-in user, so nobody can see someone else's transactions.
+ */
+const VISIBLE_TO_USER = `
+  SELECT t.id,
+         CASE WHEN t.sender_id = $1 THEN 'out' ELSE 'in' END AS direction,
+         t.amount_sen, other.full_name AS other_name, other.phone AS other_phone,
+         t.note, t.status, t.created_at, t.completed_at
+  FROM transactions t
+  JOIN users other ON other.id = CASE WHEN t.sender_id = $1 THEN t.receiver_id ELSE t.sender_id END
+  WHERE (t.sender_id = $1 OR (t.receiver_id = $1 AND t.status = 'COMPLETED'))`;
+
+/** Extra SQL condition for each History filter chip. */
+const FILTER_SQL: Record<TransactionFilter, string> = {
+  all: '',
+  in: 'AND t.receiver_id = $1',
+  out: 'AND t.sender_id = $1',
+  held: "AND t.status = 'PENDING'",
+};
+
+/** The user's transactions, newest first, narrowed by a filter (All / In / Out / Held). */
+export async function listTransactions(userId: number, filter: TransactionFilter, limit = 200): Promise<TransactionItem[]> {
+  const { rows } = await pool.query<TransactionRow>(
+    `${VISIBLE_TO_USER} ${FILTER_SQL[filter]} ORDER BY t.created_at DESC, t.id DESC LIMIT $2`,
+    [userId, limit],
+  );
+  return rows.map(toItem);
+}
+
+/** One transaction with its details, or null if it doesn't exist or isn't the user's. */
+export async function getTransaction(userId: number, id: number): Promise<TransactionDetail | null> {
+  const { rows } = await pool.query<TransactionRow>(`${VISIBLE_TO_USER} AND t.id = $2`, [userId, id]);
+  if (rows.length === 0) return null;
+  const row = rows[0];
+  return {
+    ...toItem(row),
+    otherPhone: maskPhone(row.other_phone),
+    reference: makeReference(row.id, row.created_at),
+    completedAt: row.completed_at ? row.completed_at.toISOString() : null,
+  };
+}
+
+/** Turns a database row into the shape the app receives (sen as a number, dates as ISO text). */
+function toItem(row: TransactionRow): TransactionItem {
+  return {
+    id: row.id,
+    direction: row.direction,
+    amountSen: Number(row.amount_sen),
+    otherName: row.other_name,
+    note: row.note,
+    status: row.status,
+    createdAt: row.created_at.toISOString(),
+  };
+}

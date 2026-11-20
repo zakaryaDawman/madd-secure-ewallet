@@ -46,8 +46,8 @@ export default function HomeScreen() {
           </ScrollView>
         )}
       </View>
-      {/* Other tabs open their screens in later tasks (History B7, Scan B8, Profile C2, Inbox D6). */}
-      <MaddTabBar active="home" onSelect={() => {}} />
+      {/* Other tabs open their screens in later tasks (Scan B8, Profile C2, Inbox D6). */}
+      <MaddTabBar active="home" onSelect={(tab) => tab === 'history' && openScreen('/history')} />
     </SafeAreaView>
   );
 }

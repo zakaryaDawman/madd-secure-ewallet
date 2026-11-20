@@ -5,6 +5,7 @@ import { authRouter } from './routes/auth';
 import { walletRouter } from './routes/wallet';
 import { createUsersRouter } from './routes/users';
 import { transfersRouter } from './routes/transfers';
+import { transactionsRouter } from './routes/transactions';
 
 /** Builds the Express app with security headers, JSON parsing and all routes. */
 export function createApp() {
@@ -17,6 +18,7 @@ export function createApp() {
   app.use('/wallet', walletRouter);
   app.use('/users', createUsersRouter());
   app.use('/transfers', transfersRouter);
+  app.use('/transactions', transactionsRouter);
   app.use(handleUnexpectedError);
   return app;
 }
