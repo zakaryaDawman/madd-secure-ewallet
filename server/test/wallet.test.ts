@@ -3,14 +3,13 @@ import jwt from 'jsonwebtoken';
 import { createApp } from '../src/app';
 import { pool } from '../src/db/pool';
 import { clearTables, prepareTestDatabase } from './db';
+import { signUp as signUpWith } from './helpers';
 
 const app = createApp();
 
 /** Registers a user and logs them in. Returns their id and session token. */
-async function signUp(name: string, email: string, phone: string) {
-  await request(app).post('/auth/register').send({ fullName: name, email, phone, password: 'password12', pin: '482913' });
-  const res = await request(app).post('/auth/login').send({ email, password: 'password12' });
-  return { id: res.body.user.id as number, token: res.body.token as string };
+function signUp(name: string, email: string, phone: string) {
+  return signUpWith(app, name, email, phone);
 }
 
 /** Calls GET /wallet with the given token. */

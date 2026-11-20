@@ -3,6 +3,7 @@ import { createApp } from '../src/app';
 import { pool } from '../src/db/pool';
 import { verifyToken } from '../src/auth/tokens';
 import { clearTables, prepareTestDatabase } from './db';
+import { TEST_DEVICE } from './helpers';
 
 const app = createApp();
 const account = {
@@ -15,7 +16,7 @@ const account = {
 
 /** Sends a login request with the given email and password. */
 function login(email: unknown, password: unknown) {
-  return request(app).post('/auth/login').send({ email, password });
+  return request(app).post('/auth/login').send({ email, password, deviceId: TEST_DEVICE, deviceName: 'Test Phone' });
 }
 
 beforeAll(prepareTestDatabase);
@@ -32,7 +33,7 @@ describe('POST /auth/login', () => {
     expect(res.body.user).toEqual({ id: expect.any(Number), fullName: 'Zakarya Dawman', role: 'customer' });
 
     const check = verifyToken(res.body.token);
-    expect(check).toEqual({ ok: true, claims: { userId: res.body.user.id, role: 'customer', sessionId: expect.any(String) } });
+    expect(check).toEqual({ ok: true, claims: { userId: res.body.user.id, role: 'customer', sessionId: expect.any(String), deviceId: TEST_DEVICE } });
 
     const payload = JSON.parse(Buffer.from(res.body.token.split('.')[1], 'base64url').toString());
     expect(payload.exp - payload.iat).toBe(30 * 60);

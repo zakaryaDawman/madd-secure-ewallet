@@ -8,5 +8,5 @@ export async function prepareTestDatabase(): Promise<void> {
 
 /** Empties every table so each test starts from a clean database. */
 export async function clearTables(): Promise<void> {
-  await pool.query('TRUNCATE sessions, transactions, wallets, users RESTART IDENTITY CASCADE');
+  await pool.query('TRUNCATE login_attempts, known_devices, sessions, transactions, wallets, users RESTART IDENTITY CASCADE');
 }

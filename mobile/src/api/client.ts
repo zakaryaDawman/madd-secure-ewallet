@@ -56,13 +56,13 @@ export async function authGetResult<T>(path: string): Promise<ApiResult<T>> {
   return { ok: res.ok, status: res.status, body };
 }
 
-/** POST for logged-in screens: sends JSON with the session token and returns status + body. Same 401 and offline handling as authGetResult. */
-export async function authPost<T>(path: string, data: unknown): Promise<ApiResult<T>> {
+/** Sends JSON with the session token (POST or PATCH) and returns status + body. Same 401 and offline handling as authGetResult. */
+async function authSend<T>(method: 'POST' | 'PATCH', path: string, data: unknown): Promise<ApiResult<T>> {
   const token = await getToken();
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {
-      method: 'POST',
+      method,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
       body: JSON.stringify(data),
     });
@@ -72,6 +72,16 @@ export async function authPost<T>(path: string, data: unknown): Promise<ApiResul
   if (res.status === 401) await endSession();
   const body = (await res.json().catch(() => ({}))) as T;
   return { ok: res.ok, status: res.status, body };
+}
+
+/** POST for logged-in screens. */
+export function authPost<T>(path: string, data: unknown): Promise<ApiResult<T>> {
+  return authSend<T>('POST', path, data);
+}
+
+/** PATCH for logged-in screens (change part of a record, e.g. my name). */
+export function authPatch<T>(path: string, data: unknown): Promise<ApiResult<T>> {
+  return authSend<T>('PATCH', path, data);
 }
 
 /** GET for logged-in screens: sends the saved session token and returns the body. Throws on any error. */

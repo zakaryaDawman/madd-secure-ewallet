@@ -59,10 +59,10 @@ export default function HistoryScreen() {
   );
 }
 
-/** Tab bar taps from History: Home goes back to Home, Scan opens the camera; the other tabs arrive in later tasks. */
+/** Tab bar taps from History: Home goes back to Home; Scan and Profile open. Inbox arrives in task D6. */
 function onTabSelect(tab: Tab) {
   if (tab === 'home') backToHome();
-  if (tab === 'scan') openScreen('/scan');
+  if (tab === 'scan' || tab === 'profile') openScreen(`/${tab}`);
 }
 
 /** Loads the transactions for the chosen filter and tracks loading / ready / offline. `reload()` refreshes (pull-down or Try again). */

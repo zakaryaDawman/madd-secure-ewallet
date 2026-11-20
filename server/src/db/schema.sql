@@ -43,3 +43,25 @@ CREATE TABLE IF NOT EXISTS sessions (
   revoke_reason TEXT CHECK (revoke_reason IN ('logout', 'freeze'))
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions (user_id);
+
+-- Every login attempt, right or wrong (FR-9). user_id is empty when no account has the typed email.
+CREATE TABLE IF NOT EXISTS login_attempts (
+  id          SERIAL PRIMARY KEY,
+  email       TEXT NOT NULL,
+  user_id     INT REFERENCES users(id) ON DELETE CASCADE,
+  device_id   UUID NOT NULL,
+  success     BOOLEAN NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_user ON login_attempts (user_id, created_at);
+
+-- Phones each user has logged in from. The first one is trusted; later ones wait for rule R3 (task D4).
+CREATE TABLE IF NOT EXISTS known_devices (
+  user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  device_id   UUID NOT NULL,
+  name        TEXT NOT NULL,
+  trusted     BOOLEAN NOT NULL,
+  first_seen  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_seen   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, device_id)
+);

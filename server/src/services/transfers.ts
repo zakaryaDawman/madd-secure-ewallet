@@ -49,7 +49,7 @@ export async function sendMoney(senderId: number, input: TransferInput, recipien
 }
 
 /** True if the PIN matches the one saved (as a bcrypt hash) for this user. */
-async function pinMatches(userId: number, pin: string): Promise<boolean> {
+export async function pinMatches(userId: number, pin: string): Promise<boolean> {
   const { rows } = await pool.query<{ pin_hash: string }>('SELECT pin_hash FROM users WHERE id = $1', [userId]);
   return rows.length > 0 && bcrypt.compare(pin, rows[0].pin_hash);
 }

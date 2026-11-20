@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { pool } from '../db/pool';
 import type { RegisterInput } from '../validation/register';
 
-const BCRYPT_ROUNDS = 12;
+export const BCRYPT_ROUNDS = 12;
 export const STARTING_BALANCE_SEN = 100_000; // RM 1,000 demo money
 
 /** Thrown when the email or phone number is already registered. */

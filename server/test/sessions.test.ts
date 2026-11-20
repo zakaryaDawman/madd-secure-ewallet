@@ -4,7 +4,7 @@ import type { Express } from 'express';
 import { createApp } from '../src/app';
 import { pool } from '../src/db/pool';
 import { clearTables, prepareTestDatabase } from './db';
-import { signUp } from './helpers';
+import { logIn, signUp, TEST_DEVICE } from './helpers';
 
 let app: Express;
 let zak: { id: number; token: string };
@@ -82,7 +82,7 @@ describe('requests are rejected with 401 when the token is', () => {
   });
 
   it('for a session that does not exist', async () => {
-    const madeUp = jwt.sign({ role: 'customer', sid: '00000000-0000-0000-0000-000000000000' }, process.env.JWT_SECRET!, {
+    const madeUp = jwt.sign({ role: 'customer', sid: '00000000-0000-0000-0000-000000000000', did: TEST_DEVICE }, process.env.JWT_SECRET!, {
       subject: String(zak.id),
       expiresIn: '30m',
     });
@@ -91,7 +91,7 @@ describe('requests are rejected with 401 when the token is', () => {
 
   it('for a session that belongs to someone else', async () => {
     const ahmad = await signUp(app, 'Ahmad Ali', 'ahmad@email.com', '0123454521');
-    const stolen = jwt.sign({ role: 'customer', sid: sessionIdOf(ahmad.token) }, process.env.JWT_SECRET!, {
+    const stolen = jwt.sign({ role: 'customer', sid: sessionIdOf(ahmad.token), did: TEST_DEVICE }, process.env.JWT_SECRET!, {
       subject: String(zak.id),
       expiresIn: '30m',
     });
@@ -108,7 +108,7 @@ describe('requests are rejected with 401 when the token is', () => {
 
 describe('POST /auth/logout', () => {
   it('cancels only this session; another login keeps working', async () => {
-    const second = await request(app).post('/auth/login').send({ email: 'zak@email.com', password: 'password12' });
+    const second = await logIn(app, 'zak@email.com', 'password12');
     await logout(zak.token);
     expect((await getWallet(`Bearer ${zak.token}`)).status).toBe(401);
     expect((await getWallet(`Bearer ${second.body.token}`)).status).toBe(200);

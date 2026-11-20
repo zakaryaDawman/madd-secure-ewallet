@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getWallet, WalletSummary } from '../api/wallet';
-import { OfflineError, postLogout } from '../api/client';
-import { clearSession } from '../auth/session';
+import { OfflineError } from '../api/client';
 import { ActivityList } from '../components/home/ActivityList';
 import { BalanceBlock } from '../components/home/BalanceBlock';
 import { HomeHeader } from '../components/home/HomeHeader';
@@ -12,7 +11,7 @@ import { QuickActions } from '../components/home/QuickActions';
 import { WelcomeCard } from '../components/home/WelcomeCard';
 import { MaddTabBar } from '../components/MaddTabBar';
 import { OfflineView } from '../components/OfflineView';
-import { openScreen, replaceScreen } from '../utils/navigation';
+import { openScreen } from '../utils/navigation';
 import { colors, fonts, spacing } from '../theme';
 
 type LoadState = 'loading' | 'ready' | 'offline';
@@ -36,7 +35,7 @@ export default function HomeScreen() {
             contentContainerStyle={styles.content}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={reload} colors={[colors.blue]} />}
           >
-            <HomeHeader fullName={wallet.fullName} onAvatarPress={confirmLogout} onBellPress={() => {}} />
+            <HomeHeader fullName={wallet.fullName} onAvatarPress={() => openScreen('/profile')} onBellPress={() => {}} />
             <BalanceBlock balanceSen={wallet.balanceSen} hidden={hidden} onToggleHidden={() => setHidden((h) => !h)} />
             <QuickActions onPress={(action) => openScreen(action === 'send' ? '/recipient' : `/${action}`)} />
             {wallet.recent.length === 0 && <WelcomeCard />}
@@ -45,8 +44,8 @@ export default function HomeScreen() {
           </ScrollView>
         )}
       </View>
-      {/* Profile (C2) and Inbox (D6) open their screens in later tasks. */}
-      <MaddTabBar active="home" onSelect={(tab) => (tab === 'history' || tab === 'scan') && openScreen(`/${tab}`)} />
+      {/* Inbox opens its screen in task D6. */}
+      <MaddTabBar active="home" onSelect={(tab) => tab !== 'home' && tab !== 'inbox' && openScreen(`/${tab}`)} />
     </SafeAreaView>
   );
 }
@@ -93,22 +92,6 @@ function useWallet() {
   }, []);
 
   return { wallet, state, refreshing, reload };
-}
-
-/** Temporary way to log out (until the Profile screen in task C2): asks first, cancels the session on the server, then forgets it on the phone. */
-function confirmLogout() {
-  Alert.alert('Log out?', 'You will need your password to log in again.', [
-    { text: 'Cancel', style: 'cancel' },
-    {
-      text: 'Log out',
-      style: 'destructive',
-      onPress: async () => {
-        await postLogout();
-        await clearSession();
-        replaceScreen('/');
-      },
-    },
-  ]);
 }
 
 const styles = StyleSheet.create({

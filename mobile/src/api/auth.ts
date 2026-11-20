@@ -1,4 +1,5 @@
 import { apiPost } from './client';
+import { getDeviceId, getDeviceName } from '../auth/device';
 
 export type RegisterData = {
   fullName: string;
@@ -23,10 +24,11 @@ export type LoginResult =
 
 type LoginReply = { token?: string; user?: { fullName: string }; fields?: Record<string, string>; message?: string };
 
-/** Logs in on the server. Returns the session token, or messages to show under the fields / above the button. */
+/** Logs in on the server from this phone (sends its device id and name). Returns the session token, or messages to show under the fields / above the button. */
 export async function login(email: string, password: string): Promise<LoginResult> {
   try {
-    const res = await apiPost<LoginReply>('/auth/login', { email, password });
+    const deviceId = await getDeviceId();
+    const res = await apiPost<LoginReply>('/auth/login', { email, password, deviceId, deviceName: getDeviceName() });
     if (res.ok && res.body.token && res.body.user) return { ok: true, token: res.body.token, fullName: res.body.user.fullName };
     if (res.body.fields) return { ok: false, errors: res.body.fields };
     return { ok: false, errors: { form: res.body.message ?? 'Something went wrong. Please try again.' } };

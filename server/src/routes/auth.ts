@@ -5,6 +5,7 @@ import { loginSchema } from '../validation/login';
 import { checkCredentials } from '../services/login';
 import { createToken } from '../auth/tokens';
 import { createSession, revokeSession } from '../services/sessions';
+import { recordLoginAttempt, rememberDevice } from '../services/devices';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { fieldErrors } from './fieldErrors';
 
@@ -31,7 +32,10 @@ authRouter.post('/register', async (req, res, next) => {
   }
 });
 
-/** POST /auth/login: checks email + password, starts a session and returns its 30-minute token. One message for any wrong detail. */
+/**
+ * POST /auth/login: checks email + password, records the attempt and the device, starts a session and returns its
+ * 30-minute token (with the device id inside, so it can't be faked). One message for any wrong detail.
+ */
 authRouter.post('/login', async (req, res, next) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -40,13 +44,16 @@ authRouter.post('/login', async (req, res, next) => {
   }
 
   try {
+    const { email, deviceId, deviceName } = parsed.data;
     const user = await checkCredentials(parsed.data);
+    await recordLoginAttempt(email, deviceId, user !== null);
     if (!user) {
       res.status(401).json({ error: 'invalid_login', message: 'Email or password is wrong' });
       return;
     }
+    await rememberDevice(user.userId, deviceId, deviceName);
     const sessionId = await createSession(user.userId);
-    const token = createToken({ userId: user.userId, role: user.role, sessionId });
+    const token = createToken({ userId: user.userId, role: user.role, sessionId, deviceId });
     res.json({ token, user: { id: user.userId, fullName: user.fullName, role: user.role } });
   } catch (err) {
     next(err);

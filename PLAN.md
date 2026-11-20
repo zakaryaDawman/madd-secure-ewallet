@@ -74,3 +74,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] B7 History (All/In/Out/Held, date groups) and Transfer details; GET /transactions, GET /transactions/:id, own-transactions-only test
 - [x] B8 Receive (my QR = phone number only, copy, share, save) and Scan (camera, flash, gallery) into the normal Amount flow
 - [x] C1 Sessions table (sid in JWT), POST /auth/logout cancels one session, 401 for missing/invalid/expired/cancelled tokens, Session expired screen
+- [x] C2 Device id (secure storage, inside the JWT), login_attempts + known_devices, Profile with My devices, Personal details, Change PIN, Help
