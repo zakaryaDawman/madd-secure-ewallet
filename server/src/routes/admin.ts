@@ -5,6 +5,7 @@ import { adminName } from '../services/admin';
 import { adminStats } from '../services/adminStats';
 import { getFlagged, listFlagged, STATUS_FILTERS, type StatusFilter } from '../services/flagged';
 import type { Rule } from '../services/flaggedRows';
+import { readSecurityLog } from '../services/securityLogRead';
 
 export const adminRouter = Router();
 
@@ -58,6 +59,20 @@ adminRouter.get('/flagged/:id', async (req, res, next) => {
       return;
     }
     res.json(detail);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /admin/logs?q=…&before=…: the security log, newest first, 50 at a time, searchable by user or rule (design 22).
+ * Read-only: there is no route to change it, and the database refuses any edit or delete.
+ */
+adminRouter.get('/logs', async (req, res, next) => {
+  const search = typeof req.query.q === 'string' ? req.query.q.slice(0, 60) : '';
+  const before = Number(req.query.before);
+  try {
+    res.json(await readSecurityLog(search, Number.isInteger(before) && before > 0 ? before : null));
   } catch (err) {
     next(err);
   }

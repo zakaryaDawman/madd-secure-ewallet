@@ -63,3 +63,19 @@ export async function getFlaggedList(rule: Rule | null, pendingOnly: boolean): P
 export function getFlaggedDetail(id: number): Promise<FlaggedDetail> {
   return api(`/admin/flagged/${id}`);
 }
+
+export type LogTone = 'warning' | 'info' | 'danger' | 'plain';
+
+/** One line of the Security log (design 22). */
+export type LogEntry = { id: number; at: string; code: string; tone: LogTone; name: string; line: string };
+
+/** One page of the log; `nextBefore` fetches the next older page (null at the end). */
+export type LogPage = { entries: LogEntry[]; nextBefore: number | null };
+
+/** The security log, newest first, 50 at a time, optionally searched by user or rule. */
+export function getLogs(search: string, before: number | null): Promise<LogPage> {
+  const query = new URLSearchParams();
+  if (search) query.set('q', search);
+  if (before !== null) query.set('before', String(before));
+  return api(`/admin/logs?${query}`);
+}

@@ -7,3 +7,13 @@ export function timeOfDay(iso: string): string {
 export function clockTime(iso: string): string {
   return new Date(iso).toLocaleTimeString('en-GB', { hour12: false });
 }
+
+/** The day heading for a list, e.g. "Today", "Yesterday" or "18 Nov 2026". */
+export function dayHeading(iso: string, now: Date = new Date()): string {
+  const day = new Date(iso);
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (day.toDateString() === now.toDateString()) return 'Today';
+  if (day.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return day.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}

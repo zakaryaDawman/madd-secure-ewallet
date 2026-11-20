@@ -5,7 +5,7 @@ import type { FlaggedRow, Rule } from './flaggedRows';
 export const RULE_TITLES: Record<Rule, string> = { R1: 'R1 Large amount', R2: 'R2 Velocity', R3: 'R3 New device', R4: 'R4 Failed logins' };
 
 /** The rule's code name, as in the detail header (design 48), e.g. "R1 LARGE_AMOUNT". */
-export const RULE_CODES: Record<Rule, string> = { R1: 'R1 LARGE_AMOUNT', R2: 'R2 VELOCITY', R3: 'R3 UNKNOWN_DEVICE', R4: 'R4 FAILED_LOGINS' };
+export const RULE_CODES: Record<Rule, string> = { R1: 'R1 LARGE_AMOUNT', R2: 'R2 HIGH_VELOCITY', R3: 'R3 UNKNOWN_DEVICE', R4: 'R4 FAILED_LOGINS' };
 
 export type FlaggedStatus = 'pending' | 'confirmed' | 'rejected' | 'expired' | 'locked' | 'lock_ended' | 'new_login';
 export type StatusTone = 'warning' | 'danger' | 'success' | 'muted';

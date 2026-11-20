@@ -7,6 +7,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { FlaggedDetailPage } from './pages/FlaggedDetailPage';
 import { FlaggedPage } from './pages/FlaggedPage';
 import { LoginPage } from './pages/LoginPage';
+import { LogsPage } from './pages/LogsPage';
 
 /** The admin console: the login page until an admin signs in, then the admin area. */
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
       {page === 'dashboard' && <DashboardPage />}
       {page === 'flagged' && openEvent === null && <FlaggedPage onOpen={setOpenEvent} />}
       {page === 'flagged' && openEvent !== null && <FlaggedDetailPage id={openEvent} onBack={() => setOpenEvent(null)} />}
+      {page === 'logs' && <LogsPage />}
     </AdminLayout>
   );
 }

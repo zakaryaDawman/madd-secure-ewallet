@@ -1,0 +1,4 @@
+.box { display: flex; align-items: center; gap: 14px; margin-top: 22px; padding: 16px 22px; border-radius: 18px; background: rgba(255, 255, 255, 0.1); color: #a9b4d0; max-width: 720px; }
+.input { flex: 1; border: 0; background: none; color: var(--white); font-size: 18px; }
+.input::placeholder { color: #8e9bbd; }
+.input:focus { outline: none; }
