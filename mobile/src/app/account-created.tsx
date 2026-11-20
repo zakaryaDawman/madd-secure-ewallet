@@ -1,7 +1,7 @@
 // TEMPORARY (task B2): confirms sign-up worked. Replaced by "Allow notifications" + Home in later tasks.
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { replaceScreen } from '../utils/navigation';
 import Svg, { Path } from 'react-native-svg';
 import { MaddButton } from '../components/MaddButton';
 import { colors, fonts, spacing } from '../theme';
@@ -17,9 +17,9 @@ export default function AccountCreatedScreen() {
           </Svg>
         </View>
         <Text style={styles.title}>Account created</Text>
-        <Text style={styles.text}>Your wallet is ready with RM 1,000 of demo money. Log in is coming in the next task.</Text>
+        <Text style={styles.text}>Your wallet is ready with RM 1,000 of demo money. Log in to start.</Text>
       </View>
-      <MaddButton label="Back to start" variant="secondary" onPress={() => router.replace('/')} />
+      <MaddButton label="Log in" onPress={() => replaceScreen('/login')} />
     </SafeAreaView>
   );
 }

@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { openScreen } from '../utils/navigation';
 import { router, useFocusEffect } from 'expo-router';
 import type { RegisterField } from '../api/auth';
 import { MaddButton } from '../components/MaddButton';
@@ -42,7 +43,7 @@ export default function RegisterScreen() {
     setErrors(found);
     if (Object.keys(found).length > 0) return;
     updateSignupDraft({ ...form, errors: {} });
-    router.push('/create-pin');
+    openScreen('/create-pin');
   }
 
   return (

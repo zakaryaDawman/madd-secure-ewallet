@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { openScreen } from '../../utils/navigation';
+import { useLocalSearchParams } from 'expo-router';
 import { Icon } from '../../components/icons';
 import { MaddButton } from '../../components/MaddButton';
 import { CheckedArt, SendArt, TrustedPhoneArt } from '../../components/WelcomeArt';
@@ -23,7 +24,7 @@ export default function WelcomeSlide() {
     <SafeAreaView style={styles.root}>
       <View style={styles.top}>
         {!isLast && (
-          <Pressable accessibilityRole="button" onPress={() => router.push('/register')} hitSlop={10}>
+          <Pressable accessibilityRole="button" onPress={() => openScreen('/register')} hitSlop={10}>
             <Text style={styles.skip}>Skip</Text>
           </Pressable>
         )}
@@ -37,12 +38,12 @@ export default function WelcomeSlide() {
       {isLast ? (
         <View style={styles.lastActions}>
           <Dots active={index} />
-          <MaddButton label="Create my account" onPress={() => router.push('/register')} />
+          <MaddButton label="Create my account" onPress={() => openScreen('/register')} />
         </View>
       ) : (
         <View style={styles.actions}>
           <Dots active={index} />
-          <Pressable accessibilityRole="button" style={styles.next} onPress={() => router.push(`/welcome/${index + 2}`)}>
+          <Pressable accessibilityRole="button" style={styles.next} onPress={() => openScreen(`/welcome/${index + 2}`)}>
             <Text style={styles.nextText}>Next</Text>
             <Icon name="arrowRight" size={18} color={colors.white} strokeWidth={2.4} />
           </Pressable>

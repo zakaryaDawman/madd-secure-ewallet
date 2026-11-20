@@ -24,6 +24,7 @@ MADD is a secure Android e-wallet (Final Year Project, APU). It checks every tra
 - **One job per function.** Every function has a short `/** comment */` saying what it does.
 - TypeScript everywhere, no `any`. Clear names over short names. No unused code.
 - Keep files short. If a file grows past ~200 lines, split it.
+- Navigate with `openScreen()` / `replaceScreen()` from `mobile/src/utils/navigation.ts`, never `router.push` / `router.replace` directly. They ignore double taps, so a screen can't open twice.
 
 ## Security rules (do not break)
 

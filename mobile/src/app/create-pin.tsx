@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { replaceScreen } from '../utils/navigation';
 import { router } from 'expo-router';
 import { register } from '../api/auth';
 import { MaddButton } from '../components/MaddButton';
@@ -56,7 +57,7 @@ export default function CreatePinScreen() {
 
     if (result.ok) {
       clearSignupDraft();
-      router.replace('/account-created');
+      replaceScreen('/account-created');
       return;
     }
     if (result.errors.pin) {

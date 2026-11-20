@@ -12,6 +12,8 @@ const paths = {
   scan: ['M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16'],
   bell: ['M6 9a6 6 0 0 1 12 0c0 6 3 7 3 7H3s3-1 3-7', 'M10 20a2 2 0 0 0 4 0'],
   user: ['M4 21a8 8 0 0 1 16 0'],
+  phone: ['M9 2h6a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3z', 'M11 18h2'],
+  check: ['M5 12l5 5 9-10'],
 } as const;
 
 export type IconName = keyof typeof paths;

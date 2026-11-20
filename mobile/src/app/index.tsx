@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { openScreen } from '../utils/navigation';
 import { StatusBar } from 'expo-status-bar';
-import { router } from 'expo-router';
 import { BlueGradient } from '../components/BlueGradient';
 import { MaddWordmark } from '../components/MaddWordmark';
 import { checkServer } from '../api/health';
@@ -25,11 +25,10 @@ export default function SplashScreen() {
           <Text style={styles.tagline}>Your money, watched over.</Text>
         </View>
         <View style={styles.actions}>
-          <Pressable style={[styles.button, styles.buttonWhite]} accessibilityRole="button" onPress={() => router.push('/welcome/1')}>
+          <Pressable style={[styles.button, styles.buttonWhite]} accessibilityRole="button" onPress={() => openScreen('/welcome/1')}>
             <Text style={[styles.buttonText, { color: colors.blueDark }]}>Create account</Text>
           </Pressable>
-          {/* Log in is connected in task B3. */}
-          <Pressable style={[styles.button, styles.buttonGlass]} accessibilityRole="button">
+          <Pressable style={[styles.button, styles.buttonGlass]} accessibilityRole="button" onPress={() => openScreen('/login')}>
             <Text style={[styles.buttonText, { color: colors.white }]}>Log in</Text>
           </Pressable>
         </View>

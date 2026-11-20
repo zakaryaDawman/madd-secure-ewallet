@@ -67,3 +67,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] A4 Shared components (MaddButton, MaddAppBar, MaddKeypad, MaddTabBar + temporary preview screen)
 - [x] B1 Database tables + POST /auth/register (20 tests)
 - [x] B2 Welcome slides, Create account, Create PIN (connected to /auth/register)
+- [x] B3 Login (JWT 30 min, secure storage), Forgot password screen, double-tap-safe navigation

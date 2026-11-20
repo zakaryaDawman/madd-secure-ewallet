@@ -2,6 +2,9 @@ import { Router } from 'express';
 import { ZodError } from 'zod';
 import { registerSchema } from '../validation/register';
 import { createUserWithWallet, DuplicateAccountError } from '../services/users';
+import { loginSchema } from '../validation/login';
+import { checkCredentials } from '../services/login';
+import { createToken } from '../auth/tokens';
 
 export const authRouter = Router();
 
@@ -22,6 +25,27 @@ authRouter.post('/register', async (req, res, next) => {
       res.status(409).json({ error: 'duplicate', message: 'An account with these details already exists' });
       return;
     }
+    next(err);
+  }
+});
+
+/** POST /auth/login: checks email + password and returns a 30-minute session token. One message for any wrong detail. */
+authRouter.post('/login', async (req, res, next) => {
+  const parsed = loginSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
+
+  try {
+    const user = await checkCredentials(parsed.data);
+    if (!user) {
+      res.status(401).json({ error: 'invalid_login', message: 'Email or password is wrong' });
+      return;
+    }
+    const token = createToken({ userId: user.userId, role: user.role });
+    res.json({ token, user: { id: user.userId, fullName: user.fullName, role: user.role } });
+  } catch (err) {
     next(err);
   }
 });
