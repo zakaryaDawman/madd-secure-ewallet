@@ -1,4 +1,5 @@
-import { cert, initializeApp } from 'firebase-admin/app';
+import { readFileSync } from 'node:fs';
+import { cert, initializeApp, type ServiceAccount } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
 import { config } from '../config';
 import { pool } from '../db/pool';
@@ -60,7 +61,8 @@ function currentSender(): PushSender | null {
 
 /** Delivers alerts through Firebase Cloud Messaging, on the phone's "security" channel with high priority. */
 function firebaseSender(keyFile: string): PushSender {
-  const messaging = getMessaging(initializeApp({ credential: cert(keyFile) }));
+  const key = JSON.parse(readFileSync(keyFile, 'utf8')) as ServiceAccount; // read here, never logged
+  const messaging = getMessaging(initializeApp({ credential: cert(key) }));
   return async (tokens, alert) => {
     const result = await messaging.sendEachForMulticast({
       tokens,

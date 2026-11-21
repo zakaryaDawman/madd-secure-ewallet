@@ -15,7 +15,13 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "my.madd.wallet",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -51,6 +57,17 @@
         }
       ]
     ],
-    "scheme": "madd"
+    "scheme": "madd",
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "317e4d2b-1c85-4eef-8d10-5e987531ece5"
+      }
+    },
+    "owner": "madd123"
   }
 }
