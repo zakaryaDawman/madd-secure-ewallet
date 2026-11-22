@@ -1,0 +1,38 @@
+/* Part 8: demo and closing. */
+
+/* ---------- Live demo ---------- */
+.s-demo { background: var(--ink); color: var(--white); justify-content: center; }
+.s-demo .run { position: absolute; top: 80px; left: 112px; right: 112px; color: var(--sky); }
+.s-demo .run b { color: var(--white); }
+.s-demo h2 { font-size: 150px; letter-spacing: -0.05em; }
+.s-demo h2 em { font-style: normal; color: var(--sky); }
+.demo-steps { margin: 64px 0 0; padding: 0; list-style: none; display: flex; gap: 20px; flex-wrap: wrap; }
+.demo-steps li { font-size: 24px; font-weight: 700; padding: 14px 22px; border-radius: 14px; background: rgba(255,255,255,.08); color: var(--white); }
+.demo-steps li span { font-family: var(--mono); font-size: 18px; color: var(--sky); margin-right: 12px; }
+
+/* ---------- Objectives achieved ---------- */
+.s-done h2, .s-limits h2, .s-future h2 { margin-top: 40px; }
+.done-list { margin: auto 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 18px; }
+.done-list li { display: grid; grid-template-columns: 72px 300px 1fr 300px; gap: 28px; align-items: center; background: var(--white); border: 2px solid var(--line); border-radius: 22px; padding: 22px 30px; }
+.done-list .n { font-family: var(--mono); font-size: 44px; font-weight: 700; color: var(--blue); }
+.done-list b { font-size: 32px; letter-spacing: -0.02em; }
+.done-list p { margin: 0; font-size: 20px; line-height: 1.45; color: var(--muted); }
+.done-list .status { justify-self: end; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.chip-ok { font-size: 18px; font-weight: 800; padding: 7px 14px; border-radius: 10px; background: var(--ok-bg); color: #166534; }
+.chip-part { font-size: 18px; font-weight: 800; padding: 7px 14px; border-radius: 10px; background: var(--warn-bg); color: var(--warn-ink); }
+.slides-ref { font-family: var(--mono); font-size: 16px; color: var(--muted); }
+
+/* ---------- Limitations and future work ---------- */
+.limit-list { margin: auto 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 56px; }
+.limit-list li { border-left: 4px solid var(--warn); padding: 4px 0 4px 28px; }
+.limit-list b { display: block; font-size: 28px; letter-spacing: -0.015em; }
+.limit-list span { display: block; margin-top: 6px; font-size: 20px; line-height: 1.45; color: var(--muted); }
+.future-cards { margin: auto 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 22px; }
+.future-card { background: var(--white); border: 2px solid var(--line); border-radius: 22px; padding: 28px 26px; display: flex; flex-direction: column; gap: 12px; }
+.future-card .when { font-size: 16px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
+.future-card b { font-size: 26px; letter-spacing: -0.015em; line-height: 1.2; }
+.future-card p { margin: 0; font-size: 19px; line-height: 1.45; color: var(--muted); }
+
+/* ---------- Thank you ---------- */
+.s-thanks h1 { margin-top: auto; font-size: 150px; font-weight: 800; }
+.s-thanks .q { margin-top: 32px; font-size: 44px; font-weight: 700; color: var(--sky); }

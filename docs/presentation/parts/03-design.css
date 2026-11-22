@@ -1,0 +1,32 @@
+/* Part 3: method and design. Diagrams are inline SVG coloured from the deck tokens. */
+
+.s-method h2, .s-arch h2, .s-rules h2, .s-db h2 { margin-top: 40px; }
+.diagram { margin-top: auto; margin-bottom: 48px; width: 100%; height: auto; overflow: visible; }
+.diagram text { font-family: var(--sans); }
+.diagram .mono { font-family: var(--mono); }
+
+/* ---------- The four rules ---------- */
+.rule-cards { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.rule-card { background: var(--white); border: 2px solid var(--line); border-radius: 24px; padding: 30px 28px; display: flex; flex-direction: column; gap: 14px; }
+.rule-card .top { display: flex; justify-content: space-between; align-items: center; }
+.rule-card .id { font-family: var(--mono); font-size: 40px; font-weight: 700; color: var(--blue); }
+.sev { font-size: 16px; font-weight: 700; padding: 6px 12px; border-radius: 8px; }
+.sev.med { background: var(--warn-bg); color: var(--warn-ink); }
+.sev.high { background: var(--bad-bg); color: var(--bad); }
+.rule-card b { font-size: 30px; letter-spacing: -0.02em; }
+.rule-card .when { font-family: var(--mono); font-size: 19px; line-height: 1.5; color: var(--ink); background: var(--paper); border-radius: 12px; padding: 14px 16px; }
+.rule-card .then { font-size: 20px; line-height: 1.45; color: var(--muted); }
+.rule-card .then strong { color: var(--ink); }
+.rule-card .fr { margin-top: auto; font-family: var(--mono); font-size: 16px; color: var(--muted); }
+.limits { margin: 28px 0 40px; display: flex; gap: 48px; font-size: 21px; color: var(--muted); }
+.limits b { color: var(--ink); }
+
+/* ---------- Database groups ---------- */
+.db-groups { margin-top: auto; margin-bottom: 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.db-group { background: var(--white); border: 2px solid var(--line); border-radius: 24px; padding: 32px; }
+.db-group.sec { border-color: var(--warn); }
+.db-group h3 { margin: 0 0 24px; font-size: 20px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.db-group.sec h3 { color: var(--warn-ink); }
+.db-group dl { margin: 0; display: flex; flex-direction: column; gap: 18px; }
+.db-group dt { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--blue-dark); }
+.db-group dd { margin: 4px 0 0; font-size: 19px; line-height: 1.4; color: var(--muted); }

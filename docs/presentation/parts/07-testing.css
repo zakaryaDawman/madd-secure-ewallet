@@ -1,0 +1,54 @@
+/* Part 7: security and testing. */
+
+/* ---------- Security: six protections ---------- */
+.s-sec h2, .s-tests h2, .s-perf h2, .s-check h2, .s-uat h2 { margin-top: 40px; }
+.protections { margin-top: auto; margin-bottom: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.protection { background: var(--white); border: 2px solid var(--line); border-radius: 22px; padding: 28px 30px; display: flex; flex-direction: column; gap: 10px; }
+.protection b { font-size: 27px; letter-spacing: -0.015em; }
+.protection p { margin: 0; font-size: 20px; line-height: 1.45; color: var(--muted); }
+.protection code { margin-top: auto; padding-top: 6px; font-family: var(--mono); font-size: 16px; color: var(--blue-dark); }
+.pending { display: flex; gap: 16px; align-items: baseline; margin-bottom: 40px; font-size: 21px; color: var(--warn-ink); background: var(--warn-bg); border-radius: 14px; padding: 14px 22px; }
+.pending b { white-space: nowrap; }
+
+/* ---------- Tests: big number + bars per FR ---------- */
+.s-tests .grid { margin-top: 32px; flex: 1; display: grid; grid-template-columns: 520px 1fr; gap: 96px; min-height: 0; }
+.big { white-space: nowrap; font-size: 180px; font-weight: 800; letter-spacing: -0.06em; line-height: .9; color: var(--blue); font-variant-numeric: tabular-nums; }
+.big small { font-size: 70px; color: var(--muted); letter-spacing: -0.03em; }
+.bars { display: grid; grid-template-columns: 88px 1fr 48px; column-gap: 20px; row-gap: 8px; align-content: center; font-variant-numeric: tabular-nums; }
+.bars .fr { font-family: var(--mono); font-size: 17px; font-weight: 700; color: var(--muted); align-self: center; }
+.bars .track { height: 22px; align-self: center; }
+.bars .fill { display: block; height: 100%; border-radius: 6px; background: var(--blue); width: calc(var(--v) / 49 * 100%); }
+.bars .fill.rule { background: var(--warn); }
+.bars .v { font-family: var(--mono); font-size: 17px; font-weight: 700; align-self: center; text-align: right; }
+.legend { display: flex; gap: 28px; font-size: 19px; color: var(--muted); margin-top: 24px; }
+.legend i { display: inline-block; width: 18px; height: 18px; border-radius: 5px; vertical-align: -3px; margin-right: 10px; }
+
+/* ---------- Performance meters ---------- */
+.meters { margin-top: auto; margin-bottom: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.meter { background: var(--white); border: 2px solid var(--line); border-radius: 26px; padding: 34px 36px; display: flex; flex-direction: column; gap: 18px; }
+.meter .label { font-size: 20px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.meter .val { font-size: 80px; font-weight: 800; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; line-height: 1; }
+.meter .val small { font-size: 32px; color: var(--muted); font-weight: 700; margin-left: 6px; }
+.meter .rows { font-size: 19px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+.meter .rows span { display: flex; justify-content: space-between; }
+.meter .rows b { font-family: var(--mono); color: var(--ink); }
+.gauge { height: 14px; border-radius: 7px; background: var(--paper); position: relative; overflow: hidden; }
+.gauge i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 7px; background: var(--ok); min-width: 6px; }
+.meter .tgt { font-size: 19px; color: var(--muted); display: flex; justify-content: space-between; }
+.pass { font-weight: 800; color: var(--ok); }
+
+/* ---------- Screen check ---------- */
+.check-row { margin-top: auto; margin-bottom: 48px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 80px; align-items: center; }
+.stackbar { display: flex; height: 88px; border-radius: 18px; overflow: hidden; font-size: 22px; font-weight: 700; }
+.stackbar div { display: flex; align-items: center; padding: 0 22px; color: var(--white); white-space: nowrap; }
+.stackbar .a { background: var(--ok); flex: 34; } .stackbar .b { background: var(--blue); flex: 7; } .stackbar .c { background: var(--warn); flex: 7; }
+.stack-legend { margin-top: 22px; display: flex; flex-direction: column; gap: 10px; font-size: 21px; color: var(--muted); }
+.stack-legend i { display: inline-block; width: 18px; height: 18px; border-radius: 5px; vertical-align: -3px; margin-right: 12px; }
+
+/* ---------- UAT placeholder ---------- */
+.uat-grid { margin-top: auto; margin-bottom: 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.uat-cell { border: 2px dashed var(--line); border-radius: 22px; padding: 30px; display: flex; flex-direction: column; gap: 12px; min-height: 230px; }
+.uat-cell .label { font-size: 18px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.uat-cell .val { font-size: 64px; font-weight: 800; color: var(--line); letter-spacing: -0.03em; }
+.uat-cell p { margin: auto 0 0; font-size: 18px; color: var(--muted); }
+.placeholder-tag { align-self: flex-start; display: inline-block; margin-top: 20px; font-size: 18px; font-weight: 800; color: var(--warn-ink); background: var(--warn-bg); padding: 8px 14px; border-radius: 10px; }

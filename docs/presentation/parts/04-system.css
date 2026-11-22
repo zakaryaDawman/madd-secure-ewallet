@@ -1,0 +1,30 @@
+/* Part 4: the system, getting in and moving money. Walkthrough and flow styles come from deck.css. */
+
+/* ---------- Screen map: all 41 customer screens ---------- */
+.s-allmap h2 { margin-top: 36px; }
+.map { margin-top: auto; margin-bottom: 24px; display: flex; gap: 48px; align-items: flex-start; }
+.map .group h3 { margin: 0 0 4px; font-size: 24px; letter-spacing: -0.01em; }
+.map .group p { margin: 0 0 18px; font-size: 18px; color: var(--muted); }
+.map .group.sec h3 { color: var(--warn-ink); }
+.map .grid { display: grid; grid-template-columns: repeat(var(--cols), 80px); gap: 12px; }
+.map figure { margin: 0; }
+.map img { display: block; width: 80px; aspect-ratio: 780 / 1688; border-radius: 9px; border: 1.5px solid var(--line); background: var(--white); }
+.map figcaption { margin-top: 5px; font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--muted); text-align: center; }
+
+/* ---------- Flow strip with four screens ---------- */
+.strip.four { grid-template-columns: repeat(4, 1fr); gap: 80px; padding: 0 240px; }
+.strip.four figure:not(:last-child)::after { right: -50px; }
+.strip .route { display: inline-block; margin-top: 8px; font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--blue-dark); background: var(--tint); padding: 3px 9px; border-radius: 6px; }
+
+/* ---------- Two phones with callouts (Receive and Scan) ---------- */
+.s-pair { flex-direction: row; gap: 72px; padding-top: 64px; padding-bottom: 64px; }
+.s-pair .phone { height: 100%; }
+.s-pair .side { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.s-pair h2 { margin-top: 36px; font-size: 60px; }
+.s-pair .callouts { gap: 20px; }
+.s-pair .callouts h4 { font-size: 25px; }
+.s-pair .callouts p { font-size: 20px; }
+.callout-head { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.two-lists { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.two-lists .callouts { margin: 0; }
+.s-pair .callout-head { display: block; margin: 0 0 4px; }

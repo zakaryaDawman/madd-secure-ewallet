@@ -1,0 +1,301 @@
+<title>MADD Viva Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Noto+Naskh+Arabic:wght@600&display=swap">
+<style>
+/* Layout: a fixed 1920×1080 stage scaled to fit the window; one slide at a time.
+   The app's real screens are the main subject: big phone on one side, numbered explanations on the other.
+   Single light theme on purpose: projected in a lit room, and the app itself is light. */
+:root {
+  color-scheme: light;
+  --blue: #1E4FD8; --blue-dark: #1440B8; --blue-light: #3A6FF0; --sky: #B9CCFF; --tint: #E3ECFF;
+  --ink: #0B1B3F; --muted: #5A6788; --line: #DCE4F3; --paper: #F4F7FC; --white: #FFFFFF;
+  --ok: #16A34A; --ok-bg: #DFF5E7; --warn: #F59E0B; --warn-bg: #FFF1DC; --warn-ink: #9A4A06;
+  --bad: #DC2626; --bad-bg: #FDECEC;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --arabic: "Noto Naskh Arabic", "Geeza Pro", serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--ink); color: var(--ink); font-family: var(--sans); overflow: hidden; }
+
+.viewport { position: fixed; inset: 0; overflow: hidden; }
+.stage { width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; transform-origin: center; }
+
+.slide {
+  position: absolute; inset: 0; background: var(--paper); overflow: hidden;
+  padding: 80px 112px; display: flex; flex-direction: column;
+  visibility: hidden; opacity: 0; transition: opacity .35s ease, visibility 0s linear .35s;
+}
+.slide.on { visibility: visible; opacity: 1; transition: opacity .35s ease; }
+
+.run { display: flex; justify-content: space-between; align-items: center; font-size: 21px; font-weight: 600; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+.run b { color: var(--blue); font-weight: 700; }
+.run .num { font-family: var(--mono); font-size: 20px; letter-spacing: 0; }
+
+h1, h2 { margin: 0; text-wrap: balance; letter-spacing: -0.035em; line-height: 1.04; }
+h2 { font-size: 68px; font-weight: 800; }
+.lede { font-size: 27px; line-height: 1.45; color: var(--muted); margin: 0; }
+
+/* Phone frame around a real design screen (780×1688). */
+.phone { position: relative; aspect-ratio: 780 / 1688; border-radius: 54px; padding: 12px; background: var(--ink); box-shadow: 0 50px 90px -40px rgba(11,27,63,.5); flex: none; }
+.phone > img { display: block; width: 100%; height: 100%; border-radius: 43px; }
+
+/* ---------- Title ---------- */
+.s-title { background: var(--blue); color: var(--white); padding: 0; flex-direction: row; }
+.s-title .left { flex: 1; padding: 112px 0 96px 128px; display: flex; flex-direction: column; }
+.wordmark { display: flex; align-items: baseline; gap: 28px; }
+.wordmark .latin { font-size: 64px; font-weight: 800; letter-spacing: -0.04em; }
+.wordmark .ar { font-family: var(--arabic); font-size: 56px; color: var(--sky); }
+.s-title h1 { margin-top: auto; font-size: 118px; font-weight: 800; max-width: 980px; }
+.s-title h1 em { font-style: normal; color: var(--sky); }
+.s-title .sub { margin-top: 40px; font-size: 32px; line-height: 1.45; color: #DCE6FF; max-width: 900px; }
+.meta { margin-top: 72px; display: grid; grid-template-columns: repeat(3, auto); gap: 64px; justify-content: start; font-size: 22px; }
+.meta span { display: block; color: var(--sky); font-size: 17px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-bottom: 8px; }
+.s-title .right { width: 720px; position: relative; display: grid; place-items: center; }
+.wave { position: absolute; inset: 0; width: 100%; height: 100%; }
+.s-title .phone { transform: rotate(4deg); width: 400px; background: #0A1536; }
+
+/* ---------- Screen map: every customer screen, grouped by job ---------- */
+.s-map h2 { margin-top: 40px; }
+.groups { margin-top: auto; display: grid; grid-template-columns: 2fr 4fr 2fr 3fr; gap: 40px; align-items: end; }
+.group h3 { margin: 0 0 6px; font-size: 24px; letter-spacing: -0.01em; }
+.group p { margin: 0 0 22px; font-size: 19px; color: var(--muted); }
+.group.sec h3 { color: var(--warn-ink); }
+.thumbs { display: flex; gap: 16px; }
+.thumb { flex: 1; min-width: 0; }
+.thumb img { display: block; width: 100%; aspect-ratio: 780 / 1688; border-radius: 16px; border: 2px solid var(--line); background: var(--white); }
+.thumb span { display: block; margin-top: 10px; font-size: 15px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thumb span i { font-style: normal; font-family: var(--mono); color: var(--blue); margin-right: 6px; }
+
+/* ---------- Screen walkthrough: phone + numbered callouts ---------- */
+.s-walk { flex-direction: row; gap: 112px; padding-top: 64px; padding-bottom: 64px; }
+.s-walk .phone { height: 100%; }
+.s-walk .side { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.s-walk h2 { margin-top: 36px; }
+.s-walk .lede { margin-top: 20px; max-width: 900px; }
+.callouts { list-style: none; margin: auto 0 0; padding: 0; display: flex; flex-direction: column; gap: 26px; }
+.callouts li { display: grid; grid-template-columns: 52px 1fr; gap: 24px; align-items: start; }
+.callouts h4 { margin: 4px 0 4px; font-size: 27px; letter-spacing: -0.01em; }
+.callouts p { margin: 0; font-size: 21px; line-height: 1.45; color: var(--muted); }
+.callouts code { font-family: var(--mono); font-size: 18px; color: var(--blue-dark); background: var(--tint); padding: 2px 8px; border-radius: 6px; }
+.pin { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); color: var(--white); display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 22px; box-shadow: 0 0 0 5px var(--paper); }
+.pin.warn { background: var(--warn); } .pin.bad { background: var(--bad); }
+/* Pins sit on the phone's right edge, level with the part they explain. */
+.phone .pin { position: absolute; right: -26px; top: calc(var(--y) * 1%); transform: translateY(-50%); }
+.phone .pin::before { content: ""; position: absolute; right: 100%; top: 50%; width: 44px; height: 2px; background: currentColor; opacity: .0; }
+.tags { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.tag { font-size: 15px; font-weight: 700; padding: 5px 11px; border-radius: 8px; background: var(--white); border: 2px solid var(--line); color: var(--muted); }
+.tag.srv { border-color: var(--sky); color: var(--blue-dark); }
+
+/* ---------- Flow strip: one journey, screen by screen ---------- */
+.s-flow h2 { margin-top: 36px; }
+.strip { margin-top: auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 36px; }
+.strip figure { margin: 0; display: flex; flex-direction: column; gap: 18px; position: relative; }
+.strip .phone { width: 100%; border-radius: 34px; padding: 8px; }
+.strip .phone > img { border-radius: 27px; }
+.strip figure:not(:last-child)::after { content: "→"; position: absolute; right: -32px; top: 37%; font-size: 30px; color: var(--muted); }
+.strip figcaption b { display: block; font-size: 22px; letter-spacing: -0.01em; }
+.strip figcaption span { display: block; font-size: 17px; line-height: 1.4; color: var(--muted); margin-top: 4px; }
+.strip figcaption i { font-style: normal; font-family: var(--mono); font-size: 15px; color: var(--blue); }
+
+/* ---------- controls ---------- */
+.hud { position: fixed; left: 0; right: 0; bottom: 0; padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 12px; color: #C9D6F5; font: 600 13px var(--sans); opacity: 0; transition: opacity .25s; }
+body:hover .hud, .hud:focus-within { opacity: 1; }
+.hud button { font: inherit; color: var(--white); background: rgba(255,255,255,.14); border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.hud button:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+.hud .count { font-family: var(--mono); margin-left: auto; }
+.progress { position: fixed; left: 0; top: 0; height: 4px; background: var(--blue-light); transition: width .35s ease; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .slide.on .rise { animation: rise .6s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 90ms); }
+  .slide.on .phone .pin { animation: pop .45s cubic-bezier(.3,1.6,.5,1) both; animation-delay: calc(var(--i, 0) * 120ms + 350ms); }
+}
+@keyframes rise { from { transform: translateY(18px); opacity: .001; } to { transform: none; opacity: 1; } }
+@keyframes pop { from { transform: translateY(-50%) scale(.2); } to { transform: translateY(-50%) scale(1); } }
+</style>
+
+<div class="progress" id="progress"></div>
+<div class="viewport"><div class="stage" id="stage">
+
+  <!-- Title -->
+  <section class="slide s-title" aria-label="Title">
+    <div class="left">
+      <div class="wordmark rise"><span class="latin">MADD</span><span class="ar" lang="ar">مدّ</span></div>
+      <h1 class="rise" style="--i:1">A wallet that keeps <em>checking</em> after you log in.</h1>
+      <p class="sub rise" style="--i:2">Rule-based detection of suspicious transfers on Android, with the owner deciding what goes through.</p>
+      <div class="meta rise" style="--i:3">
+        <div><span>Student</span>Zakarya Dawman · TP079346</div>
+        <div><span>Supervisor</span>Ts. Umapathy Eaganathan</div>
+        <div><span>Programme</span>Final Year Project · APU</div>
+      </div>
+    </div>
+    <div class="right">
+      <canvas class="wave" id="wave" width="720" height="1080" aria-hidden="true"></canvas>
+      <div class="phone rise" style="--i:2"><img src="screens/05-Home.png" alt="MADD home screen with balance"></div>
+    </div>
+  </section>
+
+  <!-- Screen map -->
+  <section class="slide s-map" aria-label="The app at a glance">
+    <div class="run"><span><b>The app</b> &nbsp;· at a glance</span><span class="num">02</span></div>
+    <h2 class="rise">41 customer screens, built for four jobs.</h2>
+    <div class="groups">
+      <div class="group rise" style="--i:1"><h3>Get in</h3><p>Sign up, log in, PIN</p>
+        <div class="thumbs"><div class="thumb"><img src="screens/01-Main.png" alt=""><span><i>01</i>Splash</span></div><div class="thumb"><img src="screens/02-Login.png" alt=""><span><i>02</i>Log in</span></div></div></div>
+      <div class="group rise" style="--i:2"><h3>Move money</h3><p>Send, receive, scan, history</p>
+        <div class="thumbs"><div class="thumb"><img src="screens/05-Home.png" alt=""><span><i>05</i>Home</span></div><div class="thumb"><img src="screens/07-Amount.png" alt=""><span><i>07</i>Amount</span></div><div class="thumb"><img src="screens/16-Receive.png" alt=""><span><i>16</i>Receive</span></div><div class="thumb"><img src="screens/17-History.png" alt=""><span><i>17</i>History</span></div></div></div>
+      <div class="group sec rise" style="--i:3"><h3>Stay safe</h3><p>Holds, devices, locks</p>
+        <div class="thumbs"><div class="thumb"><img src="screens/11-Held.png" alt=""><span><i>11</i>Held</span></div><div class="thumb"><img src="screens/12-NewDevice.png" alt=""><span><i>12</i>New phone</span></div></div></div>
+      <div class="group rise" style="--i:4"><h3>Manage</h3><p>Inbox, profile, freeze</p>
+        <div class="thumbs"><div class="thumb"><img src="screens/18-Notifications.png" alt=""><span><i>18</i>Security</span></div><div class="thumb"><img src="screens/19-Profile.png" alt=""><span><i>19</i>Profile</span></div><div class="thumb"><img src="screens/14-Frozen.png" alt=""><span><i>14</i>Frozen</span></div></div></div>
+    </div>
+  </section>
+
+  <!-- Walkthrough: Home -->
+  <section class="slide s-walk" aria-label="Screen 05 Home">
+    <div class="phone rise">
+      <img src="screens/05-Home.png" alt="Home screen">
+      <span class="pin" style="--y:9.3;--i:1">1</span>
+      <span class="pin" style="--y:20;--i:2">2</span>
+      <span class="pin" style="--y:28.6;--i:3">3</span>
+      <span class="pin warn" style="--y:38;--i:4">4</span>
+      <span class="pin" style="--y:60;--i:5">5</span>
+    </div>
+    <div class="side">
+      <div class="run"><span><b>Screen 05</b> &nbsp;· Home</span><span class="num">03</span></div>
+      <h2 class="rise">Home shows the money, and anything waiting for you.</h2>
+      <ol class="callouts">
+        <li class="rise" style="--i:1"><span class="pin">1</span><div><h4>Protection on</h4><p>Tells the owner the 4 rules are watching this account.</p></div></li>
+        <li class="rise" style="--i:2"><span class="pin">2</span><div><h4>Balance</h4><p>Read from the server every time; stored in whole sen, never as a decimal. The eye icon hides it in public.</p><div class="tags"><span class="tag">FR-3</span><span class="tag srv">GET /wallet</span></div></div></li>
+        <li class="rise" style="--i:3"><span class="pin">3</span><div><h4>Send · Receive · Scan</h4><p>The three ways money moves. Scan reads another user's QR, which holds only their phone number.</p><div class="tags"><span class="tag">FR-4</span><span class="tag">FR-5</span></div></div></li>
+        <li class="rise" style="--i:4"><span class="pin warn">4</span><div><h4>Transfer waiting for you</h4><p>Appears only when a rule has held a transfer. Shows the time left before it is cancelled.</p><div class="tags"><span class="tag">FR-15</span><span class="tag srv">Server decides</span></div></div></li>
+        <li class="rise" style="--i:5"><span class="pin">5</span><div><h4>Recent activity</h4><p>Last three transfers, money in and out, with names masked by the server.</p><div class="tags"><span class="tag">FR-6</span></div></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Flow strip: sending money -->
+  <section class="slide s-flow" aria-label="Sending money flow">
+    <div class="run"><span><b>Flow</b> &nbsp;· Sending money</span><span class="num">04</span></div>
+    <h2 class="rise">Sending money takes five screens. The checks happen on the fourth.</h2>
+    <div class="strip">
+      <figure class="rise" style="--i:1"><div class="phone"><img src="screens/06-Recipient.png" alt="Choose recipient"></div><figcaption><i>06</i><b>Choose who</b><span>Phone number or a recent person. The name comes back masked.</span></figcaption></figure>
+      <figure class="rise" style="--i:2"><div class="phone"><img src="screens/07-Amount.png" alt="Enter amount"></div><figcaption><i>07</i><b>Enter amount</b><span>Own keypad, RM 1 to RM 50,000, balance shown.</span></figcaption></figure>
+      <figure class="rise" style="--i:3"><div class="phone"><img src="screens/08-Review.png" alt="Review and PIN"></div><figcaption><i>08</i><b>Review + PIN</b><span>6-digit PIN, checked against a bcrypt hash.</span></figcaption></figure>
+      <figure class="rise" style="--i:4"><div class="phone"><img src="screens/09-Checking.png" alt="Checking"></div><figcaption><i>09</i><b>Checking</b><span>Server locks both wallets and runs R1–R4.</span></figcaption></figure>
+      <figure class="rise" style="--i:5"><div class="phone"><img src="screens/10-Success.png" alt="Money sent"></div><figcaption><i>10</i><b>Sent, or held</b><span>No rule fired: receipt. A rule fired: screen 11.</span></figcaption></figure>
+    </div>
+  </section>
+
+  <!-- Walkthrough: Held -->
+  <section class="slide s-walk" aria-label="Screen 11 Held transfer">
+    <div class="phone rise">
+      <img src="screens/11-Held.png" alt="Held transfer screen">
+      <span class="pin warn" style="--y:22;--i:1">1</span>
+      <span class="pin" style="--y:48;--i:2">2</span>
+      <span class="pin warn" style="--y:67.5;--i:3">3</span>
+      <span class="pin" style="--y:83.6;--i:4">4</span>
+      <span class="pin bad" style="--y:91.7;--i:5">5</span>
+    </div>
+    <div class="side">
+      <div class="run"><span><b>Screen 11</b> &nbsp;· Held transfer</span><span class="num">05</span></div>
+      <h2 class="rise">When a rule fires, the owner decides. No money moves until then.</h2>
+      <ol class="callouts">
+        <li class="rise" style="--i:1"><span class="pin warn">1</span><div><h4>5-minute countdown</h4><p>Checked on the server when read, not by a timer. After 5 minutes the transfer is cancelled.</p><div class="tags"><span class="tag">FR-15</span></div></div></li>
+        <li class="rise" style="--i:2"><span class="pin">2</span><div><h4>What was paused</h4><p>Recipient masked, amount, and which phone sent it.</p></div></li>
+        <li class="rise" style="--i:3"><span class="pin warn">3</span><div><h4>Why we paused it</h4><p>Plain words built from the rule's own numbers. Here: R1, RM 800 against a RM 500 limit.</p><div class="tags"><span class="tag">FR-11</span><span class="tag srv">security_events</span></div></div></li>
+        <li class="rise" style="--i:4"><span class="pin">4</span><div><h4>Yes, it was me</h4><p>Asks for the PIN, re-checks the balance, then sends once.</p><div class="tags"><span class="tag srv">POST /transfers/:id/confirm</span></div></div></li>
+        <li class="rise" style="--i:5"><span class="pin bad">5</span><div><h4>No, freeze my account</h4><p>Cancels the transfer, freezes the account and ends every session on every phone.</p><div class="tags"><span class="tag srv">Only an admin can unfreeze</span></div></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Walkthrough: Admin event detail -->
+  <section class="slide s-walk" aria-label="Screen 48 Admin event details">
+    <div class="phone rise">
+      <img src="screens/48-AdminFlagDetail.png" alt="Admin flagged event detail">
+      <span class="pin" style="--y:12;--i:1">1</span>
+      <span class="pin" style="--y:33;--i:2">2</span>
+      <span class="pin warn" style="--y:50;--i:3">3</span>
+      <span class="pin" style="--y:66;--i:4">4</span>
+      <span class="pin bad" style="--y:78;--i:5">5</span>
+    </div>
+    <div class="side">
+      <div class="run"><span><b>Screen 48</b> &nbsp;· Admin · Event details</span><span class="num">06</span></div>
+      <h2 class="rise">The admin sees exactly why, and cannot change it.</h2>
+      <p class="lede rise" style="--i:1">Built as a separate web console. Shown here at phone size as designed; the console uses a side menu.</p>
+      <ol class="callouts">
+        <li class="rise" style="--i:1"><span class="pin">1</span><div><h4>Event and rule</h4><p>Every fired rule gets a numbered record and a status: Pending, Confirmed or Rejected.</p><div class="tags"><span class="tag">FR-18</span></div></div></li>
+        <li class="rise" style="--i:2"><span class="pin">2</span><div><h4>Who, where, how serious</h4><p>R1 and R2 are Medium; R3 and R4 are High.</p></div></li>
+        <li class="rise" style="--i:3"><span class="pin warn">3</span><div><h4>The exact calculation</h4><p>The rule saves its numbers when it fires, so the admin sees the same maths the server used.</p></div></li>
+        <li class="rise" style="--i:4"><span class="pin">4</span><div><h4>Timeline</h4><p>Submitted, held, alert sent, then the owner's answer, to the second.</p><div class="tags"><span class="tag">FR-16</span><span class="tag">FR-19</span></div></div></li>
+        <li class="rise" style="--i:5"><span class="pin bad">5</span><div><h4>Read-only</h4><p>Admins can't approve or cancel a transfer. The log is append-only, enforced by a database trigger.</p><div class="tags"><span class="tag">FR-17</span><span class="tag">FR-20</span></div></div></li>
+      </ol>
+    </div>
+  </section>
+
+</div></div>
+
+<div class="hud">
+  <button type="button" id="prev" aria-label="Previous slide">←</button>
+  <button type="button" id="next" aria-label="Next slide">→</button>
+  <button type="button" id="full">Full screen (F)</button>
+  <span class="count" id="count"></span>
+</div>
+
+<script>
+/** Draws the madda wave behind the title phone. */
+function drawWave() {
+  const c = document.getElementById("wave"), g = c.getContext("2d");
+  for (let k = 0; k < 9; k++) {
+    g.beginPath();
+    for (let x = 0; x <= 720; x += 6) {
+      const y = 280 + k * 46 + Math.sin(x / 120 + k * 0.5) * (40 + k * 6);
+      x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
+    }
+    g.strokeStyle = `rgba(185,204,255,${0.08 + k * 0.025})`;
+    g.lineWidth = 3;
+    g.stroke();
+  }
+}
+
+const slides = [...document.querySelectorAll(".slide")];
+let current = 0;
+
+/** Shows slide i and updates the counter and progress bar. */
+function show(i) {
+  current = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, k) => s.classList.toggle("on", k === current));
+  document.getElementById("count").textContent = `${current + 1} / ${slides.length}`;
+  document.getElementById("progress").style.width = `${((current + 1) / slides.length) * 100}%`;
+}
+
+/** Scales the 1920×1080 stage to fit the window without cropping. */
+function fit() {
+  const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
+  document.getElementById("stage").style.transform = `translate(-50%, -50%) scale(${scale})`;
+}
+
+/** Toggles browser full screen; ignored where the frame does not allow it. */
+function toggleFull() {
+  const req = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+  req?.catch?.(() => {});
+}
+
+drawWave();
+fit();
+show(0);
+addEventListener("resize", fit);
+addEventListener("keydown", (e) => {
+  if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); show(current + 1); }
+  if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); show(current - 1); }
+  if (e.key === "Home") show(0);
+  if (e.key === "End") show(slides.length - 1);
+  if (e.key === "f" || e.key === "F") toggleFull();
+});
+document.getElementById("prev").onclick = () => show(current - 1);
+document.getElementById("next").onclick = () => show(current + 1);
+document.getElementById("full").onclick = toggleFull;
+document.getElementById("stage").addEventListener("click", (e) => show(current + (e.clientX < innerWidth / 3 ? -1 : 1)));
+</script>

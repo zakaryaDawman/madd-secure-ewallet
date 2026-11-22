@@ -1,0 +1,27 @@
+/* Part 5: staying safe. Reuses walkthrough, pair and flow styles from earlier parts. */
+
+/* Paths: each phone gets a coloured label above it (Yes / No / no answer). */
+.paths { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px; padding: 0 300px; }
+.paths figure { margin: 0; display: flex; flex-direction: column; gap: 16px; }
+.paths .phone { width: 100%; border-radius: 34px; padding: 8px; }
+.paths .phone > img { border-radius: 27px; }
+.path-tag { align-self: flex-start; font-size: 18px; font-weight: 800; padding: 7px 14px; border-radius: 10px; }
+.path-tag.start { background: var(--warn-bg); color: var(--warn-ink); }
+.path-tag.yes { background: var(--blue); color: var(--white); }
+.path-tag.no { background: var(--bad-bg); color: var(--bad); }
+.path-tag.wait { background: var(--white); color: var(--muted); border: 2px solid var(--line); }
+.paths figcaption b { display: block; font-size: 22px; letter-spacing: -0.01em; }
+.paths figcaption span { display: block; margin-top: 4px; font-size: 17px; line-height: 1.4; color: var(--muted); }
+.paths .route { display: inline-block; margin-top: 8px; font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--blue-dark); background: var(--tint); padding: 3px 9px; border-radius: 6px; }
+
+/* Server panel: what the server did, beside the phones. */
+.server-box { background: var(--ink); color: var(--white); border-radius: 24px; padding: 30px 30px 34px; display: flex; flex-direction: column; gap: 14px; align-self: stretch; }
+.server-box h4 { margin: 0; font-family: var(--mono); font-size: 16px; letter-spacing: .08em; color: var(--sky); }
+.server-box ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; font-size: 19px; line-height: 1.4; }
+.server-box code { font-family: var(--mono); font-size: 16px; color: var(--sky); }
+
+/* R1 and R2 reason samples beside the Held walkthrough. */
+.reasons { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+.reason { background: var(--warn-bg); border-radius: 14px; padding: 14px 18px; font-size: 18px; line-height: 1.4; color: var(--warn-ink); }
+.reason b { font-family: var(--mono); margin-right: 6px; }
+.run .ex { font-size: 16px; letter-spacing: .04em; color: var(--muted); font-weight: 600; }

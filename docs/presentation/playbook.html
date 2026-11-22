@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MADD Presentation Playbook</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  :root { --blue:#1E4FD8; --ink:#0B1B3F; --muted:#5A6788; --line:#DCE4F3; --paper:#F4F7FC; --tint:#E3ECFF; --warn:#9A4A06; --warnbg:#FFF1DC; }
+  body { font-family: Inter, system-ui, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5; margin: 0; }
+  .eyebrow { font-size: 8pt; letter-spacing: .3em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  h1 { font-size: 36pt; letter-spacing: -0.03em; margin: 40mm 0 4mm; line-height: 1; }
+  h2 { font-size: 18pt; letter-spacing: -0.02em; margin: 0 0 3mm; page-break-before: always; }
+  h3 { font-size: 12pt; margin: 6mm 0 2mm; }
+  .lead { font-size: 13pt; color: var(--muted); max-width: 140mm; }
+  .meta { margin-top: 20mm; font-size: 9.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 4mm; }
+  ol, ul { padding-left: 5mm; margin: 2mm 0; }
+  li { margin: 1mm 0; }
+  .box { background: var(--paper); border: 1px solid var(--line); border-radius: 3mm; padding: 4mm 5mm; margin: 4mm 0; }
+  .story { background: var(--warnbg); border: 1px solid #FCD9A0; border-radius: 3mm; padding: 4mm 5mm; }
+  .story p { margin: 0 0 2mm; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 3mm 0; }
+  th, td { text-align: left; padding: 2mm 2.5mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 8pt; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .task { page-break-inside: avoid; margin: 6mm 0 2mm; }
+  .head { display: flex; align-items: baseline; gap: 4mm; border-bottom: 2px solid var(--ink); padding-bottom: 1.5mm; }
+  .id { font-family: "JetBrains Mono", monospace; font-weight: 500; background: var(--blue); color: #fff; padding: .5mm 2mm; border-radius: 1.5mm; font-size: 9pt; }
+  .head b { font-size: 12pt; flex: 1; }
+  .head span { font-size: 8.5pt; color: var(--muted); }
+  .uses { font-size: 9pt; color: var(--muted); margin: 2mm 0; }
+  .prompt { background: var(--ink); color: #E8EEFF; border-radius: 2.5mm; padding: 4mm 5mm; font-size: 9.5pt; white-space: pre-wrap; margin: 2mm 0; }
+  .done { font-size: 9.5pt; }
+  .done b { color: var(--blue); }
+</style>
+</head>
+<body>
+
+<div class="eyebrow">MADD · Final Year Project · Presentation</div>
+<h1>Presentation<br>Playbook</h1>
+<p class="lead">Every prompt to send Claude to build your viva deck, one part at a time. The app's real screens are the centre of the deck; every claim is backed by your own report, code or test results.</p>
+<div class="meta">Zakarya Zaben Ullah Nasser Dawman · TP079346 · Asia Pacific University<br>
+Supervisor: Ts. Umapathy Eaganathan · Second marker: Dr. Mohamed Shabbir Hamza Abdulnabi<br>
+Deck: HTML, CSS and JavaScript in <code>docs/presentation/</code> · Style: <code>style-sample.html</code> · Version 1 · 22 November 2026</div>
+
+<h2>How to use this playbook</h2>
+<ol>
+  <li><b>One prompt per message.</b> Copy the dark box exactly. Don't combine parts.</li>
+  <li><b>Claude plans first.</b> It lists the slides it will add. Reply "go" or correct it.</li>
+  <li><b>Check it in the browser.</b> Open the link Claude gives you and go through the "Done when" list.</li>
+  <li><b>Commit.</b> Ask "commit this part". One commit per part.</li>
+</ol>
+
+<div class="box">
+<h3 style="margin-top:0">Rules for every slide</h3>
+<ul>
+  <li><b>Same style as <code>style-sample.html</code>.</b> MADD colours, Inter, light background, 1920×1080, keyboard and click navigation.</li>
+  <li><b>The UI is the main thing.</b> Real screens from <code>design/app-screens/</code>, numbered markers on the phone, matching explanations beside it.</li>
+  <li><b>One point per slide.</b> The title is a full sentence that states that point.</li>
+  <li><b>Only true numbers.</b> From the IR, <code>PLAN.md</code>, <code>docs/F1/</code> or the code. Nothing invented. If a number is missing, ask.</li>
+  <li><b>Not AI-looking.</b> No emoji, no stock icons, no gradients for decoration, no filler words ("seamless", "robust", "cutting-edge"). Short plain sentences.</li>
+  <li><b>Speaker notes</b> for every slide, in simple English, shown with the N key.</li>
+  <li><b>One file per part</b> in <code>docs/presentation/parts/</code>, joined into <code>deck.html</code>. Keep each file short.</li>
+</ul>
+</div>
+
+<h3>Running order (about 34 slides, ★ = can skip if time is short)</h3>
+<table>
+  <tr><th>Part</th><th>Slides</th><th>Prompt</th></tr>
+  <tr><td>Opening</td><td>Title · My story · Agenda</td><td>P1</td></tr>
+  <tr><td>The problem</td><td>E-wallet growth and fraud · Account takeover after login · Research gap ★</td><td>P1</td></tr>
+  <tr><td>Aim and objectives</td><td>Aim · Four objectives</td><td>P2</td></tr>
+  <tr><td>Research</td><td>Similar systems (Touch 'n Go, GrabPay, MAE) · Survey: 31 respondents</td><td>P2</td></tr>
+  <tr><td>Method</td><td>Incremental model, 4 increments · What changed since the IR ★</td><td>P3</td></tr>
+  <tr><td>Design</td><td>Architecture · Four rules R1–R4 · Database ★</td><td>P3</td></tr>
+  <tr><td>The system</td><td>Screen map · Get in · Home · Send flow · Held · Yes / No · New device · Login lock · Inbox and profile ★</td><td>P4, P5</td></tr>
+  <tr><td>Admin console</td><td>Dashboard · Event details · Users and unfreeze</td><td>P6</td></tr>
+  <tr><td>Security and testing</td><td>How the server protects money · 279 tests · Performance · Screen check ★ · UAT</td><td>P7</td></tr>
+  <tr><td>Demo and closing</td><td>Live demo · Objectives achieved · Limitations · Future work · Thank you</td><td>P8</td></tr>
+</table>
+
+<h2>Your story (draft for you to edit)</h2>
+<p>This goes on slide 2. Claude wrote it from what you said: you are from Yemen, security matters a lot to you, and you wanted to add this feature to make safe payments easier. <b>Change anything that isn't true for you before P1.</b> Don't add events that didn't happen; examiners often ask about this slide.</p>
+<div class="story">
+  <p><b>Slide title:</b> "I'm from Yemen, where trust in money is hard-won."</p>
+  <p><b>On the slide (short):</b> From Yemen to Malaysia · Paying became one tap · One tap is also all a thief needs · So I built a wallet that keeps checking.</p>
+  <p><b>What you say:</b> "I'm from Yemen. Back home, I learned early that keeping money safe is something you think about every day. When I came to Malaysia to study, e-wallets made paying and sending money very easy, just one tap. But I noticed that the same one tap is all a thief needs once they get into your phone. Security has always been very important to me, so I asked myself: what if the wallet kept checking after login, and asked me before anything unusual went through? I wanted to add that one feature, and keep paying just as easy as before. That is MADD."</p>
+  <p><b>Why "MADD" (مدّ):</b> the madda is the Arabic mark that extends a sound. MADD extends protection beyond the moment you log in.</p>
+</div>
+
+<h2>The prompts</h2>
+
+<div class="task"><div class="head"><span class="id">P1</span><b>Deck frame, opening and problem</b><span>about 6 slides</span></div>
+<div class="uses">Uses: style-sample.html · IR Chapter 1.1 · the story page of this playbook</div>
+<div class="prompt">Task P1 (presentation). Read docs/presentation/style-sample.html and docs/presentation/playbook.html.
+Build docs/presentation/deck.html with the same style, plus: slide counter, progress bar, F for full screen, N for speaker notes, and one file per part in docs/presentation/parts/.
+Add these slides: Title · My story (use my edited story) · Agenda · E-wallet growth and fraud · Account takeover after login · Research gap (optional).
+Take the problem facts and numbers only from my IR (docs/IR-Zakarya-TP079346.docx, section 1.1), with the source in small text.
+Add speaker notes to each slide. Plan first, then build.</div>
+<div class="done"><b>Done when:</b> the 6 slides open in the browser, arrows and N work, every number has its source.</div></div>
+
+<div class="task"><div class="head"><span class="id">P2</span><b>Aim, objectives and research</b><span>about 4 slides</span></div>
+<div class="uses">Uses: IR 1.2, 1.3, 2.2 (similar systems, comparison matrix), 3.4 (survey analysis)</div>
+<div class="prompt">Task P2 (presentation). Add: Aim · Four objectives (numbered, they return at the end) · Similar systems: Touch 'n Go, GrabPay and MAE compared with MADD on the features from my IR comparison matrix · Survey: 31 respondents, the 3–4 findings that support the project, as a real chart.
+Use only the numbers in my IR. Speaker notes for each. Plan first.</div>
+<div class="done"><b>Done when:</b> the comparison and survey numbers match the IR exactly.</div></div>
+
+<div class="task"><div class="head"><span class="id">P3</span><b>Method and design</b><span>about 5 slides</span></div>
+<div class="uses">Uses: IR 3.1, PLAN.md, server/src/rules/, server/src/db/schema.sql</div>
+<div class="prompt">Task P3 (presentation). Add: Incremental model with the 4 increments and the FRs each one delivered · What changed since the IR (Flutter → React Native with Expo, admin as a separate web console, and why) · Architecture diagram (phone app, Express server, PostgreSQL, Firebase Cloud Messaging, admin web console) · The four rules R1–R4 with their exact thresholds from server/src/rules/config.ts · Database tables (optional).
+Draw diagrams in SVG with the MADD colours. Speaker notes. Plan first.</div>
+<div class="done"><b>Done when:</b> the thresholds on the slide match config.ts, and you can explain the diagram.</div></div>
+
+<div class="task"><div class="head"><span class="id">P4</span><b>The system: getting in and moving money</b><span>about 5 slides</span></div>
+<div class="uses">Designs: 36–38, 03, 04, 02, 05, 06–10, 16, 15, 17</div>
+<div class="prompt">Task P4 (presentation). Add, in the style of the sample's walkthrough and flow slides: Screen map (all customer screens grouped by job) · Get in flow (welcome → create account → PIN → log in) · Home walkthrough (05) · Send money flow (06 → 10) · Receive and scan (16, 15) · History (17).
+Each numbered marker must sit exactly on the part it explains. Each explanation names the FR and, where useful, the server route. Speaker notes. Plan first.</div>
+<div class="done"><b>Done when:</b> every marker lines up with its part of the screen.</div></div>
+
+<div class="task"><div class="head"><span class="id">P5</span><b>The system: staying safe</b><span>about 6 slides</span></div>
+<div class="uses">Designs: 11, 29, 14, 35, 12, 13, 45, 27, 31, 18, 19, 30</div>
+<div class="prompt">Task P5 (presentation). Add: Held transfer walkthrough (11) · Yes with PIN, and No with freeze (29, 14, 35) as a two-path flow · New device, R3 (12, 13, 45) · Login lock, R4, and PIN lock (27, 31) · Inbox and Security tab (18) · Profile and Freeze my account (19, 30) (optional).
+For each rule, show which screen the user sees and what the server did. Speaker notes. Plan first.</div>
+<div class="done"><b>Done when:</b> each of R1–R4 has a slide showing what the user sees.</div></div>
+
+<div class="task"><div class="head"><span class="id">P6</span><b>Admin console</b><span>about 3 slides</span></div>
+<div class="uses">Designs: 20, 21, 48, 22, 24, 23, 25 · screenshots of the real admin-web</div>
+<div class="prompt">Task P6 (presentation). Add: Dashboard (20) · Flagged activity and event details (21, 48) · Users, user details and unfreeze with a required reason (24, 23, 25).
+Use real screenshots of admin-web running on my laptop (start it with demo data; never use my real password). Show that admins cannot move money or see PINs. Speaker notes. Plan first.</div>
+<div class="done"><b>Done when:</b> the slides show the real web console, not only the phone designs.</div></div>
+
+<div class="task"><div class="head"><span class="id">P7</span><b>Security and testing</b><span>about 5 slides</span></div>
+<div class="uses">Uses: CLAUDE.md security rules, docs/F1/test-results.md, measurements.md, screen-check.md, UAT results</div>
+<div class="prompt">Task P7 (presentation). Add: How the server protects money (server decides, integer sen, one transaction with FOR UPDATE, bcrypt, 30-minute JWT sessions, append-only security log) · Tests: 279 of 279 by requirement, as a chart · Performance against targets · Screen check 01–48 (optional) · UAT: my testers' results (ask me for them; if I have none yet, leave a clearly marked placeholder).
+Every number from docs/F1. Speaker notes. Plan first.</div>
+<div class="done"><b>Done when:</b> every number matches docs/F1.</div></div>
+
+<div class="task"><div class="head"><span class="id">P8</span><b>Demo and closing</b><span>about 5 slides</span></div>
+<div class="prompt">Task P8 (presentation). Add: Live demo slide (big, simple: "Live demo on the phone"), with my 5-minute demo script in its speaker notes · Objectives achieved: each of the 4 objectives with a tick and the evidence slide it links to · Limitations (honest: local push setup, free hosting sleeps, rule thresholds are fixed, not machine learning) · Future work · Thank you and questions.
+Speaker notes. Plan first.</div>
+<div class="done"><b>Done when:</b> each objective points to real evidence in the deck.</div></div>
+
+<div class="task"><div class="head"><span class="id">P9</span><b>Final check and practice</b><span>whole deck</span></div>
+<div class="prompt">Task P9 (presentation). Go through the whole deck: check every number against its source, every marker position, spelling, and that no slide looks crowded. List anything you are unsure of instead of guessing.
+Then give me: the timing per part for a 20-minute and a 30-minute version (which ★ slides to skip), and the 10 questions examiners are most likely to ask, with short answers from my project.</div>
+<div class="done"><b>Done when:</b> you have practised once with the timing, and can answer the 10 questions.</div></div>
+
+</body>
+</html>
