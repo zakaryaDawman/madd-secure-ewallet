@@ -17,3 +17,6 @@ mobile/google-services.json
 
 # F1 raw Jest output (the tables in docs/F1 are built from it)
 docs/F1/jest-results.json
+
+# Exported single-file decks (generated, large)
+docs/presentation/export/

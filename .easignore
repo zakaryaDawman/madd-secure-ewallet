@@ -1,0 +1,17 @@
+# What EAS Build uploads (it reads this file at the git root, not in mobile/).
+# Same as .gitignore, except mobile/google-services.json is INCLUDED: the build needs it and it is not secret.
+node_modules/
+.env
+dist/
+coverage/
+.expo/
+mobile/android/
+mobile/ios/
+*.apk
+*.log
+.DS_Store
+*.zip
+.claude/
+mobile/.claude/
+server/secrets/
+docs/F1/jest-results.json
