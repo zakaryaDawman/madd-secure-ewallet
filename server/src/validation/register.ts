@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
-/** Turns a Malaysian mobile number into one standard form, e.g. "012 345 6789" -> "+60123456789". Returns null if invalid. */
+/** Turns a Malaysian mobile number, with or without the leading 0, into one standard form, e.g. "12 345 6789" -> "+60123456789". Returns null if invalid. */
 export function normalisePhone(input: string): string | null {
-  const digits = input.replace(/[\s-]/g, '').replace(/^\+?60/, '0');
-  if (!/^01\d{8,9}$/.test(digits)) return null;
-  return `+6${digits}`;
+  const local = input.replace(/[\s-]/g, '').replace(/^\+?60/, '').replace(/^0/, '');
+  if (!/^1\d{8,9}$/.test(local)) return null;
+  return `+60${local}`;
 }
 
 /** True for PINs that are easy to guess: all the same digit (111111) or counting up/down (123456, 654321). */

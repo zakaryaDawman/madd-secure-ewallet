@@ -32,6 +32,12 @@ describe('GET /users/lookup', () => {
     expect(JSON.stringify(res.body)).not.toContain('Ahmad');
   });
 
+  it('finds the same user when the number has no leading 0 (G2)', async () => {
+    const res = await lookup('12 345 4521');
+    expect(res.status).toBe(200);
+    expect(res.body.phone).toBe('+60123454521');
+  });
+
   it('says not found for an unknown number', async () => {
     const res = await lookup('0198881234');
     expect(res.status).toBe(404);

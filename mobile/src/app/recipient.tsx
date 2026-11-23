@@ -80,8 +80,8 @@ function usePhoneLookup(phone: string) {
   const [result, setResult] = useState<Recipient | null>(null);
   const [error, setError] = useState('');
   const [searching, setSearching] = useState(false);
-  const digits = phone.replace(/\D/g, '');
-  const ready = digits.length >= 10;
+  const localDigits = phone.replace(/\D/g, '').replace(/^60/, '').replace(/^0/, '');
+  const ready = localDigits.length >= 9;
 
   useEffect(() => {
     if (!ready) return;

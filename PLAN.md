@@ -95,7 +95,7 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 ## Phase G · Extra features (after F1)
 
 - [x] G1 Camera permission in the APK (expo-image-picker `cameraPermission: false` was removing CAMERA from the manifest)
-- [ ] G2 Phone number with or without the leading 0 (one stored format; register, lookup and QR all match)
+- [x] G2 Phone number with or without the leading 0 (one stored format; register, lookup and QR all match)
 - [ ] G3 Email sending with nodemailer (Gmail SMTP from `.env`, mock transport in tests)
 - [ ] G4 Email OTP for suspicious activity (6-digit code, hashed, 5 min, 5 tries, resend cooldown)
 - [ ] G5 Authenticator app (TOTP) as another way to approve, set up in Profile with PIN

@@ -93,6 +93,20 @@ describe('POST /auth/register: duplicates', () => {
     const res = await register({ email: 'other@email.com', phone: '+60123456789' });
     expect(res.status).toBe(409);
   });
+
+  it('accepts a phone without the leading 0 and stores the same form (G2)', async () => {
+    const res = await register({ phone: '12 345 6789' });
+    expect(res.status).toBe(201);
+    const { rows } = await pool.query('SELECT phone FROM users WHERE email = $1', [valid.email.toLowerCase()]);
+    expect(rows[0].phone).toBe('+60123456789');
+  });
+
+  it('refuses the same phone without the 0, with the same generic message (G2)', async () => {
+    await register();
+    const res = await register({ email: 'other@email.com', phone: '123456789' });
+    expect(res.status).toBe(409);
+    expect(res.body.message).toBe('An account with these details already exists');
+  });
 });
 
 describe('helpers', () => {
@@ -100,6 +114,20 @@ describe('helpers', () => {
     expect(normalisePhone('012-345 6789')).toBe('+60123456789');
     expect(normalisePhone('+60 11 2345 6789')).toBe('+601123456789');
     expect(normalisePhone('12345')).toBeNull();
+  });
+
+  it('accepts the phone number with or without the leading 0 (G2)', () => {
+    for (const form of ['0123456789', '123456789', '012 345 6789', '12-345 6789', '60123456789', '+60 12-345 6789']) {
+      expect(normalisePhone(form)).toBe('+60123456789');
+    }
+    expect(normalisePhone('1112345678')).toBe('+601112345678');
+    expect(normalisePhone('01112345678')).toBe('+601112345678');
+  });
+
+  it('rejects numbers that are too short, too long, not mobile or have letters (G2)', () => {
+    for (const bad of ['12345678', '0012345678', '111234567890', '0312345678', '312345678', '12345678a', 'abc', '']) {
+      expect(normalisePhone(bad)).toBeNull();
+    }
   });
 
   it('spots weak PINs only', () => {

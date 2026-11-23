@@ -77,7 +77,7 @@ function checkFields(form: { fullName: string; email: string; phone: string; pas
   const errors: Errors = {};
   if (form.fullName.trim().length < 2) errors.fullName = 'Enter your full name';
   if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) errors.email = 'Enter a valid email address';
-  if (!/^(\+?60|0)?1\d{8,9}$/.test(form.phone.replace(/[\s-]/g, ''))) errors.phone = 'Enter a Malaysian mobile number, e.g. 12 345 6789';
+  if (!/^(\+?60|0)?1\d{8,9}$/.test(form.phone.replace(/[\s-]/g, ''))) errors.phone = 'Enter a Malaysian mobile number, e.g. 12 345 6789 or 012 345 6789';
   if (form.password.length < 8) errors.password = 'Use at least 8 characters';
   else if (!/[A-Za-z]/.test(form.password) || !/\d/.test(form.password)) errors.password = 'Use letters and at least one number';
   return errors;
