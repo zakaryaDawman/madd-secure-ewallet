@@ -11,6 +11,7 @@ export const colors = {
   background: '#F4F7FC', // screen background
   white: '#FFFFFF',
   success: '#16A34A',
+  moneyIn: '#15803D', // "+ RM" amounts: a darker green that is easy to read on white (task G7)
   successBg: '#DFF5E7',
   warning: '#F59E0B',
   warningBg: '#FFF1DC',

@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { RecentTransaction } from '../../api/wallet';
 import { Icon } from '../icons';
-import { formatRM } from '../../utils/money';
+import { AmountText } from '../AmountText';
 import { shortDate } from '../../utils/dates';
 import { PersonAvatar } from '../PersonAvatar';
 import { colors, fonts } from '../../theme';
@@ -18,21 +18,17 @@ export function ActivityList({ items, onSendPress }: { items: RecentTransaction[
   );
 }
 
-/** One person row: coloured initials, name, note and date, and the signed amount (green for money in). */
+/** One compact person row (task G7): coloured initials, name, note and date, and the signed amount (green in, red out). */
 function ActivityRow({ item }: { item: RecentTransaction }) {
-  const isIn = item.direction === 'in';
   const detail = [item.note, shortDate(item.createdAt)].filter(Boolean).join(' · ');
   return (
     <View style={styles.row}>
-      <PersonAvatar name={item.otherName} />
+      <PersonAvatar name={item.otherName} size={36} />
       <View style={styles.middle}>
         <Text style={styles.name} numberOfLines={1}>{item.otherName}</Text>
         <Text style={styles.detail} numberOfLines={1}>{detail}</Text>
       </View>
-      <Text style={[styles.amount, isIn && { color: '#15803D' }]}>
-        {isIn ? '+ ' : '− '}
-        {formatRM(item.amountSen)}
-      </Text>
+      <AmountText item={item} size={14} />
     </View>
   );
 }
@@ -54,11 +50,10 @@ function EmptyActivity({ onSendPress }: { onSendPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 11 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 7 },
   middle: { flex: 1 },
-  name: { fontFamily: fonts.bold, fontSize: 15, color: colors.ink },
-  detail: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted },
-  amount: { fontFamily: fonts.bold, fontSize: 15, color: colors.ink, fontVariant: ['tabular-nums'] },
+  name: { fontFamily: fonts.bold, fontSize: 14, color: colors.ink },
+  detail: { fontFamily: fonts.regular, fontSize: 12, color: colors.muted },
   empty: { alignItems: 'center', gap: 10, paddingVertical: 24, paddingHorizontal: 16 },
   emptyIcon: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   emptyTitle: { fontFamily: fonts.bold, fontSize: 17, color: colors.ink },

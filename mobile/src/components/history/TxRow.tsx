@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { RecentTransaction } from '../../api/wallet';
-import { formatRM } from '../../utils/money';
+import { AmountText } from '../AmountText';
 import { timeOfDay } from '../../utils/dateGroups';
 import { PersonAvatar } from '../PersonAvatar';
 import { colors, fonts } from '../../theme';
@@ -18,8 +18,6 @@ function secondLine(item: RecentTransaction): Line {
 /** One History row (design 17): avatar, name, status or note, and the signed amount. Tapping opens the details. */
 export function TxRow({ item, onPress }: { item: RecentTransaction; onPress: () => void }) {
   const line = secondLine(item);
-  const failed = line.tone === 'danger';
-  const isIn = item.direction === 'in';
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
       <PersonAvatar name={item.otherName} />
@@ -27,10 +25,7 @@ export function TxRow({ item, onPress }: { item: RecentTransaction; onPress: () 
         <Text style={styles.name} numberOfLines={1}>{item.otherName}</Text>
         <Text style={[styles.detail, styles[line.tone]]} numberOfLines={1}>{line.text}</Text>
       </View>
-      <Text style={[styles.amount, isIn && styles.amountIn, failed && styles.amountFailed]}>
-        {failed ? '' : isIn ? '+ ' : '− '}
-        {formatRM(item.amountSen)}
-      </Text>
+      <AmountText item={item} />
     </Pressable>
   );
 }
@@ -44,7 +39,4 @@ const styles = StyleSheet.create({
   normal: { color: colors.muted },
   warning: { fontFamily: fonts.semibold, color: colors.warningText },
   danger: { fontFamily: fonts.semibold, color: colors.dangerText },
-  amount: { fontFamily: fonts.bold, fontSize: 15, color: colors.ink, fontVariant: ['tabular-nums'] },
-  amountIn: { color: '#15803D' },
-  amountFailed: { color: colors.muted, textDecorationLine: 'line-through' },
 });
