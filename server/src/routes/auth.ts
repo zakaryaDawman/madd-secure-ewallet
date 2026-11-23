@@ -10,6 +10,7 @@ import { checkNewDeviceLogin } from '../services/loginRules';
 import { currentLoginLock, lockAfterFailure } from '../services/loginLock';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { fieldErrors } from './fieldErrors';
+import { config } from '../config';
 import { emailSignupCode, sendFreshSignupCode, verifySignupCode } from '../services/signupCode';
 import { resendCodeSchema, verifyEmailSchema } from '../validation/verifyEmail';
 
@@ -72,7 +73,7 @@ authRouter.post('/login', async (req, res, next) => {
     }
     if (user.frozen) {
       // Only told after the right password, so this reveals nothing to someone guessing.
-      res.status(423).json({ error: 'account_frozen', message: 'Your account is frozen. Contact MADD support.' });
+      res.status(423).json({ error: 'account_frozen', message: `Your account is frozen. Contact ${config.supportEmail}.` });
       return;
     }
     await rememberDevice(user.userId, deviceId, deviceName);

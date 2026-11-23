@@ -7,6 +7,7 @@ import { MaddButton } from '../components/MaddButton';
 import { FreezeAccountSheet } from '../components/profile/FreezeAccountSheet';
 import { getProfile } from '../api/me';
 import { FaqItem } from '../components/profile/FaqItem';
+import { SUPPORT_EMAIL } from '../utils/support';
 import { colors, fonts, radius, spacing } from '../theme';
 
 /** Questions and answers shown on Help (design 44). The first one starts open. */
@@ -55,8 +56,8 @@ export default function HelpScreen() {
         </View>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Contact MADD support</Text>
-          <Text style={styles.cardText}>support@madd.my</Text>
-          <Text style={styles.cardText}>+60 3-1234 5678 · 9am to 6pm</Text>
+          <Text style={styles.cardText}>{SUPPORT_EMAIL}</Text>
+          <Text style={styles.cardText}>We reply within 1 working day</Text>
         </View>
       </ScrollView>
       <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>

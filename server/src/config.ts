@@ -29,4 +29,6 @@ export const config = {
     pass: requiredOutsideTests('SMTP_PASS'),
   },
   mailFrom: requiredOutsideTests('MAIL_FROM'),
+  // Where customers reach MADD support (task G8), shown in emails and messages.
+  supportEmail: 'maddwallet622@gmail.com',
 };

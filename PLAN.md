@@ -102,5 +102,5 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [ ] G5 Authenticator app (TOTP) as another way to approve, set up in Profile with PIN
 - [x] G6 Share receipt as an image (Sent and Transfer details)
 - [ ] G7 Smaller Recent activity rows, money in green (+), money out red (−)
-- [ ] G8 Real contact info: maddwallet622@gmail.com
+- [x] G8 Real contact info: maddwallet622@gmail.com
 - [ ] G9 Phone test of G1–G8, then build and check the APK

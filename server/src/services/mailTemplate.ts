@@ -1,3 +1,5 @@
+import { config } from '../config';
+
 // MADD colours (same values as mobile/src/theme/).
 const BLUE = '#1E4FD8';
 const INK = '#0B1B3F';
@@ -19,6 +21,6 @@ export function brandedEmail(title: string, paragraphs: string[]): string {
 <h1 style="margin:0 0 16px;font-size:20px;color:${INK}">${escapeHtml(title)}</h1>
 ${body}
 </div>
-<p style="font-size:12px;color:${MUTED};margin-top:16px">MADD will never ask for your password or PIN by email.</p>
+<p style="font-size:12px;color:${MUTED};margin-top:16px">MADD will never ask for your password or PIN by email.<br>Questions? Contact ${escapeHtml(config.supportEmail)}</p>
 </div></body></html>`;
 }

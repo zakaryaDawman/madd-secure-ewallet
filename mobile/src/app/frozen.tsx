@@ -5,6 +5,7 @@ import { Icon } from '../components/icons';
 import { MaddButton } from '../components/MaddButton';
 import { formatRM } from '../utils/money';
 import { restartAt } from '../utils/navigation';
+import { SUPPORT_EMAIL } from '../utils/support';
 import { colors, fonts, radius, spacing } from '../theme';
 
 /**
@@ -38,7 +39,7 @@ export default function FrozenScreen() {
         </View>
         <View style={styles.support}>
           <Text style={styles.supportTitle}>To unfreeze, contact support</Text>
-          <Text style={styles.supportText}>support@madd.my · +60 3-1234 5678</Text>
+          <Text style={styles.supportText}>{SUPPORT_EMAIL}</Text>
         </View>
       </View>
       <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.xl }]}>
