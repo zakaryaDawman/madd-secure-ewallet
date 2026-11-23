@@ -46,6 +46,11 @@ export default function LoginScreen() {
       });
       return;
     }
+    if (!result.ok && "unverified" in result) {
+      setPassword("");
+      openScreen({ pathname: "/verify-email", params: { email: email.trim().toLowerCase() } });
+      return;
+    }
     if (!result.ok) {
       setErrors(result.errors);
       return;

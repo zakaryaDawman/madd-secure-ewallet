@@ -14,7 +14,7 @@ import { colors, fonts, spacing } from '../theme';
 
 const PIN_LENGTH = 6;
 
-/** Create PIN screen (design 04): type a PIN, type it again, then the whole account is sent to the server. */
+/** Create PIN screen (design 04): type a PIN, type it again, then the whole account is sent to the server and the emailed code is asked for. */
 export default function CreatePinScreen() {
   const [firstPin, setFirstPin] = useState<string | null>(null); // set once the first PIN is accepted
   const [pin, setPin] = useState('');
@@ -57,7 +57,7 @@ export default function CreatePinScreen() {
 
     if (result.ok) {
       clearSignupDraft();
-      replaceScreen('/account-created');
+      replaceScreen({ pathname: '/verify-email', params: { email } });
       return;
     }
     if (result.errors.pin) {

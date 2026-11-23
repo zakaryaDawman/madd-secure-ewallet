@@ -36,5 +36,7 @@ export function adminEventText(e: EventFacts): { text: string; tone: EventTone }
       return { text: 'Email code sent', tone: 'info' };
     case 'OTP_LOCKED':
       return { text: 'Too many wrong email codes', tone: 'danger' };
+    case 'EMAIL_VERIFIED':
+      return { text: 'Email verified', tone: 'info' };
   }
 }

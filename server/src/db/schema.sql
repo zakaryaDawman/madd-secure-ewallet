@@ -95,7 +95,7 @@ CREATE INDEX IF NOT EXISTS idx_security_events_transaction ON security_events (t
 ALTER TABLE security_events DROP CONSTRAINT IF EXISTS security_events_type_check;
 ALTER TABLE security_events ADD CONSTRAINT security_events_type_check CHECK (type IN (
   'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED', 'DEVICE_TRUSTED',
-  'ADMIN_FREEZE', 'ADMIN_UNFREEZE', 'ADMIN_TRUST_DEVICE', 'OTP_SENT', 'OTP_LOCKED'
+  'ADMIN_FREEZE', 'ADMIN_UNFREEZE', 'ADMIN_TRUST_DEVICE', 'OTP_SENT', 'OTP_LOCKED', 'EMAIL_VERIFIED'
 ));
 
 -- Task E4: which admin did it (empty for things users and rules do). The admin's written reason goes in `reason`.
@@ -163,3 +163,10 @@ CREATE TABLE IF NOT EXISTS email_otps (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_email_otps_transaction ON email_otps (transaction_id) WHERE transaction_id IS NOT NULL;
+
+-- Task G4b: when the owner proved the email is theirs with the sign-up code. Accounts that existed before G4b are
+-- counted as verified (the DEFAULT fills them once, when the column is added); new accounts start empty.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE users ALTER COLUMN email_verified_at DROP DEFAULT;
+-- One sign-up code per user: "Resend" replaces it.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_email_otps_signup ON email_otps (user_id) WHERE purpose = 'SIGNUP';

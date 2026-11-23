@@ -24,7 +24,7 @@ type OtpRow = { id: number; code_hash: string; expires_at: Date; used_at: Date |
 const inFlight = new Set<Promise<void>>();
 
 /** A random 6-digit code from the system's secure random source, e.g. "048213". */
-function newCode(): string {
+export function newCode(): string {
   return String(randomInt(0, 1_000_000)).padStart(6, '0');
 }
 
@@ -44,7 +44,12 @@ export async function createHoldCode(client: PoolClient, userId: number, transac
 
 /** Emails the code in the background (the transfer never waits for Gmail), then logs OTP_SENT if Gmail accepted it. */
 export function emailHoldCode(userId: number, transactionId: number, amountSen: number, code: string): void {
-  const job = sendHoldEmail(userId, transactionId, amountSen, code).catch((err) => console.error('Code email failed:', err?.code ?? 'error'));
+  inBackground(sendHoldEmail(userId, transactionId, amountSen, code));
+}
+
+/** Runs a code email without making the request wait; a failure is logged by its error code only. */
+export function inBackground(work: Promise<void>): void {
+  const job = work.catch((err) => console.error('Code email failed:', err?.code ?? 'error'));
   inFlight.add(job);
   void job.finally(() => inFlight.delete(job));
 }

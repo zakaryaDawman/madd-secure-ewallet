@@ -4,6 +4,7 @@ import { pool } from '../src/db/pool';
 import { verifyToken } from '../src/auth/tokens';
 import { clearTables, prepareTestDatabase } from './db';
 import { TEST_DEVICE } from './helpers';
+import { lastCode } from './mailbox';
 
 const app = createApp();
 const account = {
@@ -23,6 +24,7 @@ beforeAll(prepareTestDatabase);
 beforeEach(async () => {
   await clearTables();
   await request(app).post('/auth/register').send(account);
+  await request(app).post('/auth/verify-email').send({ email: account.email, code: await lastCode(account.email) });
 });
 afterAll(() => pool.end());
 

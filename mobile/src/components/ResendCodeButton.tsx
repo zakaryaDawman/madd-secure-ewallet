@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { colors, fonts } from '../../theme';
+import { colors, fonts } from '../theme';
 
 const COOLDOWN_SECONDS = 60;
 

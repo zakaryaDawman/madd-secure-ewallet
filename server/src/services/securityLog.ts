@@ -13,7 +13,8 @@ export type SecurityEventType =
   | 'ADMIN_UNFREEZE'
   | 'ADMIN_TRUST_DEVICE'
   | 'OTP_SENT'
-  | 'OTP_LOCKED';
+  | 'OTP_LOCKED'
+  | 'EMAIL_VERIFIED';
 
 export type SecurityEvent = {
   userId: number;

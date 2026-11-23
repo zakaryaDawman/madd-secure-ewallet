@@ -10,10 +10,12 @@ import { checkNewDeviceLogin } from '../services/loginRules';
 import { currentLoginLock, lockAfterFailure } from '../services/loginLock';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { fieldErrors } from './fieldErrors';
+import { emailSignupCode, sendFreshSignupCode, verifySignupCode } from '../services/signupCode';
+import { resendCodeSchema, verifyEmailSchema } from '../validation/verifyEmail';
 
 export const authRouter = Router();
 
-/** POST /auth/register: checks the input, then creates the account and its RM 1,000 wallet. */
+/** POST /auth/register: checks the input, creates the account and its RM 1,000 wallet, and emails the sign-up code (task G4b). */
 authRouter.post('/register', async (req, res, next) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -22,7 +24,8 @@ authRouter.post('/register', async (req, res, next) => {
   }
 
   try {
-    const userId = await createUserWithWallet(parsed.data);
+    const { userId, code } = await createUserWithWallet(parsed.data);
+    emailSignupCode(parsed.data.email, code); // after the commit: never a code for an account that wasn't saved
     res.status(201).json({ userId });
   } catch (err) {
     if (err instanceof DuplicateAccountError) {
@@ -61,6 +64,12 @@ authRouter.post('/login', async (req, res, next) => {
       res.status(401).json({ error: 'invalid_login', message: 'Email or password is wrong' });
       return;
     }
+    if (!user.verified) {
+      // Only told after the right password. Sends a fresh code (at most one a minute) and starts no session.
+      await sendFreshSignupCode(email);
+      res.status(403).json({ error: 'email_not_verified', message: 'Check your email for the code to finish creating your account.' });
+      return;
+    }
     if (user.frozen) {
       // Only told after the right password, so this reveals nothing to someone guessing.
       res.status(423).json({ error: 'account_frozen', message: 'Your account is frozen. Contact MADD support.' });
@@ -71,6 +80,39 @@ authRouter.post('/login', async (req, res, next) => {
     const sessionId = await createSession(user.userId);
     const token = createToken({ userId: user.userId, role: user.role, sessionId, deviceId });
     res.json({ token, deviceTrusted, user: { id: user.userId, fullName: user.fullName, role: user.role } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /auth/verify-email (task G4b): the sign-up code. One reply for every failure, so it never shows who has an account. */
+authRouter.post('/verify-email', async (req, res, next) => {
+  const parsed = verifyEmailSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
+  try {
+    if (await verifySignupCode(parsed.data.email, parsed.data.code)) {
+      res.json({ verified: true });
+      return;
+    }
+    res.status(400).json({ error: 'invalid_code', message: 'The code is wrong or has run out. Check it, or ask for a new one.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /auth/resend-code (task G4b): the same reply whether or not a code was really sent (unknown, verified, or within 60 s). */
+authRouter.post('/resend-code', async (req, res, next) => {
+  const parsed = resendCodeSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
+  try {
+    await sendFreshSignupCode(parsed.data.email);
+    res.json({ message: "If this email needs a code, we've sent a new one." });
   } catch (err) {
     next(err);
   }

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeypadKey, MaddKeypad } from '../MaddKeypad';
 import { PinBoxes } from '../PinBoxes';
-import { ResendCodeButton } from './ResendCodeButton';
+import { ResendCodeButton } from '../ResendCodeButton';
 import { colors, fonts, radius, spacing } from '../../theme';
 
 const LENGTH = 6;

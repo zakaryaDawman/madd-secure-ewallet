@@ -21,8 +21,8 @@ export async function seedAdmin(db: Pool, env: Record<string, string | undefined
     bcrypt.hash(crypto.randomBytes(32).toString('hex'), BCRYPT_ROUNDS),
   ]);
   const { rows } = await db.query<{ id: number }>(
-    `INSERT INTO users (full_name, email, phone, password_hash, pin_hash, role)
-     VALUES ($1, $2, $3, $4, $5, 'admin')
+    `INSERT INTO users (full_name, email, phone, password_hash, pin_hash, role, email_verified_at)
+     VALUES ($1, $2, $3, $4, $5, 'admin', now())
      ON CONFLICT (email) DO UPDATE
        SET full_name = EXCLUDED.full_name, phone = EXCLUDED.phone, password_hash = EXCLUDED.password_hash
        WHERE users.role = 'admin'
