@@ -20,5 +20,8 @@ export const transferSchema = z.object({
 
 export type TransferInput = z.infer<typeof transferSchema>;
 
-/** Input rules for a PIN-only request: "Yes, it was me" and "Trust this device". */
+/** Input rules for "Yes, it was me" (task G4): the PIN and the 6-digit code emailed to the owner. */
+export const confirmHoldSchema = z.object({ pin: typedPin, code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code from your email') });
+
+/** Input rules for a PIN-only request: "Trust this device". */
 export const pinOnlySchema = z.object({ pin: typedPin });

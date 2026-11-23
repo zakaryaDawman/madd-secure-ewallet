@@ -7,6 +7,7 @@ import { freezeAccount } from './freeze';
 import { isTrustedDevice } from './devices';
 import { logSecurityEvent } from './securityLog';
 import { notify } from './notify';
+import { checkHoldCode, CodeCheck, useHoldCode } from './emailOtp';
 
 type HeldRow = {
   id: number;
@@ -20,31 +21,38 @@ type HeldRow = {
 };
 
 export type DecisionError = 'not_found' | 'already_handled' | 'expired' | 'insufficient_funds' | 'needs_trusted_device';
-export type ConfirmResult = { ok: true; receipt: TransferReceipt } | { ok: false; error: DecisionError } | Exclude<PinCheck, { ok: true }>;
+export type ConfirmResult =
+  | { ok: true; receipt: TransferReceipt }
+  | { ok: false; error: DecisionError }
+  | Exclude<PinCheck, { ok: true }>
+  | Exclude<CodeCheck, { ok: true }>;
 export type RejectResult = { ok: true; cancelledAmountSen: number } | { ok: false; error: 'not_found' | 'already_handled' | 'needs_trusted_device' };
 
 /**
- * "Yes, it was me": checks the PIN, then in ONE database transaction locks the held transfer, checks it is still waiting,
- * checks the balance again and moves the money. A second tap waits for the lock, then finds it already COMPLETED.
+ * "Yes, it was me": checks the PIN and the emailed code (task G4), then in ONE database transaction locks the held
+ * transfer, checks it is still waiting, uses the code up, checks the balance again and moves the money. A second tap waits for the lock, then finds it already COMPLETED.
  * Only a trusted phone may decide (rule R3), so a stolen password on a new phone can't approve its own transfer.
  */
-export async function confirmHold(user: { userId: number; deviceId: string }, transactionId: number, pin: string): Promise<ConfirmResult> {
+export async function confirmHold(user: { userId: number; deviceId: string }, transactionId: number, pin: string, code: string): Promise<ConfirmResult> {
   const { userId } = user;
   if (!(await isTrustedDevice(userId, user.deviceId))) return { ok: false, error: 'needs_trusted_device' };
   const pinCheck = await checkPin(userId, pin);
   if (!pinCheck.ok) return pinCheck;
+  const codeCheck = await checkHoldCode(userId, transactionId, code);
+  if (!codeCheck.ok) return codeCheck;
 
   return inTransaction(async (client) => {
     const held = await lockHeldTransfer(client, userId, transactionId);
     if (!held) return { ok: false, error: 'not_found' };
     if (held.status !== 'PENDING') return { ok: false, error: 'already_handled' };
     if (held.ran_out) return { ok: false, error: 'expired' };
+    if (!(await useHoldCode(client, held.id))) return { ok: false, error: 'already_handled' };
 
     const amountSen = Number(held.amount_sen);
     if ((await lockWallets(client, userId, held.receiver_id)) < amountSen) return { ok: false, error: 'insufficient_funds' };
     const newBalanceSen = await moveBalances(client, userId, held.receiver_id, amountSen);
     await client.query("UPDATE transactions SET status = 'COMPLETED', completed_at = now() WHERE id = $1", [held.id]);
-    await logSecurityEvent({ userId, type: 'HOLD_CONFIRMED', transactionId: held.id, reason: 'The owner confirmed the held transfer with their PIN.' }, client);
+    await logSecurityEvent({ userId, type: 'HOLD_CONFIRMED', transactionId: held.id, reason: 'The owner confirmed the held transfer with their PIN and the emailed code.' }, client);
     await notify({ userId, kind: 'HOLD_CONFIRMED', transactionId: held.id }, client);
     await notify({ userId: held.receiver_id, kind: 'MONEY_RECEIVED', transactionId: held.id }, client);
     return { ok: true, receipt: toReceipt(held, newBalanceSen) };

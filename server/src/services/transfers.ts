@@ -8,6 +8,7 @@ import { holdTransfer } from './holds';
 import { notify } from './notify';
 import { alertTrustedPhones } from './push';
 import { heldTransferAlert } from './pushAlerts';
+import { createHoldCode, emailHoldCode } from './emailOtp';
 
 export type TransferReceipt = {
   id: number;
@@ -29,7 +30,7 @@ export type TransferResult =
 /**
  * Sends money from one user to another.
  * Order: check PIN (with the wrong-PIN lock), find recipient, then inside ONE database transaction: check the balance,
- * run rules R1, R2 + R3, and either hold the transfer (a rule fired, no money moves) or move the money.
+ * run rules R1, R2 + R3, and either hold the transfer (a rule fired, no money moves, a code is emailed) or move the money.
  */
 export async function sendMoney(
   sender: { userId: number; deviceId: string },
@@ -55,8 +56,11 @@ export async function sendMoney(
     const fired = await runTransferRules(client, sender, input.amountSen);
     if (fired.length > 0) {
       const id = await holdTransfer(client, sender, recipient.id, input, fired);
+      const code = await createHoldCode(client, senderId, id);
       await client.query('COMMIT');
-      alertTrustedPhones(senderId, heldTransferAlert(input.amountSen)); // only after COMMIT: never alert about a hold that wasn't saved
+      // Only after COMMIT: never alert about a hold that wasn't saved.
+      alertTrustedPhones(senderId, heldTransferAlert(input.amountSen));
+      emailHoldCode(senderId, id, input.amountSen, code);
       return { ok: true, status: 'held', id };
     }
     const receipt = await moveMoney(client, sender, recipient, input);

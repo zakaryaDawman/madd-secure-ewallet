@@ -4,6 +4,7 @@ import { createApp } from '../src/app';
 import { pool } from '../src/db/pool';
 import { clearTables, prepareTestDatabase } from './db';
 import { logIn, signUp, TEST_DEVICE } from './helpers';
+import { lastCode } from './mailbox';
 
 const NEW_PHONE = '22222222-2222-4222-8222-222222222222';
 const GENERAL_REASON = 'This transfer needs approval from your usual phone.';
@@ -68,13 +69,13 @@ describe('transfers from a new phone', () => {
 
   it('the new phone cannot approve or reject its own transfer', async () => {
     const { body } = await sendRM10(newPhone);
-    expect((await post(`/transfers/${body.id}/confirm`, newPhone, { pin: '482913' })).status).toBe(403);
+    expect((await post(`/transfers/${body.id}/confirm`, newPhone, { pin: '482913', code: await lastCode('zak@email.com') })).status).toBe(403);
     expect((await post(`/transfers/${body.id}/reject`, newPhone)).status).toBe(403);
   });
 
   it('the usual phone approves it: the money moves once', async () => {
     const { body } = await sendRM10(newPhone);
-    const res = await post(`/transfers/${body.id}/confirm`, usual, { pin: '482913' });
+    const res = await post(`/transfers/${body.id}/confirm`, usual, { pin: '482913', code: await lastCode('zak@email.com') });
     expect(res.status).toBe(201);
     expect(res.body.newBalanceSen).toBe(99_000);
   });

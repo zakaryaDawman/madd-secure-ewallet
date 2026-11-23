@@ -4,7 +4,7 @@ import type { RecentTransaction } from './wallet';
 export type TransactionFilter = 'all' | 'in' | 'out' | 'held';
 
 /** Why a transfer was paused and how long the owner has left to decide (design 11). */
-export type HoldDetails = { reasons: string[]; expiresAt: string; secondsLeft: number; thisDevice: boolean; canDecide: boolean };
+export type HoldDetails = { reasons: string[]; expiresAt: string; secondsLeft: number; thisDevice: boolean; canDecide: boolean; codeSentTo: string };
 
 export type TransactionDetail = RecentTransaction & {
   otherNameMasked: string;

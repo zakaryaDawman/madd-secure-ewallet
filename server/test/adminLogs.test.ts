@@ -4,6 +4,7 @@ import { createApp } from '../src/app';
 import { pool } from '../src/db/pool';
 import { seedAdmin } from '../src/db/seedAdmin';
 import { logSecurityEvent } from '../src/services/securityLog';
+import { codeEmailsSettled } from '../src/services/emailOtp';
 import { clearTables, prepareTestDatabase } from './db';
 import { logIn, signUp } from './helpers';
 
@@ -28,6 +29,7 @@ async function holdRM800(): Promise<void> {
     [zak.id],
   );
   await request(app).post('/transfers').set('Authorization', `Bearer ${zak.token}`).send({ recipientPhone: '012 345 4521', amountSen: 80_000, note: '', pin: '482913' });
+  await codeEmailsSettled(); // its "Email code sent" row is logged right after the hold
 }
 
 beforeAll(prepareTestDatabase);
@@ -52,9 +54,10 @@ describe('GET /admin/logs (design 22)', () => {
       ['ACCOUNT_FROZEN', 'danger', 'Zakarya D.'],
       ['R4 FAILED_LOGINS', 'danger', 'Ahmad A.'],
       ['R3 UNKNOWN_DEVICE', 'info', 'Zakarya D.'],
+      ['OTP_SENT', 'plain', 'Zakarya D.'],
       ['R1 LARGE_AMOUNT', 'warning', 'Zakarya D.'],
     ]);
-    expect(entries[3].line).toBe('RM 800 > max(RM 500, 3 × avg RM 96). Held.');
+    expect(entries[4].line).toBe('RM 800 > max(RM 500, 3 × avg RM 96). Held.');
     expect(entries[1].line).toBe('5 failures in under 1 min. Login locked 15 min.');
   });
 
@@ -64,7 +67,7 @@ describe('GET /admin/logs (design 22)', () => {
     expect((await logs('?q=ahmad')).entries.map((e) => e.code)).toEqual(['R4 FAILED_LOGINS']);
     expect((await logs('?q=r1')).entries.map((e) => e.code)).toEqual(['R1 LARGE_AMOUNT']);
     expect((await logs('?q=large_amount')).entries.map((e) => e.code)).toEqual(['R1 LARGE_AMOUNT']);
-    expect((await logs('?q=zakarya')).entries.map((e) => e.name)).toEqual(['Zakarya D.']);
+    expect((await logs('?q=zakarya')).entries.map((e) => e.name)).toEqual(['Zakarya D.', 'Zakarya D.']);
   });
 
   it('treats search text as plain text (no SQL injection, % is not a wildcard)', async () => {

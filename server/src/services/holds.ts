@@ -3,6 +3,7 @@ import { pool } from '../db/pool';
 import { ruleConfig } from '../rules/config';
 import type { TransferInput } from '../validation/transfer';
 import type { FiredRule } from './transferRules';
+import { maskEmail } from '../utils/mask';
 import { logSecurityEvent } from './securityLog';
 import { notify } from './notify';
 
@@ -18,6 +19,7 @@ export type HoldDetails = {
   secondsLeft: number;
   thisDevice: boolean;
   canDecide: boolean; // false on an untrusted phone: it must wait for the usual phone (design 12)
+  codeSentTo: string; // the owner's email, masked, where the one-time code went (task G4)
 };
 
 /**
@@ -67,13 +69,13 @@ export async function expireHolds(userId: number): Promise<void> {
  * An untrusted phone gets one general sentence instead of the rule details, and can't decide.
  */
 export async function holdDetails(transactionId: number, deviceId: string, viewerTrusted: boolean): Promise<HoldDetails> {
-  const { rows } = await pool.query<{ reasons: string[]; expires_at: Date; seconds_left: number; this_device: boolean }>(
-    `SELECT t.expires_at,
+  const { rows } = await pool.query<{ reasons: string[]; expires_at: Date; seconds_left: number; this_device: boolean; email: string }>(
+    `SELECT t.expires_at, u.email,
             GREATEST(0, CEIL(EXTRACT(EPOCH FROM t.expires_at - now())))::int AS seconds_left,
             t.device_id IS NOT DISTINCT FROM $2::uuid AS this_device,
             ARRAY(SELECT e.reason FROM security_events e
                   WHERE e.transaction_id = t.id AND e.type = 'RULE_FIRED' ORDER BY e.rule) AS reasons
-     FROM transactions t WHERE t.id = $1`,
+     FROM transactions t JOIN users u ON u.id = t.sender_id WHERE t.id = $1`,
     [transactionId, deviceId],
   );
   const row = rows[0];
@@ -83,5 +85,6 @@ export async function holdDetails(transactionId: number, deviceId: string, viewe
     secondsLeft: row.seconds_left,
     thisDevice: row.this_device,
     canDecide: viewerTrusted,
+    codeSentTo: maskEmail(row.email),
   };
 }

@@ -4,6 +4,7 @@ import { createApp } from '../src/app';
 import { pool } from '../src/db/pool';
 import { clearTables, prepareTestDatabase } from './db';
 import { logIn, signUp } from './helpers';
+import { lastCode } from './mailbox';
 
 const NEW_PHONE = '22222222-2222-4222-8222-222222222222';
 
@@ -68,7 +69,7 @@ describe('held transfers', () => {
 
   it('after Yes: the card goes, Security says "You confirmed a held transfer", and the recipient gets "Money received"', async () => {
     const { body } = await send(80_000);
-    await post(`/transfers/${body.id}/confirm`, { pin: '482913' });
+    await post(`/transfers/${body.id}/confirm`, { pin: '482913', code: await lastCode('zak@email.com') });
     const security = await get('/notifications?tab=security');
     expect(security.body.pending).toEqual([]);
     expect(security.body.items[0]).toMatchObject({ title: 'You confirmed a held transfer', body: 'RM 800.00 to Ahmad Ali was sent.' });

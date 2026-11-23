@@ -97,7 +97,8 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] G1 Camera permission in the APK (expo-image-picker `cameraPermission: false` was removing CAMERA from the manifest)
 - [x] G2 Phone number with or without the leading 0 (one stored format; register, lookup and QR all match)
 - [x] G3 Email sending with nodemailer (Gmail SMTP from `.env`, mock transport in tests)
-- [ ] G4 Email OTP for suspicious activity (6-digit code, hashed, 5 min, 5 tries, resend cooldown)
+- [x] G4 Email code for held transfers: PIN + 6-digit code emailed to the owner (hashed, 5 min, 5 tries, resend every 60 s, max 3 emails)
+- [ ] G4b Email verification at sign-up (same code system; unverified accounts can't sign in)
 - [ ] G5 Authenticator app (TOTP) as another way to approve, set up in Profile with PIN
 - [ ] G6 Share receipt as an image (Sent and Transfer details)
 - [ ] G7 Smaller Recent activity rows, money in green (+), money out red (−)

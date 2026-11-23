@@ -2,6 +2,7 @@ import request from 'supertest';
 import type { Express } from 'express';
 import { createApp } from '../src/app';
 import { pool } from '../src/db/pool';
+import { codeEmailsSettled } from '../src/services/emailOtp';
 import { clearTables, prepareTestDatabase } from './db';
 import { signUp } from './helpers';
 
@@ -135,7 +136,11 @@ describe('who can see a hold', () => {
 });
 
 describe('security_events is append-only', () => {
-  beforeEach(() => send(80_000));
+  // Waits for the code email too, so its OTP_SENT row is in before the checks (2 rows: RULE_FIRED + OTP_SENT).
+  beforeEach(async () => {
+    await send(80_000);
+    await codeEmailsSettled();
+  });
 
   it.each([
     ['UPDATE', "UPDATE security_events SET reason = 'nothing happened'"],
@@ -143,6 +148,6 @@ describe('security_events is append-only', () => {
     ['TRUNCATE', 'TRUNCATE security_events'],
   ])('refuses %s', async (_name, sql) => {
     await expect(pool.query(sql)).rejects.toThrow(/append-only/);
-    expect((await pool.query('SELECT 1 FROM security_events')).rows).toHaveLength(1);
+    expect((await pool.query('SELECT 1 FROM security_events')).rows).toHaveLength(2);
   });
 });

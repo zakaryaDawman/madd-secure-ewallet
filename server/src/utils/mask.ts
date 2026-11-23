@@ -23,3 +23,9 @@ export function shortName(fullName: string): string {
   const words = fullName.trim().split(/\s+/);
   return words.length === 1 ? words[0] : `${words[0]} ${words[words.length - 1][0]}.`;
 }
+
+/** Hides most of an email so the owner knows where the code went, e.g. "zakarya@gmail.com" -> "z******@gmail.com". */
+export function maskEmail(email: string): string {
+  const [name, domain] = email.split('@');
+  return `${name[0]}${'*'.repeat(Math.max(name.length - 1, 1))}@${domain}`;
+}

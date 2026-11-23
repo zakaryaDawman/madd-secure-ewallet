@@ -25,7 +25,15 @@ export type InboxItem = {
   canFreeze: boolean; // "Freeze my account" link on the lock items, only on a trusted phone
 };
 
-export type PendingCard = { transactionId: number; amountSen: number; otherName: string; reasons: string[]; secondsLeft: number; canDecide: boolean };
+export type PendingCard = {
+  transactionId: number;
+  amountSen: number;
+  otherName: string;
+  reasons: string[];
+  secondsLeft: number;
+  canDecide: boolean;
+  codeSentTo: string; // masked email where the one-time code went (task G4)
+};
 
 type Row = {
   id: number;
@@ -98,7 +106,7 @@ export async function pendingCards(userId: number, deviceId: string): Promise<Pe
   return Promise.all(
     rows.map(async (r) => {
       const hold = await holdDetails(r.id, deviceId, trusted);
-      return { transactionId: r.id, amountSen: Number(r.amount_sen), otherName: r.other_name, reasons: hold.reasons, secondsLeft: hold.secondsLeft, canDecide: hold.canDecide };
+      return { transactionId: r.id, amountSen: Number(r.amount_sen), otherName: r.other_name, reasons: hold.reasons, secondsLeft: hold.secondsLeft, canDecide: hold.canDecide, codeSentTo: hold.codeSentTo };
     }),
   );
 }

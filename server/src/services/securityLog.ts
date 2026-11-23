@@ -11,7 +11,9 @@ export type SecurityEventType =
   | 'DEVICE_TRUSTED'
   | 'ADMIN_FREEZE'
   | 'ADMIN_UNFREEZE'
-  | 'ADMIN_TRUST_DEVICE';
+  | 'ADMIN_TRUST_DEVICE'
+  | 'OTP_SENT'
+  | 'OTP_LOCKED';
 
 export type SecurityEvent = {
   userId: number;

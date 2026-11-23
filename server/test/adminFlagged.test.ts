@@ -6,6 +6,7 @@ import { seedAdmin } from '../src/db/seedAdmin';
 import { pushesSettled, setPushSender } from '../src/services/push';
 import { clearTables, prepareTestDatabase } from './db';
 import { logIn, signUp } from './helpers';
+import { lastCode } from './mailbox';
 
 const ADMIN_ENV = { ADMIN_EMAIL: 'admin@madd.test', ADMIN_PASSWORD: 'test-admin-pass-1', ADMIN_NAME: 'Test Admin', ADMIN_PHONE: '019 999 9999' };
 const NEW_PHONE = '22222222-2222-4222-8222-222222222222';
@@ -87,6 +88,7 @@ describe('R1: RM 800 when the usual transfer is RM 96 (designs 21 and 48)', () =
     expect(body.timeline.map((s: { label: string }) => s.label)).toEqual([
       'Transfer submitted',
       'R1 flagged, transfer held',
+      'Email code sent to the owner',
       expect.stringMatching(/^Waiting for user · expires \d\d:\d\d:\d\d$/),
     ]);
   });
@@ -103,11 +105,11 @@ describe('R1: RM 800 when the usual transfer is RM 96 (designs 21 and 48)', () =
 
   it('shows Confirmed after the owner says Yes', async () => {
     const { id } = (await send(80_000)).body;
-    await request(app).post(`/transfers/${id}/confirm`).set('Authorization', `Bearer ${zak.token}`).send({ pin: '482913' });
+    await request(app).post(`/transfers/${id}/confirm`).set('Authorization', `Bearer ${zak.token}`).send({ pin: '482913', code: await lastCode('zak@email.com') });
     const [item] = await flagged();
     expect(item.badge.label).toBe('Confirmed');
     const labels = (await get(`/admin/flagged/${item.id}`)).body.timeline.map((s: { label: string }) => s.label);
-    expect(labels.at(-1)).toBe('Owner confirmed with PIN, money sent');
+    expect(labels.at(-1)).toBe('Owner confirmed with PIN and email code, money sent');
   });
 
   it('shows Rejected, with "Account frozen", after the owner says No', async () => {

@@ -2,7 +2,8 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { confirmHeldTransfer, rejectHeldTransfer } from '../api/holds';
+import { confirmHeldTransfer, failureStep, rejectHeldTransfer, resendHoldCode } from '../api/holds';
+import type { ReleaseStep } from '../components/hold/ReleasePinSheet';
 import { freezeMyAccount } from '../api/me';
 import { getInbox, InboxPage, InboxTab, markTabRead, PendingCard } from '../api/notifications';
 import { clearSession } from '../auth/session';
@@ -24,14 +25,14 @@ export default function InboxScreen() {
   const [tab, setTab] = useState<InboxTab>('all');
   const { page, reload } = useInbox(tab);
   const [releasing, setReleasing] = useState<PendingCard | null>(null);
-  const [pinError, setPinError] = useState('');
+  const [pinError, setPinError] = useState<{ step: ReleaseStep; message: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  /** "Yes, it was me" with the PIN (design 29): the server sends the money and the receipt opens. */
-  async function onRelease(pin: string) {
+  /** "Yes, it was me" with the emailed code and the PIN (design 29): the server sends the money and the receipt opens. */
+  async function onRelease(code: string, pin: string) {
     if (!releasing) return;
     setBusy(true);
-    const result = await confirmHeldTransfer(releasing.transactionId, pin);
+    const result = await confirmHeldTransfer(releasing.transactionId, pin, code);
     setBusy(false);
     if (result.ok) {
       updateTransferDraft({ receipt: result.receipt });
@@ -40,7 +41,7 @@ export default function InboxScreen() {
     else if (result.reason === 'expired') {
       setReleasing(null);
       reload();
-    } else setPinError(result.message);
+    } else setPinError({ step: failureStep(result.reason), message: result.message });
   }
 
   /** "No, freeze": the server cancels the transfer, freezes the account and logs out every phone. */
@@ -76,12 +77,14 @@ export default function InboxScreen() {
       {releasing && (
         <ReleasePinSheet
           summary={`${formatRM(releasing.amountSen)} to ${releasing.otherName} will be sent now`}
+          codeSentTo={releasing.codeSentTo}
           error={pinError}
           sending={busy}
           onSubmit={onRelease}
+          onResend={() => resendHoldCode(releasing.transactionId)}
           onCancel={() => {
             setReleasing(null);
-            setPinError('');
+            setPinError(null);
           }}
         />
       )}

@@ -18,7 +18,7 @@ export function logCode(f: LogFacts): string {
 /** The colour of the code (design 22). */
 export function logTone(f: LogFacts): LogTone {
   if (f.type === 'RULE_FIRED') return f.rule === 'R1' ? 'warning' : f.rule === 'R4' ? 'danger' : 'info';
-  if (f.type === 'ACCOUNT_FROZEN' || f.type === 'HOLD_REJECTED' || f.type === 'PIN_LOCKED' || f.type === 'ADMIN_FREEZE') return 'danger';
+  if (f.type === 'ACCOUNT_FROZEN' || f.type === 'HOLD_REJECTED' || f.type === 'PIN_LOCKED' || f.type === 'ADMIN_FREEZE' || f.type === 'OTP_LOCKED') return 'danger';
   return 'plain';
 }
 

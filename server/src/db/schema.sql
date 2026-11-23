@@ -95,7 +95,7 @@ CREATE INDEX IF NOT EXISTS idx_security_events_transaction ON security_events (t
 ALTER TABLE security_events DROP CONSTRAINT IF EXISTS security_events_type_check;
 ALTER TABLE security_events ADD CONSTRAINT security_events_type_check CHECK (type IN (
   'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED', 'DEVICE_TRUSTED',
-  'ADMIN_FREEZE', 'ADMIN_UNFREEZE', 'ADMIN_TRUST_DEVICE'
+  'ADMIN_FREEZE', 'ADMIN_UNFREEZE', 'ADMIN_TRUST_DEVICE', 'OTP_SENT', 'OTP_LOCKED'
 ));
 
 -- Task E4: which admin did it (empty for things users and rules do). The admin's written reason goes in `reason`.
@@ -147,3 +147,19 @@ CREATE TABLE IF NOT EXISTS push_log (
   event_at   TIMESTAMPTZ NOT NULL,  -- when the held transfer / login happened
   sent_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Task G4: one-time codes emailed to the owner (held transfers now; sign-up in G4b). Only the bcrypt hash is stored.
+CREATE TABLE IF NOT EXISTS email_otps (
+  id             SERIAL PRIMARY KEY,
+  user_id        INT NOT NULL REFERENCES users(id),
+  purpose        TEXT NOT NULL CHECK (purpose IN ('HOLD', 'SIGNUP')),
+  transaction_id INT REFERENCES transactions(id),
+  code_hash      TEXT NOT NULL,
+  expires_at     TIMESTAMPTZ NOT NULL,
+  attempts       INT NOT NULL DEFAULT 0,
+  sends          INT NOT NULL DEFAULT 1,
+  last_sent_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  used_at        TIMESTAMPTZ,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_email_otps_transaction ON email_otps (transaction_id) WHERE transaction_id IS NOT NULL;

@@ -32,5 +32,9 @@ export function adminEventText(e: EventFacts): { text: string; tone: EventTone }
       return { text: 'Unfrozen by an admin', tone: 'info' };
     case 'ADMIN_TRUST_DEVICE':
       return { text: 'Device trusted by an admin', tone: 'info' };
+    case 'OTP_SENT':
+      return { text: 'Email code sent', tone: 'info' };
+    case 'OTP_LOCKED':
+      return { text: 'Too many wrong email codes', tone: 'danger' };
   }
 }

@@ -13,6 +13,6 @@ export async function prepareTestDatabase(): Promise<void> {
 export async function clearTables(): Promise<void> {
   await pool.query(`
     ALTER TABLE security_events DISABLE TRIGGER USER;
-    TRUNCATE security_events, notifications, push_log, pin_attempts, login_attempts, known_devices, sessions, transactions, wallets, users RESTART IDENTITY CASCADE;
+    TRUNCATE email_otps, security_events, notifications, push_log, pin_attempts, login_attempts, known_devices, sessions, transactions, wallets, users RESTART IDENTITY CASCADE;
     ALTER TABLE security_events ENABLE TRIGGER USER;`);
 }

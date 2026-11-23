@@ -15,7 +15,15 @@ export type InboxItem = {
 };
 
 /** A held transfer waiting for my decision, shown as the card on top of Security (design 18). */
-export type PendingCard = { transactionId: number; amountSen: number; otherName: string; reasons: string[]; secondsLeft: number; canDecide: boolean };
+export type PendingCard = {
+  transactionId: number;
+  amountSen: number;
+  otherName: string;
+  reasons: string[];
+  secondsLeft: number;
+  canDecide: boolean;
+  codeSentTo: string; // masked email where the one-time code went
+};
 
 export type UnreadCounts = Record<InboxTab, number>;
 

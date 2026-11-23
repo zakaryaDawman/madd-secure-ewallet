@@ -3,6 +3,7 @@ import type { Express } from 'express';
 import { createApp } from '../src/app';
 import { pool } from '../src/db/pool';
 import { seedAdmin } from '../src/db/seedAdmin';
+import { codeEmailsSettled } from '../src/services/emailOtp';
 import { clearTables, prepareTestDatabase } from './db';
 import { logIn, signUp } from './helpers';
 
@@ -67,10 +68,12 @@ describe('GET /admin/stats (design 20)', () => {
 
   it('shows the latest events newest first, with short names and nothing secret', async () => {
     await send(80_000);
+    await codeEmailsSettled();
     await logIn(app, 'zak@email.com', 'password12', '22222222-2222-4222-8222-222222222222'); // R3 new device
     const { body } = await get('/admin/stats', admin);
     expect(body.latest.map((e: { name: string; text: string; tone: string }) => [e.name, e.text, e.tone])).toEqual([
       ['Zakarya D.', 'R3 new device', 'info'],
+      ['Zakarya D.', 'Email code sent', 'info'],
       ['Zakarya D.', 'R1 held RM 800', 'warning'],
     ]);
     expect(JSON.stringify(body)).not.toMatch(/\$2b\$|password|pin_hash|zak@email|\+6012/);

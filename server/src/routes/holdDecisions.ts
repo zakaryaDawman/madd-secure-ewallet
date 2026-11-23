@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
-import { pinOnlySchema } from '../validation/transfer';
+import { confirmHoldSchema } from '../validation/transfer';
 import { confirmHold, DecisionError, rejectHold } from '../services/holdDecision';
+import { resendHoldCode } from '../services/emailOtp';
+import { sendCodeRefusal } from './codeRefusal';
 import { fieldErrors } from './fieldErrors';
 import { sendPinRefusal } from './pinRefusal';
 
@@ -22,9 +24,9 @@ function transferId(raw: unknown): number | null {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-/** POST /transfers/:id/confirm: "Yes, it was me" (design 29). Needs the PIN; sends the held money exactly once. */
+/** POST /transfers/:id/confirm: "Yes, it was me" (design 29). Needs the PIN and the emailed code; sends the held money exactly once. */
 holdDecisionsRouter.post('/:id/confirm', requireAuth, async (req, res, next) => {
-  const parsed = pinOnlySchema.safeParse(req.body);
+  const parsed = confirmHoldSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
     return;
@@ -35,11 +37,13 @@ holdDecisionsRouter.post('/:id/confirm', requireAuth, async (req, res, next) => 
     return;
   }
   try {
-    const result = await confirmHold(currentUser(res), id, parsed.data.pin);
+    const result = await confirmHold(currentUser(res), id, parsed.data.pin, parsed.data.code);
     if (result.ok) {
       res.status(201).json(result.receipt);
     } else if (result.error === 'wrong_pin' || result.error === 'pin_locked') {
       sendPinRefusal(res, result);
+    } else if (result.error === 'wrong_code' || result.error === 'code_locked' || result.error === 'code_expired') {
+      sendCodeRefusal(res, result);
     } else {
       res.status(REFUSALS[result.error].status).json({ error: result.error, message: REFUSALS[result.error].message });
     }
@@ -61,6 +65,25 @@ holdDecisionsRouter.post('/:id/reject', requireAuth, async (req, res, next) => {
       res.json({ frozen: true, cancelledAmountSen: result.cancelledAmountSen });
     } else {
       res.status(REFUSALS[result.error].status).json({ error: result.error, message: REFUSALS[result.error].message });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /transfers/:id/resend-code: emails a new code for a waiting transfer (once per 60 s, at most 3 emails). */
+holdDecisionsRouter.post('/:id/resend-code', requireAuth, async (req, res, next) => {
+  const id = transferId(req.params.id);
+  try {
+    const result = id ? await resendHoldCode(currentUser(res).userId, id) : ({ ok: false, error: 'not_found' } as const);
+    if (result.ok) {
+      res.json({ sent: true });
+    } else if (result.error === 'resend_cooldown') {
+      res.status(429).json({ error: 'resend_cooldown', message: `Wait ${result.secondsLeft} seconds before asking for a new code.`, secondsLeft: result.secondsLeft });
+    } else if (result.error === 'resend_limit') {
+      res.status(429).json({ error: 'resend_limit', message: "We can't send more codes for this transfer." });
+    } else {
+      res.status(404).json({ error: 'not_found', message: "This transfer isn't waiting for a code." });
     }
   } catch (err) {
     next(err);

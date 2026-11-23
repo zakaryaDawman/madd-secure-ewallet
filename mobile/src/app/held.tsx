@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { confirmHeldTransfer, rejectHeldTransfer } from '../api/holds';
+import { confirmHeldTransfer, failureStep, rejectHeldTransfer, resendHoldCode } from '../api/holds';
+import type { ReleaseStep } from '../components/hold/ReleasePinSheet';
 import { getTransaction, TransactionDetail } from '../api/transactions';
 import { clearSession } from '../auth/session';
 import { updateTransferDraft } from '../auth/transferDraft';
@@ -19,13 +20,13 @@ import { colors, fonts, spacing } from '../theme';
 /**
  * "Was this you?" (design 11): a transfer the server paused because rule R1 or R2 fired. Shows the server's reason and
  * counts down 5 minutes. When time is up it asks the server again, which cancels the transfer, and opens "Transfer cancelled".
- * "Yes" asks for the PIN (design 29) and the server sends the money; "No" freezes the account (design 14).
+ * "Yes" asks for the emailed code and the PIN (design 29, task G4) and the server sends the money; "No" freezes the account (design 14).
  */
 export default function HeldScreen() {
   const { id, fromSend } = useLocalSearchParams<{ id: string; fromSend?: string }>();
   const [tx, setTx] = useState<TransactionDetail | null>();
   const [pinOpen, setPinOpen] = useState(false);
-  const [pinError, setPinError] = useState('');
+  const [pinError, setPinError] = useState<{ step: ReleaseStep; message: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState('');
 
@@ -43,10 +44,10 @@ export default function HeldScreen() {
 
   useEffect(refresh, [refresh]);
 
-  /** "Yes, it was me": the server checks the PIN and the balance again, then sends the money and the receipt opens. */
-  async function onRelease(pin: string) {
+  /** "Yes, it was me": the server checks the emailed code, the PIN and the balance again, then sends the money and the receipt opens. */
+  async function onRelease(code: string, pin: string) {
     setBusy(true);
-    const result = await confirmHeldTransfer(Number(id), pin);
+    const result = await confirmHeldTransfer(Number(id), pin, code);
     setBusy(false);
     if (result.ok) {
       updateTransferDraft({ receipt: result.receipt });
@@ -56,7 +57,7 @@ export default function HeldScreen() {
     } else if (result.reason === 'expired') {
       replaceScreen({ pathname: '/hold-expired', params: { id, fromSend } });
     } else {
-      setPinError(result.message);
+      setPinError({ step: failureStep(result.reason), message: result.message });
     }
   }
 
@@ -103,12 +104,14 @@ export default function HeldScreen() {
       {pinOpen && (
         <ReleasePinSheet
           summary={`${formatRM(tx.amountSen)} to ${tx.otherNameMasked} will be sent now`}
+          codeSentTo={tx.hold.codeSentTo}
           error={pinError}
           sending={busy}
           onSubmit={onRelease}
+          onResend={() => resendHoldCode(Number(id))}
           onCancel={() => {
             setPinOpen(false);
-            setPinError('');
+            setPinError(null);
           }}
         />
       )}
