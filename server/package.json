@@ -10,7 +10,8 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed-admin": "tsx src/db/seedAdmin.ts",
     "report:tests": "tsx scripts/testReport.ts",
-    "report:measure": "tsx scripts/measure.ts"
+    "report:measure": "tsx scripts/measure.ts",
+    "mail:test": "tsx scripts/mailTest.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -20,6 +21,7 @@
     "firebase-admin": "^14.5.1",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.6.1",
     "pg": "^8.23.1",
     "zod": "^4.6.7"
   },
@@ -29,6 +31,7 @@
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.6",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
     "jest": "^30.5.2",
