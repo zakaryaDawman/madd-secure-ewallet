@@ -58,6 +58,7 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 | D · Detection and alerts (Inc 3) | D1–D8 | FR-11 to FR-16 |
 | E · Admin (Inc 4) | E1–E4 | FR-17 to FR-20, as a separate web console (`admin-web/`, decided 20 Nov 2026) |
 | F · Test and release | F1–F4 | Results, demo, APK, UAT |
+| G · Extra features (after F1) | G1–G9 | Camera in APK, phone format, email OTP, authenticator app, receipt image, Home colours, real contact info |
 
 ## Progress
 
@@ -90,3 +91,15 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] E3 Security log (22): GET /admin/logs, search by user or rule (SQL-safe), cursor paging 50 at a time, read-only (no edit routes + append-only trigger), day headings and Load older in the console
 - [x] E4 Users list (24), User details (23), Unfreeze with required reason (25); admin freeze, unfreeze and trust device, each logged with the admin (actor_id) and reason; admins still cannot move money, change balances or see PINs
 - [x] F1 Results tables (280/280 tests, by FR), performance measurements (all pass, suggested targets), screen check 01–48 with B1, B2, D1–D7 fixed
+
+## Phase G · Extra features (after F1)
+
+- [x] G1 Camera permission in the APK (expo-image-picker `cameraPermission: false` was removing CAMERA from the manifest)
+- [ ] G2 Phone number with or without the leading 0 (one stored format; register, lookup and QR all match)
+- [ ] G3 Email sending with nodemailer (Gmail SMTP from `.env`, mock transport in tests)
+- [ ] G4 Email OTP for suspicious activity (6-digit code, hashed, 5 min, 5 tries, resend cooldown)
+- [ ] G5 Authenticator app (TOTP) as another way to approve, set up in Profile with PIN
+- [ ] G6 Share receipt as an image (Sent and Transfer details)
+- [ ] G7 Smaller Recent activity rows, money in green (+), money out red (−)
+- [ ] G8 Real contact info: maddwallet622@gmail.com
+- [ ] G9 Phone test of G1–G8, then build and check the APK
