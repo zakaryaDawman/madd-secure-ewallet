@@ -1,4 +1,7 @@
-import { ScrollView, Share, StyleSheet, Text, View } from "react-native";
+import { type ComponentRef, useRef } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ReceiptImage } from "../components/ReceiptImage";
+import { shareViewAsImage } from "../utils/shareImage";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -14,6 +17,7 @@ import { colors, fonts, radius, spacing } from "../theme";
 export default function SentScreen() {
   const receipt = getTransferDraft().receipt;
   const insets = useSafeAreaInsets();
+  const imageRef = useRef<ComponentRef<typeof View>>(null);
   if (!receipt) return null;
 
   const when = new Date(receipt.createdAt).toLocaleString("en-US", {
@@ -24,15 +28,26 @@ export default function SentScreen() {
     minute: "2-digit",
   });
 
-  /** Opens Android's share menu with a short text receipt. */
+  /** Opens Android's share menu with a picture of the receipt (task G6). */
   function onShare() {
-    Share.share({
-      message: `MADD receipt ${receipt!.reference}\n${formatRM(receipt!.amountSen)} sent to ${receipt!.recipientName}\n${when}`,
-    });
+    shareViewAsImage(imageRef, "Share receipt");
   }
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
+      <ReceiptImage
+        ref={imageRef}
+        facts={{
+          direction: "out",
+          amount: formatRM(receipt.amountSen),
+          otherName: receipt.recipientName,
+          rows: [
+            { label: "For", value: receipt.note || "—" },
+            { label: "Date", value: when },
+            { label: "Reference", value: receipt.reference },
+          ],
+        }}
+      />
       {/* The receipt scrolls with a large font, so the buttons always stay above Android's nav bar. */}
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.top}>

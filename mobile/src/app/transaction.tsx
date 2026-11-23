@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { type ComponentRef, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { getTransaction, TransactionDetail } from '../api/transactions';
@@ -8,6 +8,8 @@ import { TxTimeline } from '../components/history/TxTimeline';
 import { MaddAppBar } from '../components/MaddAppBar';
 import { MaddButton } from '../components/MaddButton';
 import { PersonAvatar } from '../components/PersonAvatar';
+import { ReceiptImage, type ReceiptFacts } from '../components/ReceiptImage';
+import { shareViewAsImage } from '../utils/shareImage';
 import { timeOfDay } from '../utils/dateGroups';
 import { formatRM } from '../utils/money';
 import { colors, fonts, radius, spacing } from '../theme';
@@ -23,6 +25,7 @@ export default function TransactionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const tx = useTransaction(Number(id));
   const insets = useSafeAreaInsets();
+  const imageRef = useRef<ComponentRef<typeof View>>(null);
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -33,6 +36,7 @@ export default function TransactionScreen() {
       {tx === null && <Text style={[styles.message, styles.messageText]}>We couldn&apos;t find this transaction.</Text>}
       {tx && (
         <>
+          <ReceiptImage ref={imageRef} facts={receiptFacts(tx)} />
           <ScrollView contentContainerStyle={styles.content}>
             <View style={styles.top}>
               <PersonAvatar name={tx.otherName} size={64} />
@@ -50,7 +54,7 @@ export default function TransactionScreen() {
             <TxTimeline tx={tx} />
           </ScrollView>
           <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.xl }]}>
-            <MaddButton label="Share receipt" variant="secondary" onPress={() => shareReceipt(tx)} />
+            <MaddButton label="Share receipt" variant="secondary" onPress={() => shareViewAsImage(imageRef, 'Share receipt')} />
           </View>
         </>
       )}
@@ -76,10 +80,19 @@ function useTransaction(id: number): TransactionDetail | null | undefined {
   return tx;
 }
 
-/** Opens Android's share menu with a short text receipt. */
-function shareReceipt(tx: TransactionDetail) {
-  const line = tx.direction === 'out' ? `${formatRM(tx.amountSen)} sent to ${tx.otherName}` : `${formatRM(tx.amountSen)} received from ${tx.otherName}`;
-  Share.share({ message: `MADD receipt ${tx.reference}\n${line}\n${fullDate(tx.createdAt)}` });
+/** What the shared receipt picture shows (task G6): masked name and phone, never the balance. */
+function receiptFacts(tx: TransactionDetail): ReceiptFacts {
+  return {
+    direction: tx.direction,
+    amount: formatRM(tx.amountSen),
+    otherName: tx.otherNameMasked,
+    rows: [
+      { label: 'For', value: tx.note || '—' },
+      { label: tx.direction === 'out' ? 'Recipient phone' : 'Sender phone', value: tx.otherPhone },
+      { label: 'Date', value: fullDate(tx.createdAt) },
+      { label: 'Reference', value: tx.reference },
+    ],
+  };
 }
 
 /** One label/value line in the details card. */

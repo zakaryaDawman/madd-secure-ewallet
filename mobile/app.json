@@ -63,7 +63,8 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "scheme": "madd",
     "extra": {
