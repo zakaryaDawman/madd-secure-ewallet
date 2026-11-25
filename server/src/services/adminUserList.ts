@@ -3,7 +3,7 @@ import { containsPattern } from '../utils/sqlLike';
 import { lockedEmails } from './loginLock';
 import { timeOfDayMY } from '../utils/time';
 
-export type UserStatus = 'active' | 'frozen' | 'locked';
+export type UserStatus = 'active' | 'frozen' | 'locked' | 'deactivated';
 export const USER_FILTERS = ['all', 'frozen', 'locked'] as const;
 export type UserFilter = (typeof USER_FILTERS)[number];
 
@@ -12,7 +12,7 @@ export type UserListItem = { id: number; fullName: string; status: UserStatus; l
 
 export type UserList = { users: UserListItem[]; counts: { total: number; frozen: number; locked: number } };
 
-type Row = { id: number; full_name: string; email: string; frozen_at: Date | null; frozen_by_admin: boolean; held: number; devices: number };
+type Row = { id: number; full_name: string; email: string; frozen_at: Date | null; deactivated_at: Date | null; frozen_by_admin: boolean; held: number; devices: number };
 
 const LIST_LIMIT = 100;
 
@@ -23,7 +23,7 @@ const LIST_LIMIT = 100;
 export async function listUsers(search: string, filter: UserFilter): Promise<UserList> {
   const [{ rows }, locked] = await Promise.all([
     pool.query<Row>(
-      `SELECT u.id, u.full_name, u.email, u.frozen_at,
+      `SELECT u.id, u.full_name, u.email, u.frozen_at, u.deactivated_at,
               COALESCE((SELECT e.details->>'source' = 'admin' FROM security_events e
                         WHERE e.user_id = u.id AND e.type = 'ACCOUNT_FROZEN' ORDER BY e.id DESC LIMIT 1), false) AS frozen_by_admin,
               (SELECT count(*) FROM transactions t WHERE t.sender_id = u.id AND t.status = 'PENDING' AND t.expires_at > now())::int AS held,
@@ -42,9 +42,10 @@ export async function listUsers(search: string, filter: UserFilter): Promise<Use
   };
 }
 
-/** Status and the grey line under the name, e.g. "Frozen by user · 9:15 PM", "Sign-in locked · 9 min left", "2 devices". */
+/** Status and the grey line under the name, e.g. "Deactivated · 9:15 PM", "Frozen by user · 9:15 PM", "Sign-in locked · 9 min left", "2 devices". */
 function toItem(r: Row, unlocksAt: Date | null): UserListItem {
   const base = { id: r.id, fullName: r.full_name };
+  if (r.deactivated_at) return { ...base, status: 'deactivated', line: `Deactivated · ${timeOfDayMY(r.deactivated_at)}` };
   if (r.frozen_at) return { ...base, status: 'frozen', line: `Frozen by ${r.frozen_by_admin ? 'admin' : 'user'} · ${timeOfDayMY(r.frozen_at)}` };
   if (unlocksAt) return { ...base, status: 'locked', line: `Sign-in locked · ${Math.ceil((unlocksAt.getTime() - Date.now()) / 60_000)} min left` };
   if (r.held > 0) return { ...base, status: 'active', line: `${r.held} held transfer${r.held === 1 ? '' : 's'}` };

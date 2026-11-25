@@ -14,7 +14,11 @@ export type SecurityEventType =
   | 'ADMIN_TRUST_DEVICE'
   | 'OTP_SENT'
   | 'OTP_LOCKED'
-  | 'EMAIL_VERIFIED';
+  | 'EMAIL_VERIFIED'
+  | 'ADMIN_ADD_USER'
+  | 'ADMIN_EDIT_USER'
+  | 'ADMIN_DEACTIVATE'
+  | 'INVITE_ACCEPTED';
 
 export type SecurityEvent = {
   userId: number;

@@ -38,5 +38,13 @@ export function adminEventText(e: EventFacts): { text: string; tone: EventTone }
       return { text: 'Too many wrong email codes', tone: 'danger' };
     case 'EMAIL_VERIFIED':
       return { text: 'Email verified', tone: 'info' };
+    case 'ADMIN_ADD_USER':
+      return { text: 'Added by an admin', tone: 'info' };
+    case 'ADMIN_EDIT_USER':
+      return { text: 'Details changed by an admin', tone: 'info' };
+    case 'ADMIN_DEACTIVATE':
+      return { text: 'Deactivated by an admin', tone: 'danger' };
+    case 'INVITE_ACCEPTED':
+      return { text: 'Invite accepted', tone: 'info' };
   }
 }

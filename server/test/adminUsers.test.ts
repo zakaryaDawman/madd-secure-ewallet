@@ -132,7 +132,9 @@ describe('Admin freeze and trust', () => {
 describe('what admins can never do, and customers can never reach', () => {
   it('an admin cannot send money or change a balance (no such routes; wallet routes refuse admins)', async () => {
     expect((await post('/transfers', { recipientPhone: '012 345 4521', amountSen: 1_000, note: '', pin: '482913' })).status).toBe(403);
-    expect((await request(app).patch(`/admin/users/${zak.id}`).set('Authorization', `Bearer ${admin}`).send({ balanceSen: 1 })).status).toBe(404);
+    // Edit user (task G10) only takes name, email and phone: a balance in the body is refused and nothing changes.
+    expect((await request(app).patch(`/admin/users/${zak.id}`).set('Authorization', `Bearer ${admin}`).send({ balanceSen: 1, reason: REASON })).status).toBe(400);
+    expect((await pool.query('SELECT balance_sen FROM wallets WHERE user_id = $1', [zak.id])).rows[0].balance_sen).toBe('100000');
     expect((await post(`/admin/users/${zak.id}/balance`, { balanceSen: 1, reason: REASON })).status).toBe(404);
   });
 

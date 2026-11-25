@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { replaceScreen } from '../utils/navigation';
 import { router } from 'expo-router';
-import { register } from '../api/auth';
+import { acceptInvite, register } from '../api/auth';
 import { MaddButton } from '../components/MaddButton';
 import { KeypadKey, MaddKeypad } from '../components/MaddKeypad';
 import { PinDots } from '../components/PinDots';
@@ -14,7 +14,10 @@ import { colors, fonts, spacing } from '../theme';
 
 const PIN_LENGTH = 6;
 
-/** Create PIN screen (design 04): type a PIN, type it again, then the whole account is sent to the server and the emailed code is asked for. */
+/**
+ * Create PIN screen (design 04): type a PIN, type it again, then the whole account is sent to the server and the emailed
+ * code is asked for. After "I have an invite" (task G10) it accepts the invite instead, and the account is ready at once.
+ */
 export default function CreatePinScreen() {
   const [firstPin, setFirstPin] = useState<string | null>(null); // set once the first PIN is accepted
   const [pin, setPin] = useState('');
@@ -51,13 +54,14 @@ export default function CreatePinScreen() {
       return;
     }
     setSending(true);
-    const { fullName, email, phone, password } = getSignupDraft();
-    const result = await register({ fullName, email, phone, password, pin });
+    const { fullName, email, phone, password, inviteCode } = getSignupDraft();
+    const result = inviteCode ? await acceptInvite(email, inviteCode, password, pin) : await register({ fullName, email, phone, password, pin });
     setSending(false);
 
     if (result.ok) {
       clearSignupDraft();
-      replaceScreen({ pathname: '/verify-email', params: { email } });
+      if (inviteCode) replaceScreen('/account-created');
+      else replaceScreen({ pathname: '/verify-email', params: { email } });
       return;
     }
     if (result.errors.pin) {

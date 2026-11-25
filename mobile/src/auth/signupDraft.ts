@@ -6,10 +6,11 @@ export type SignupDraft = {
   email: string;
   phone: string;
   password: string;
+  inviteCode: string; // set on "I have an invite" (task G10): the PIN step accepts the invite instead of registering
   errors: Partial<Record<RegisterField, string>>;
 };
 
-const empty: SignupDraft = { fullName: '', email: '', phone: '', password: '', errors: {} };
+const empty: SignupDraft = { fullName: '', email: '', phone: '', password: '', inviteCode: '', errors: {} };
 let draft: SignupDraft = { ...empty };
 
 /** Returns the current sign-up details. */

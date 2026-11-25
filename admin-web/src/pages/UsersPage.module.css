@@ -2,3 +2,5 @@
 .total { color: var(--sky); font-weight: 700; font-size: 17px; }
 .status { color: var(--muted); padding: 18px 0; }
 .error { color: var(--danger-text); font-weight: 600; padding: 18px 0; }
+.aside { display: flex; align-items: center; gap: 18px; }
+.add { padding: 10px 20px; border: 0; border-radius: 999px; background: var(--blue); color: var(--white); font-weight: 700; font-size: 16px; cursor: pointer; }

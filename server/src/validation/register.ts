@@ -23,25 +23,32 @@ export const pinField = z
   .regex(/^\d{6}$/, 'PIN must be exactly 6 digits')
   .refine((pin) => !isWeakPin(pin), 'This PIN is too easy to guess');
 
+/** Email rule, shared by register and the admin's Add / Edit user: trimmed and lowercase. */
+export const emailField = z.string().trim().toLowerCase().email('Enter a valid email address');
+
+/** Malaysian mobile rule, shared by register and the admin's Add / Edit user: converted to +60 form. */
+export const phoneField = z.string().transform((value, ctx) => {
+  const phone = normalisePhone(value);
+  if (!phone) {
+    ctx.addIssue({ code: 'custom', message: 'Enter a Malaysian mobile number, e.g. 012 345 6789' });
+    return z.NEVER;
+  }
+  return phone;
+});
+
+/** Password rule, shared by register and accepting an invite. */
+export const passwordField = z
+  .string()
+  .min(8, 'Use at least 8 characters')
+  .regex(/[A-Za-z]/, 'Include at least one letter')
+  .regex(/\d/, 'Include at least one number');
+
 /** Input rules for POST /auth/register. Phone is converted to +60 form, email to lowercase. */
 export const registerSchema = z.object({
   fullName: fullNameField,
-  email: z.string().trim().toLowerCase().email('Enter a valid email address'),
-  phone: z
-    .string()
-    .transform((value, ctx) => {
-      const phone = normalisePhone(value);
-      if (!phone) {
-        ctx.addIssue({ code: 'custom', message: 'Enter a Malaysian mobile number, e.g. 012 345 6789' });
-        return z.NEVER;
-      }
-      return phone;
-    }),
-  password: z
-    .string()
-    .min(8, 'Use at least 8 characters')
-    .regex(/[A-Za-z]/, 'Include at least one letter')
-    .regex(/\d/, 'Include at least one number'),
+  email: emailField,
+  phone: phoneField,
+  password: passwordField,
   pin: pinField,
 });
 

@@ -148,6 +148,15 @@ export default function LoginScreen() {
                 Create account
               </Text>
             </Text>
+            <Text style={styles.bottomText}>
+              Added by MADD staff?{" "}
+              <Text
+                style={styles.linkBold}
+                onPress={() => openScreen("/accept-invite")}
+              >
+                I have an invite
+              </Text>
+            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

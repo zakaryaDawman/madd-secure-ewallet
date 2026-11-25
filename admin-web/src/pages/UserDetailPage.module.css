@@ -10,3 +10,6 @@
 .unfreeze { background: var(--blue); }
 .status { color: var(--muted); }
 .error { color: var(--danger-text); font-weight: 600; }
+.moreActions { display: flex; gap: 12px; flex-wrap: wrap; }
+.outline { flex: 1; padding: 16px; border: 1.5px solid var(--blue); border-radius: 999px; background: none; color: var(--blue); font-weight: 700; font-size: 17px; cursor: pointer; }
+.outlineDanger { border-color: var(--danger); color: var(--danger-text); }

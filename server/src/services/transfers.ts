@@ -74,9 +74,9 @@ export async function sendMoney(
   }
 }
 
-/** Finds a user by their +60 phone number. */
+/** Finds a user who can be paid by their +60 phone number (deactivated accounts can't). */
 async function findUserByPhone(phone: string): Promise<{ id: number; fullName: string } | null> {
-  const { rows } = await pool.query<{ id: number; full_name: string }>('SELECT id, full_name FROM users WHERE phone = $1', [phone]);
+  const { rows } = await pool.query<{ id: number; full_name: string }>('SELECT id, full_name FROM users WHERE phone = $1 AND deactivated_at IS NULL', [phone]);
   return rows[0] ? { id: rows[0].id, fullName: rows[0].full_name } : null;
 }
 

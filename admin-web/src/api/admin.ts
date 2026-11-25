@@ -80,7 +80,7 @@ export function getLogs(search: string, before: number | null): Promise<LogPage>
   return api(`/admin/logs?${query}`);
 }
 
-export type UserStatus = 'active' | 'frozen' | 'locked';
+export type UserStatus = 'active' | 'frozen' | 'locked' | 'deactivated';
 export type UserFilter = 'all' | 'frozen' | 'locked';
 
 /** One row of the Users list (design 24). */
@@ -123,4 +123,22 @@ export function freezeUser(id: number, reason: string): Promise<void> {
 
 export function trustDevice(id: number, deviceId: string, reason: string): Promise<void> {
   return api(`/admin/users/${id}/devices/${deviceId}/trust`, { method: 'POST', body: { reason } });
+}
+
+/** Name, email and phone of a customer, as the admin types them (the server checks and normalises them). */
+export type UserDetails = { fullName: string; email: string; phone: string };
+
+/** Adds a customer with a RM 0 wallet; the server emails them an invite code to set their own password and PIN. */
+export function addUser(details: UserDetails): Promise<{ userId: number }> {
+  return api('/admin/users', { method: 'POST', body: details });
+}
+
+/** Changes a customer's details (only the changed ones are sent), with the written reason. */
+export function editUser(id: number, changes: Partial<UserDetails>, reason: string): Promise<void> {
+  return api(`/admin/users/${id}`, { method: 'PATCH', body: { ...changes, reason } });
+}
+
+/** Closes a customer's account (balance must be RM 0.00). Nothing is deleted. */
+export function deactivateUser(id: number, reason: string): Promise<void> {
+  return api(`/admin/users/${id}/deactivate`, { method: 'POST', body: { reason } });
 }

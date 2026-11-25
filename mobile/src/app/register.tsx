@@ -42,7 +42,7 @@ export default function RegisterScreen() {
     const found = checkFields(form);
     setErrors(found);
     if (Object.keys(found).length > 0) return;
-    updateSignupDraft({ ...form, errors: {} });
+    updateSignupDraft({ ...form, inviteCode: '', errors: {} });
     openScreen('/create-pin');
   }
 

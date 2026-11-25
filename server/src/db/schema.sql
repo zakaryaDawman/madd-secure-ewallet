@@ -95,7 +95,8 @@ CREATE INDEX IF NOT EXISTS idx_security_events_transaction ON security_events (t
 ALTER TABLE security_events DROP CONSTRAINT IF EXISTS security_events_type_check;
 ALTER TABLE security_events ADD CONSTRAINT security_events_type_check CHECK (type IN (
   'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED', 'DEVICE_TRUSTED',
-  'ADMIN_FREEZE', 'ADMIN_UNFREEZE', 'ADMIN_TRUST_DEVICE', 'OTP_SENT', 'OTP_LOCKED', 'EMAIL_VERIFIED'
+  'ADMIN_FREEZE', 'ADMIN_UNFREEZE', 'ADMIN_TRUST_DEVICE', 'OTP_SENT', 'OTP_LOCKED', 'EMAIL_VERIFIED',
+  'ADMIN_ADD_USER', 'ADMIN_EDIT_USER', 'ADMIN_DEACTIVATE', 'INVITE_ACCEPTED'
 ));
 
 -- Task E4: which admin did it (empty for things users and rules do). The admin's written reason goes in `reason`.
@@ -170,3 +171,13 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ DEFAULT
 ALTER TABLE users ALTER COLUMN email_verified_at DROP DEFAULT;
 -- One sign-up code per user: "Resend" replaces it.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_email_otps_signup ON email_otps (user_id) WHERE purpose = 'SIGNUP';
+
+-- Task G10: admins add, edit and deactivate customers.
+-- A deactivated account can't sign in, can't be paid and is never deleted (its transfers and log rows stay).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS deactivated_at TIMESTAMPTZ;
+ALTER TABLE sessions DROP CONSTRAINT IF EXISTS sessions_revoke_reason_check;
+ALTER TABLE sessions ADD CONSTRAINT sessions_revoke_reason_check CHECK (revoke_reason IN ('logout', 'freeze', 'admin'));
+-- An admin-added customer gets an INVITE code by email and sets their own password and PIN with it.
+ALTER TABLE email_otps DROP CONSTRAINT IF EXISTS email_otps_purpose_check;
+ALTER TABLE email_otps ADD CONSTRAINT email_otps_purpose_check CHECK (purpose IN ('HOLD', 'SIGNUP', 'INVITE'));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_email_otps_invite ON email_otps (user_id) WHERE purpose = 'INVITE';

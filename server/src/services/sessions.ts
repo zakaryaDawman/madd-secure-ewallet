@@ -31,6 +31,6 @@ export async function revokeSession(sessionId: string, reason: 'logout'): Promis
 }
 
 /** Ends every open session of the user (all phones) at once. Runs inside the caller's database transaction. */
-export async function endAllSessions(client: PoolClient, userId: number, reason: 'freeze'): Promise<void> {
+export async function endAllSessions(client: PoolClient, userId: number, reason: 'freeze' | 'admin'): Promise<void> {
   await client.query('UPDATE sessions SET revoked_at = now(), revoke_reason = $2 WHERE user_id = $1 AND revoked_at IS NULL', [userId, reason]);
 }

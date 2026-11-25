@@ -71,10 +71,25 @@ export async function verifyEmail(email: string, code: string): Promise<{ ok: tr
   }
 }
 
-/** Asks for a new sign-up code. The server gives the same reply whether or not it really sent one. */
-export async function resendSignupCode(email: string): Promise<{ ok: boolean; message?: string }> {
+/**
+ * An admin-added customer accepts their invite (task G10) with the emailed code and their own password and PIN.
+ * Returns the server's message for each wrong field, or one general message.
+ */
+export async function acceptInvite(email: string, code: string, password: string, pin: string): Promise<RegisterResult> {
   try {
-    const res = await apiPost<{ message?: string }>('/auth/resend-code', { email });
+    const res = await apiPost<{ accepted?: boolean; fields?: Record<string, string>; message?: string }>('/auth/accept-invite', { email, code, password, pin });
+    if (res.ok && res.body.accepted) return { ok: true, userId: 0 };
+    if (res.body.fields) return { ok: false, errors: res.body.fields };
+    return { ok: false, errors: { form: res.body.message ?? 'Something went wrong. Please try again.' } };
+  } catch {
+    return { ok: false, errors: { form: "Can't reach MADD. Check your connection and try again." } };
+  }
+}
+
+/** Asks for a new sign-up code (or invite code). The server gives the same reply whether or not it really sent one. */
+export async function resendSignupCode(email: string, invite = false): Promise<{ ok: boolean; message?: string }> {
+  try {
+    const res = await apiPost<{ message?: string }>('/auth/resend-code', { email, invite });
     return { ok: res.ok, message: res.body.message };
   } catch {
     return { ok: false, message: "Can't reach MADD. Check your connection and try again." };

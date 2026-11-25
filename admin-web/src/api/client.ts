@@ -15,7 +15,7 @@ export class ApiError extends Error {
  * Calls the MADD server with the admin's token and returns the JSON reply.
  * A 401 (session expired, logged out, account frozen) ends the session here too, so the login page shows.
  */
-export async function api<T>(path: string, init: { method?: 'GET' | 'POST'; body?: unknown } = {}): Promise<T> {
+export async function api<T>(path: string, init: { method?: 'GET' | 'POST' | 'PATCH'; body?: unknown } = {}): Promise<T> {
   const token = getToken();
   let res: Response;
   try {

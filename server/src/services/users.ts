@@ -44,7 +44,7 @@ export async function createUserWithWallet(input: RegisterInput): Promise<{ user
 }
 
 /** True if a database error means "this value already exists" (Postgres code 23505). */
-function isUniqueViolation(err: unknown): boolean {
+export function isUniqueViolation(err: unknown): boolean {
   return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23505';
 }
 

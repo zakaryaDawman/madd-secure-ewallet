@@ -12,7 +12,8 @@ import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { fieldErrors } from './fieldErrors';
 import { config } from '../config';
 import { emailSignupCode, sendFreshSignupCode, verifySignupCode } from '../services/signupCode';
-import { resendCodeSchema, verifyEmailSchema } from '../validation/verifyEmail';
+import { acceptInviteSchema, resendCodeSchema, verifyEmailSchema } from '../validation/verifyEmail';
+import { acceptInvite } from '../services/invite';
 
 export const authRouter = Router();
 
@@ -112,8 +113,26 @@ authRouter.post('/resend-code', async (req, res, next) => {
     return;
   }
   try {
-    await sendFreshSignupCode(parsed.data.email);
+    await sendFreshSignupCode(parsed.data.email, parsed.data.invite ? 'INVITE' : 'SIGNUP');
     res.json({ message: "If this email needs a code, we've sent a new one." });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /auth/accept-invite (task G10): invite code + the customer's own password and PIN. One reply for every failure. */
+authRouter.post('/accept-invite', async (req, res, next) => {
+  const parsed = acceptInviteSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
+  try {
+    if (await acceptInvite(parsed.data)) {
+      res.json({ accepted: true });
+      return;
+    }
+    res.status(400).json({ error: 'invalid_code', message: 'The code is wrong or has run out. Check it, or ask for a new one.' });
   } catch (err) {
     next(err);
   }

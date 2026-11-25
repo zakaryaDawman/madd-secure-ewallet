@@ -32,8 +32,8 @@ const FROZEN_BY: Record<string, string> = {
 
 /** One customer's details, or null if there is no such customer (admins are not shown here). */
 export async function getUserDetail(userId: number): Promise<UserDetail | null> {
-  const { rows } = await pool.query<{ id: number; full_name: string; email: string; phone: string; frozen_at: Date | null; balance_sen: string }>(
-    `SELECT u.id, u.full_name, u.email, u.phone, u.frozen_at, w.balance_sen
+  const { rows } = await pool.query<{ id: number; full_name: string; email: string; phone: string; frozen_at: Date | null; deactivated_at: Date | null; balance_sen: string }>(
+    `SELECT u.id, u.full_name, u.email, u.phone, u.frozen_at, u.deactivated_at, w.balance_sen
      FROM users u JOIN wallets w ON w.user_id = u.id WHERE u.id = $1 AND u.role = 'customer'`,
     [userId],
   );
@@ -45,7 +45,7 @@ export async function getUserDetail(userId: number): Promise<UserDetail | null> 
     fullName: user.full_name,
     email: user.email,
     phone: formatPhone(user.phone),
-    status: user.frozen_at ? 'frozen' : locked.has(user.email) ? 'locked' : 'active',
+    status: user.deactivated_at ? 'deactivated' : user.frozen_at ? 'frozen' : locked.has(user.email) ? 'locked' : 'active',
     balanceSen: Number(user.balance_sen),
     devices,
     events,

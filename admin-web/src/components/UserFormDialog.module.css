@@ -1,0 +1,12 @@
+.backdrop { position: fixed; inset: 0; background: rgba(11, 27, 63, 0.5); display: grid; place-items: center; padding: 24px; z-index: 10; }
+.dialog { width: 100%; max-width: 560px; max-height: 100%; overflow-y: auto; background: var(--white); border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 16px; }
+.title { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+.label { display: flex; flex-direction: column; gap: 8px; font-weight: 700; font-size: 17px; }
+.input, .reason { padding: 14px 18px; border: 1.5px solid var(--line); border-radius: 18px; font-size: 17px; font-weight: 400; }
+.reason { min-height: 100px; resize: vertical; }
+.input:focus, .reason:focus { outline: none; border-color: var(--blue); }
+.note { margin: 0; font-size: 14px; color: var(--muted); }
+.error { margin: 0; color: var(--danger-text); font-weight: 600; }
+.confirm { padding: 16px; border: 0; border-radius: 999px; background: var(--blue); color: var(--white); font-weight: 700; font-size: 17px; cursor: pointer; }
+.confirm:disabled { opacity: 0.5; cursor: default; }
+.cancel { padding: 8px; border: 0; background: none; color: var(--blue); font-weight: 700; font-size: 17px; cursor: pointer; }

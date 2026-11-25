@@ -1,6 +1,8 @@
 import { Router, type Response } from 'express';
 import { currentUser } from '../middleware/requireAuth';
 import { adminReasonSchema } from '../validation/adminAction';
+import { addUserSchema, editUserSchema } from '../validation/adminUser';
+import { addUser, deactivateUser, editUser } from '../services/adminUserEdits';
 import { listUsers, USER_FILTERS, type UserFilter } from '../services/adminUserList';
 import { getUserDetail } from '../services/adminUserDetail';
 import { freezeUser, trustUserDevice, unfreezeUser, type AdminActionResult } from '../services/adminActions';
@@ -15,6 +17,10 @@ const REFUSALS = {
   not_frozen: { status: 409, message: 'This account is not frozen.' },
   already_frozen: { status: 409, message: 'This account is already frozen.' },
   already_trusted: { status: 409, message: 'This device is already trusted.' },
+  deactivated: { status: 409, message: 'This account is deactivated.' },
+  duplicate: { status: 409, message: 'An account with these details already exists.' },
+  no_change: { status: 400, message: 'Nothing was changed.' },
+  balance_not_zero: { status: 409, message: 'Only an account with a RM 0.00 balance can be deactivated.' },
 } as const;
 
 /** Reads a positive whole-number id from the path, or null. */
@@ -38,6 +44,41 @@ adminUsersRouter.get('/', async (req, res, next) => {
   const filter: UserFilter = (USER_FILTERS as readonly unknown[]).includes(req.query.filter) ? (req.query.filter as UserFilter) : 'all';
   try {
     res.json(await listUsers(search, filter));
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /admin/users { fullName, email, phone } (task G10): adds a customer and emails them an invite code. */
+adminUsersRouter.post('/', async (req, res, next) => {
+  const parsed = addUserSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
+  try {
+    const result = await addUser(currentUser(res).userId, parsed.data);
+    if (result.ok) res.status(201).json({ userId: result.userId });
+    else sendResult(res, result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** PATCH /admin/users/:id { fullName?, email?, phone?, reason } (task G10). */
+adminUsersRouter.patch('/:id', async (req, res, next) => {
+  const parsed = editUserSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
+  const userId = idFrom(req.params.id);
+  if (!userId) {
+    res.status(404).json({ error: 'not_found', message: REFUSALS.not_found.message });
+    return;
+  }
+  try {
+    sendResult(res, await editUser(currentUser(res).userId, userId, parsed.data));
   } catch (err) {
     next(err);
   }
@@ -90,3 +131,6 @@ adminUsersRouter.post('/:id/freeze', reasonAction((adminId, userId, reason) => f
 
 /** POST /admin/users/:id/devices/:deviceId/trust { reason }. */
 adminUsersRouter.post('/:id/devices/:deviceId/trust', reasonAction((adminId, userId, reason, deviceId) => trustUserDevice(adminId, userId, deviceId, reason)));
+
+/** POST /admin/users/:id/deactivate { reason } (task G10). */
+adminUsersRouter.post('/:id/deactivate', reasonAction((adminId, userId, reason) => deactivateUser(adminId, userId, reason)));

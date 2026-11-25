@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { freezeUser, getUser, trustDevice, unfreezeUser, type UserDetail } from '../api/admin';
+import { deactivateUser, editUser, freezeUser, getUser, trustDevice, unfreezeUser, type UserDetail, type UserDetails } from '../api/admin';
 import { ApiError } from '../api/client';
 import { DeviceList } from '../components/DeviceList';
 import { EventList } from '../components/EventList';
 import { Initials } from '../components/Initials';
 import { PageHeader } from '../components/PageHeader';
 import { ReasonDialog } from '../components/ReasonDialog';
+import { UserFormDialog } from '../components/UserFormDialog';
 import { StatusBadge } from '../components/StatusBadge';
 import { userBadge } from '../utils/userBadge';
 import { formatRM } from '../utils/money';
@@ -13,16 +14,18 @@ import { dayHeading, timeOfDay } from '../utils/time';
 import styles from './UserDetailPage.module.css';
 
 type Device = UserDetail['devices'][number];
-type Action = { kind: 'unfreeze' } | { kind: 'freeze' } | { kind: 'trust'; device: Device };
+type Action = { kind: 'unfreeze' } | { kind: 'freeze' } | { kind: 'deactivate' } | { kind: 'trust'; device: Device };
 
 /**
  * One customer (design 23): contact, status, balance (read-only), devices with "Trust device", recent security events,
- * and Freeze / Unfreeze. Every action asks for a written reason (design 25) and is logged under this admin.
+ * Freeze / Unfreeze, and (task G10) Edit details and Deactivate. Every action asks for a written reason (design 25)
+ * and is logged under this admin. A deactivated account has no actions left.
  */
 export function UserDetailPage({ id, onBack }: { id: number; onBack: () => void }) {
   const [user, setUser] = useState<UserDetail | null>(null);
   const [error, setError] = useState('');
   const [action, setAction] = useState<Action | null>(null);
+  const [editing, setEditing] = useState(false);
 
   /** Loads (or reloads, after an action) the customer. */
   const load = useCallback(() => {
@@ -61,14 +64,26 @@ export function UserDetailPage({ id, onBack }: { id: number; onBack: () => void 
             <p className={styles.section}>RECENT SECURITY EVENTS</p>
             <EventList events={user.events} />
             <p className={styles.note}>ⓘ Admins cannot move money, change balances or see PINs. Every admin action is written to the security log.</p>
-            {user.status === 'frozen' ? (
+            {user.status === 'deactivated' && <p className={styles.note}>This account is deactivated. It can't sign in or be paid; its records are kept.</p>}
+            {user.status === 'frozen' && (
               <button className={styles.unfreeze} onClick={() => setAction({ kind: 'unfreeze' })}>
                 Unfreeze account
               </button>
-            ) : (
+            )}
+            {user.status !== 'frozen' && user.status !== 'deactivated' && (
               <button className={styles.freeze} onClick={() => setAction({ kind: 'freeze' })}>
                 Freeze account
               </button>
+            )}
+            {user.status !== 'deactivated' && (
+              <div className={styles.moreActions}>
+                <button className={styles.outline} onClick={() => setEditing(true)}>
+                  Edit details
+                </button>
+                <button className={`${styles.outline} ${styles.outlineDanger}`} onClick={() => setAction({ kind: 'deactivate' })}>
+                  Deactivate account
+                </button>
+              </div>
             )}
           </>
         )}
@@ -81,6 +96,21 @@ export function UserDetailPage({ id, onBack }: { id: number; onBack: () => void 
             load();
           }}
           onCancel={() => setAction(null)}
+        />
+      )}
+      {user && editing && (
+        <UserFormDialog
+          title={`Edit ${user.fullName}`}
+          initial={{ fullName: user.fullName, email: user.email, phone: user.phone }}
+          needsReason
+          confirmLabel="Save changes"
+          note="A new email must be verified again: the customer is signed out and gets a code at the new address."
+          onConfirm={(details, reason) => editUser(user.id, changedDetails(user, details), reason)}
+          onDone={() => {
+            setEditing(false);
+            load();
+          }}
+          onCancel={() => setEditing(false)}
         />
       )}
     </>
@@ -114,6 +144,18 @@ function dialogFor(user: UserDetail, action: Action) {
       onConfirm: (reason: string) => freezeUser(user.id, reason),
     };
   }
+  if (action.kind === 'deactivate') {
+    return {
+      title: `Deactivate ${user.fullName}?`,
+      facts: [
+        { label: 'Balance', value: `${formatRM(user.balanceSen)} (must be RM 0.00)` },
+        { label: 'What happens', value: "Held transfers cancelled, every phone logged out, can't sign in or be paid. Records are kept." },
+      ],
+      confirmLabel: 'Deactivate account',
+      tone: 'danger' as const,
+      onConfirm: (reason: string) => deactivateUser(user.id, reason),
+    };
+  }
   return {
     title: `Trust ${action.device.name}?`,
     facts: [{ label: 'What happens', value: 'Transfers from this phone are no longer held by R3' }],
@@ -121,4 +163,13 @@ function dialogFor(user: UserDetail, action: Action) {
     tone: 'primary' as const,
     onConfirm: (reason: string) => trustDevice(user.id, action.device.deviceId, reason),
   };
+}
+
+/** Only the details the admin really changed, so the log shows exactly what was edited. */
+function changedDetails(user: UserDetail, details: UserDetails): Partial<UserDetails> {
+  const changes: Partial<UserDetails> = {};
+  if (details.fullName.trim() !== user.fullName) changes.fullName = details.fullName.trim();
+  if (details.email.trim().toLowerCase() !== user.email) changes.email = details.email.trim();
+  if (details.phone.replace(/[\s-]/g, '') !== user.phone.replace(/[\s-]/g, '')) changes.phone = details.phone;
+  return changes;
 }

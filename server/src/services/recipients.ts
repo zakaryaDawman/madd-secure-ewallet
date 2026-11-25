@@ -10,10 +10,10 @@ export type Recipient = {
 
 export type LookupResult = { found: Recipient } | { error: 'not_found' | 'self' };
 
-/** Finds the MADD user with this phone number. Refuses the sender's own number. */
+/** Finds the MADD user with this phone number (not a deactivated one). Refuses the sender's own number. */
 export async function lookupRecipient(senderId: number, phone: string): Promise<LookupResult> {
   const { rows } = await pool.query<{ id: number; full_name: string; phone: string }>(
-    'SELECT id, full_name, phone FROM users WHERE phone = $1',
+    'SELECT id, full_name, phone FROM users WHERE phone = $1 AND deactivated_at IS NULL',
     [phone],
   );
   const user = rows[0];
