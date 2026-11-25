@@ -8,6 +8,7 @@ import { transfersRouter } from './routes/transfers';
 import { holdDecisionsRouter } from './routes/holdDecisions';
 import { transactionsRouter } from './routes/transactions';
 import { meRouter } from './routes/me';
+import { phoneChangeRouter } from './routes/phoneChange';
 import { devicesRouter } from './routes/devices';
 import { notificationsRouter } from './routes/notifications';
 import { adminRouter } from './routes/admin';
@@ -35,6 +36,7 @@ export function createApp() {
   app.use('/transfers', holdDecisionsRouter);
   app.use('/transactions', transactionsRouter);
   app.use('/me/devices', devicesRouter);
+  app.use('/me/phone', phoneChangeRouter);
   app.use('/me', meRouter);
   app.use('/notifications', notificationsRouter);
   app.use('/admin', adminRouter);

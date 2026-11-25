@@ -96,7 +96,7 @@ ALTER TABLE security_events DROP CONSTRAINT IF EXISTS security_events_type_check
 ALTER TABLE security_events ADD CONSTRAINT security_events_type_check CHECK (type IN (
   'RULE_FIRED', 'HOLD_EXPIRED', 'HOLD_CONFIRMED', 'HOLD_REJECTED', 'ACCOUNT_FROZEN', 'PIN_LOCKED', 'DEVICE_TRUSTED',
   'ADMIN_FREEZE', 'ADMIN_UNFREEZE', 'ADMIN_TRUST_DEVICE', 'OTP_SENT', 'OTP_LOCKED', 'EMAIL_VERIFIED',
-  'ADMIN_ADD_USER', 'ADMIN_EDIT_USER', 'ADMIN_DEACTIVATE', 'INVITE_ACCEPTED'
+  'ADMIN_ADD_USER', 'ADMIN_EDIT_USER', 'ADMIN_DEACTIVATE', 'INVITE_ACCEPTED', 'PHONE_CHANGED'
 ));
 
 -- Task E4: which admin did it (empty for things users and rules do). The admin's written reason goes in `reason`.
@@ -179,5 +179,10 @@ ALTER TABLE sessions DROP CONSTRAINT IF EXISTS sessions_revoke_reason_check;
 ALTER TABLE sessions ADD CONSTRAINT sessions_revoke_reason_check CHECK (revoke_reason IN ('logout', 'freeze', 'admin'));
 -- An admin-added customer gets an INVITE code by email and sets their own password and PIN with it.
 ALTER TABLE email_otps DROP CONSTRAINT IF EXISTS email_otps_purpose_check;
-ALTER TABLE email_otps ADD CONSTRAINT email_otps_purpose_check CHECK (purpose IN ('HOLD', 'SIGNUP', 'INVITE'));
+ALTER TABLE email_otps ADD CONSTRAINT email_otps_purpose_check CHECK (purpose IN ('HOLD', 'SIGNUP', 'INVITE', 'PHONE'));
 CREATE UNIQUE INDEX IF NOT EXISTS idx_email_otps_invite ON email_otps (user_id) WHERE purpose = 'INVITE';
+
+-- Task G11: the owner changes their phone number with their PIN and a code emailed to them. The new number waits here
+-- until the code is right. One open change per user: asking again replaces it.
+ALTER TABLE email_otps ADD COLUMN IF NOT EXISTS new_phone TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_email_otps_phone ON email_otps (user_id) WHERE purpose = 'PHONE';

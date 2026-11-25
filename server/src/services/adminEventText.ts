@@ -46,5 +46,7 @@ export function adminEventText(e: EventFacts): { text: string; tone: EventTone }
       return { text: 'Deactivated by an admin', tone: 'danger' };
     case 'INVITE_ACCEPTED':
       return { text: 'Invite accepted', tone: 'info' };
+    case 'PHONE_CHANGED':
+      return { text: 'Phone number changed', tone: 'info' };
   }
 }

@@ -18,7 +18,8 @@ export type SecurityEventType =
   | 'ADMIN_ADD_USER'
   | 'ADMIN_EDIT_USER'
   | 'ADMIN_DEACTIVATE'
-  | 'INVITE_ACCEPTED';
+  | 'INVITE_ACCEPTED'
+  | 'PHONE_CHANGED';
 
 export type SecurityEvent = {
   userId: number;
