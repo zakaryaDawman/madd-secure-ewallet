@@ -24,7 +24,7 @@ const EMPTY_TEXT: Record<TransactionFilter, string> = {
   held: 'Nothing is waiting for your OK.',
 };
 
-/** History screen (design 17): filter chips and the user's transactions grouped by day. Tap a row for its details. */
+/** History screen (design 17): filter chips and the user's transactions grouped by day. Tap a row for its details; Export PDF opens the statement (G12). */
 export default function HistoryScreen() {
   const [filter, setFilter] = useState<TransactionFilter>('all');
   const { items, state, refreshing, reload } = useTransactions(filter);
@@ -34,7 +34,12 @@ export default function HistoryScreen() {
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.body}>
         <View style={styles.head}>
-          <Text style={styles.title}>History</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>History</Text>
+            <Text style={styles.export} onPress={() => openScreen('/statement')} accessibilityRole="button">
+              Export PDF
+            </Text>
+          </View>
           <FilterChips value={filter} onChange={setFilter} />
         </View>
         {state === 'offline' && <OfflineView onRetry={() => reload()} retrying={refreshing} />}
@@ -109,6 +114,8 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
   body: { flex: 1 },
   head: { paddingHorizontal: 20, paddingTop: spacing.xxl, gap: 18 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  export: { fontFamily: fonts.bold, fontSize: 15, color: colors.blue },
   title: { fontFamily: fonts.extrabold, fontSize: 34, letterSpacing: -1.2, color: colors.ink },
   spinner: { marginTop: 48 },
   list: { paddingHorizontal: 20, paddingBottom: spacing.xl },

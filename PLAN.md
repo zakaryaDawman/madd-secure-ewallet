@@ -106,4 +106,4 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [ ] G9 Phone test of G1–G8, then build and check the APK
 - [x] G10 Admin adds (email invite, customer sets own password + PIN, RM 0 wallet), edits (name/email/phone, reason, new email re-verified) and deactivates customers (RM 0 balance, nothing deleted, can't sign in or be paid)
 - [x] G11 Customer changes their phone number: PIN + 6-digit code emailed to them (5 min, 5 tries, resend limits), number saved only after the code, "number changed" email
-- [ ] G12 Export History as a PDF statement (date range, All/In/Out), share or save
+- [x] G12 Export History as a PDF statement: This month / Last month / Last 3 months / custom (max 1 year), All/In/Out, masked names, no balance; Share PDF (temp file deleted) or Save to phone

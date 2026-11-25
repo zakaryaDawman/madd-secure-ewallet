@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { currentUser, requireAuth } from '../middleware/requireAuth';
 import { FILTERS, getTransaction, listTransactions, TransactionFilter } from '../services/transactions';
+import { getStatement } from '../services/statement';
+import { statementSchema } from '../validation/statement';
+import { fieldErrors } from './fieldErrors';
 
 export const transactionsRouter = Router();
 
@@ -20,6 +23,20 @@ transactionsRouter.get('/', requireAuth, async (req, res, next) => {
   }
   try {
     res.json({ transactions: await listTransactions(currentUser(res).userId, filter) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** GET /transactions/statement?from=YYYY-MM-DD&to=YYYY-MM-DD&filter=all|in|out (task G12): rows for the PDF statement. */
+transactionsRouter.get('/statement', requireAuth, async (req, res, next) => {
+  const parsed = statementSchema.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'validation', fields: fieldErrors(parsed.error) });
+    return;
+  }
+  try {
+    res.json(await getStatement(currentUser(res).userId, parsed.data));
   } catch (err) {
     next(err);
   }
