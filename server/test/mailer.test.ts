@@ -39,7 +39,7 @@ describe('brandedEmail (G3)', () => {
     expect(html).toContain('Your code');
     expect(html).toContain('Line two');
     expect(html).toContain('#1E4FD8');
-    expect(html).toContain('Questions? Contact maddwallet622@gmail.com');
+    expect(html).toContain('Questions? Contact maddwallet622@gmail.com or call 011-6437 9383');
   });
 
   it('escapes HTML so text cannot inject tags', () => {

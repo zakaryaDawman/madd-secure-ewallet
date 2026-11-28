@@ -17,6 +17,9 @@ function smtpSetting(name: string): string {
   return process.env.BREVO_API_KEY ? (process.env[name] ?? '') : requiredOutsideTests(name);
 }
 
+const SUPPORT_EMAIL = 'maddwallet622@gmail.com';
+const SUPPORT_HOTLINE = '011-6437 9383';
+
 /** All server settings in one place. */
 export const config = {
   port: Number(process.env.PORT ?? 3000),
@@ -37,5 +40,8 @@ export const config = {
   },
   mailFrom: requiredOutsideTests('MAIL_FROM'),
   // Where customers reach MADD support (task G8), shown in emails and messages.
-  supportEmail: 'maddwallet622@gmail.com',
+  supportEmail: SUPPORT_EMAIL,
+  supportHotline: SUPPORT_HOTLINE,
+  // The one sentence shown whenever an account is frozen (sign-in, any request, Help).
+  frozenMessage: `Your account is frozen. Contact ${SUPPORT_EMAIL} or call our hotline ${SUPPORT_HOTLINE}.`,
 };

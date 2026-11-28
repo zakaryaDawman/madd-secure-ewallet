@@ -74,7 +74,7 @@ authRouter.post('/login', async (req, res, next) => {
     }
     if (user.frozen) {
       // Only told after the right password, so this reveals nothing to someone guessing.
-      res.status(423).json({ error: 'account_frozen', message: `Your account is frozen. Contact ${config.supportEmail}.` });
+      res.status(423).json({ error: 'account_frozen', message: config.frozenMessage });
       return;
     }
     await rememberDevice(user.userId, deviceId, deviceName);

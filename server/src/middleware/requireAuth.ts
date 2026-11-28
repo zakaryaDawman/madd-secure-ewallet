@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { TokenClaims, verifyToken } from '../auth/tokens';
 import { sessionState } from '../services/sessions';
+import { config } from '../config';
 
 type Refusal = 'missing_token' | 'invalid_token' | 'session_expired' | 'session_revoked' | 'account_frozen';
 
@@ -14,7 +15,7 @@ export function currentUser(res: Response): TokenClaims {
  * except a freeze: that token belonged to the owner, so the app may say the account is frozen (design 14).
  */
 function refuse(res: Response, error: Refusal) {
-  const message = error === 'account_frozen' ? 'Your account is frozen.' : 'Your session has ended. Please log in again.';
+  const message = error === 'account_frozen' ? config.frozenMessage : 'Your session has ended. Please log in again.';
   res.status(401).json({ error, message });
 }
 

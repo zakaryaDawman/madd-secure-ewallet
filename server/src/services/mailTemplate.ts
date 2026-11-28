@@ -21,6 +21,6 @@ export function brandedEmail(title: string, paragraphs: string[]): string {
 <h1 style="margin:0 0 16px;font-size:20px;color:${INK}">${escapeHtml(title)}</h1>
 ${body}
 </div>
-<p style="font-size:12px;color:${MUTED};margin-top:16px">MADD will never ask for your password or PIN by email.<br>Questions? Contact ${escapeHtml(config.supportEmail)}</p>
+<p style="font-size:12px;color:${MUTED};margin-top:16px">MADD will never ask for your password or PIN by email.<br>Questions? Contact ${escapeHtml(config.supportEmail)} or call ${escapeHtml(config.supportHotline)}</p>
 </div></body></html>`;
 }

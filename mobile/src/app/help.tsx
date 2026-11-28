@@ -7,7 +7,7 @@ import { MaddButton } from '../components/MaddButton';
 import { FreezeAccountSheet } from '../components/profile/FreezeAccountSheet';
 import { getProfile } from '../api/me';
 import { FaqItem } from '../components/profile/FaqItem';
-import { SUPPORT_EMAIL } from '../utils/support';
+import { SUPPORT_EMAIL, SUPPORT_HOTLINE } from '../utils/support';
 import { colors, fonts, radius, spacing } from '../theme';
 
 /** Questions and answers shown on Help (design 44). The first one starts open. */
@@ -22,7 +22,7 @@ const FAQ = [
   },
   {
     question: 'I froze my account. What now?',
-    answer: 'All transfers and logins are stopped. Contact MADD support; only our team can unfreeze your account after checking it is really you.',
+    answer: `All transfers and logins are stopped. Contact ${SUPPORT_EMAIL} or call our hotline ${SUPPORT_HOTLINE}; only our team can unfreeze your account after checking it is really you.`,
   },
   {
     question: 'I forgot my PIN',
@@ -57,6 +57,7 @@ export default function HelpScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Contact MADD support</Text>
           <Text style={styles.cardText}>{SUPPORT_EMAIL}</Text>
+          <Text style={styles.cardText}>Hotline {SUPPORT_HOTLINE}</Text>
           <Text style={styles.cardText}>We reply within 1 working day</Text>
         </View>
       </ScrollView>
