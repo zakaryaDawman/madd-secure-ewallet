@@ -47,7 +47,7 @@ export function emailSignupCode(email: string, code: string, purpose: AccountCod
     `Enter it in MADD to ${action}. It works for ${ruleConfig.otpMinutes} minutes.`,
     `${ignore} Never share this code with anyone.`,
   ];
-  inBackground(sendMail(email, title, lines.join('\n\n'), brandedEmail(title, lines)).then(() => undefined));
+  inBackground(sendMail(email, title, lines.join('\n\n'), brandedEmail(title, lines.slice(1), code)).then(() => undefined));
 }
 
 /**

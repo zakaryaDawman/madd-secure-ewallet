@@ -68,7 +68,7 @@ async function sendHoldEmail(userId: number, transactionId: number, amountSen: n
     `We paused your transfer of ${formatRM(amountSen)}. Enter this code and your PIN in MADD to send it. The code works for ${ruleConfig.otpMinutes} minutes.`,
     "If this wasn't you, open MADD and tap \"No, freeze my account\". Never share this code with anyone.",
   ];
-  if (await sendMail(rows[0].email, title, lines.join('\n\n'), brandedEmail(title, lines))) {
+  if (await sendMail(rows[0].email, title, lines.join('\n\n'), brandedEmail(title, lines.slice(1), code))) {
     await logSecurityEvent({ userId, type: 'OTP_SENT', transactionId, reason: 'A one-time code was emailed to the owner.' });
   }
 }

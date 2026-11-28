@@ -42,6 +42,13 @@ describe('brandedEmail (G3)', () => {
     expect(html).toContain('Questions? Contact maddwallet622@gmail.com or call 011-6437 9383');
   });
 
+  it('shows a one-time code big and bold in a blue box, once', () => {
+    const html = brandedEmail('Your code', ['Enter it in MADD.'], '048213');
+    expect(html).toMatch(/font-size:36px;font-weight:bold;letter-spacing:10px;color:#1E4FD8[^>]*>048213</);
+    expect(html.match(/048213/g)).toHaveLength(1);
+    expect(brandedEmail('No code', ['Hi'])).not.toContain('Your code</div>');
+  });
+
   it('escapes HTML so text cannot inject tags', () => {
     expect(brandedEmail('<script>x</script>', ['<b>"hi"</b>'])).not.toContain('<script>');
     expect(escapeHtml(`<a href="x">'`)).toBe('&lt;a href=&quot;x&quot;&gt;&#39;');

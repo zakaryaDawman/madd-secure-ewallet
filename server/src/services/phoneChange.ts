@@ -145,7 +145,7 @@ function emailPhoneCode(email: string, newPhone: string, code: string): void {
     `Enter it in MADD to change your phone number to ${maskPhone(newPhone)}. It works for ${ruleConfig.otpMinutes} minutes.`,
     "If this wasn't you, don't share this code, and change your password. Never share this code with anyone.",
   ];
-  inBackground(sendMail(email, title, lines.join('\n\n'), brandedEmail(title, lines)).then(() => undefined));
+  inBackground(sendMail(email, title, lines.join('\n\n'), brandedEmail(title, lines.slice(1), code)).then(() => undefined));
 }
 
 /** Tells the owner by email that their number changed (people now pay them on the new one). */
