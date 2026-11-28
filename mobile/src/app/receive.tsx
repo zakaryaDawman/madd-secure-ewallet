@@ -1,5 +1,5 @@
 import { ComponentRef, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
@@ -14,6 +14,7 @@ import { QrLogo } from '../components/qr/QrLogo';
 import { ScanReceiveSwitch } from '../components/qr/ScanReceiveSwitch';
 import { formatPhone, toQrText } from '../utils/qrPayload';
 import { replaceScreen } from '../utils/navigation';
+import { shareViewAsImage } from '../utils/shareImage';
 import { colors, fonts, radius, spacing } from '../theme';
 
 const TOAST_MS = 2000;
@@ -41,9 +42,9 @@ export default function ReceiveScreen() {
     showToast('Number copied');
   }
 
-  /** Opens Android's share menu with my number, so someone can pay me. */
+  /** Opens Android's share menu with a picture of my QR card, so someone can scan it and pay me. */
   function shareQr() {
-    if (me) Share.share({ message: `Pay me on MADD: ${formatPhone(me.phone)}` });
+    if (me) shareViewAsImage(cardRef, 'Share my MADD QR');
   }
 
   /** Takes a picture of the QR card and saves it to the phone's gallery (asks for permission first). */

@@ -4,7 +4,7 @@ import * as Sharing from 'expo-sharing';
 import { captureRef, releaseCapture } from 'react-native-view-shot';
 
 /**
- * Captures a view as a PNG and opens Android's share menu with it (task G6).
+ * Captures a view as a PNG and opens Android's share menu with it (receipts, task G6, and the Receive QR).
  * The temporary file is always deleted afterwards, even if sharing was cancelled or failed.
  */
 export async function shareViewAsImage(ref: RefObject<ComponentRef<typeof View> | null>, title: string): Promise<void> {
@@ -13,7 +13,7 @@ export async function shareViewAsImage(ref: RefObject<ComponentRef<typeof View> 
     uri = await captureRef(ref, { format: 'png', quality: 1, result: 'tmpfile' });
     await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: title });
   } catch {
-    Alert.alert("Couldn't share", 'Something went wrong making the receipt image. Please try again.');
+    Alert.alert("Couldn't share", 'Something went wrong making the image. Please try again.');
   } finally {
     if (uri) releaseCapture(uri);
   }
