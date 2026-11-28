@@ -33,8 +33,15 @@ export async function seedAdmin(db: Pool, env: Record<string, string | undefined
   return rows[0].id;
 }
 
-/** Command-line entry: `npm run db:seed-admin` reads the ADMIN_* values from .env. Prints no secrets. */
+/**
+ * Command-line entry: `npm run db:seed-admin` reads the ADMIN_* values from .env. Prints no secrets.
+ * Also runs on every start in production (Railway); when ADMIN_EMAIL isn't set it does nothing.
+ */
 async function main() {
+  if (!process.env.ADMIN_EMAIL) {
+    console.log('No ADMIN_EMAIL set: admin account not changed.');
+    return;
+  }
   const { pool } = await import('./pool');
   try {
     await seedAdmin(pool, process.env);

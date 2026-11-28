@@ -1,4 +1,4 @@
-import { sendMail, setMailSender, type Mail } from '../src/services/mailer';
+import { parseAddress, sendMail, setMailSender, type Mail } from '../src/services/mailer';
 import { brandedEmail, escapeHtml } from '../src/services/mailTemplate';
 
 afterEach(() => setMailSender(undefined));
@@ -45,5 +45,13 @@ describe('brandedEmail (G3)', () => {
   it('escapes HTML so text cannot inject tags', () => {
     expect(brandedEmail('<script>x</script>', ['<b>"hi"</b>'])).not.toContain('<script>');
     expect(escapeHtml(`<a href="x">'`)).toBe('&lt;a href=&quot;x&quot;&gt;&#39;');
+  });
+});
+
+describe('parseAddress (Brevo sender)', () => {
+  it('reads a name and an address, or a bare address', () => {
+    expect(parseAddress('MADD <maddwallet622@gmail.com>')).toEqual({ name: 'MADD', email: 'maddwallet622@gmail.com' });
+    expect(parseAddress('"MADD Wallet" <a@b.com>')).toEqual({ name: 'MADD Wallet', email: 'a@b.com' });
+    expect(parseAddress('a@b.com')).toEqual({ email: 'a@b.com' });
   });
 });
