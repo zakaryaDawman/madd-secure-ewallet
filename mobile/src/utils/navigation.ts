@@ -2,6 +2,7 @@ import { Href, router } from 'expo-router';
 
 const LOCK_MS = 600;
 let lastNavigation = 0;
+let lastRestart = { key: '', at: 0 };
 
 /** True if another navigation happened a moment ago, so a double tap can't open the same screen twice. */
 function isTooSoon(): boolean {
@@ -36,7 +37,12 @@ export function replaceScreen(href: Href): void {
 
 /** Closes every open screen and shows this one alone, so Back can't return to a logged-in screen (session ended). */
 export function restartAt(href: Href): void {
-  if (isTooSoon()) return;
+  // Not a tap, so never skipped as a double tap: right after the app opens, a 401 must still reach "Session expired".
+  // Several requests failing together all ask for the same screen, so only the first one in a moment is acted on.
+  const key = JSON.stringify(href);
+  const now = Date.now();
+  if (key === lastRestart.key && now - lastRestart.at < LOCK_MS) return;
+  lastRestart = { key, at: now };
   if (router.canDismiss()) router.dismissAll();
   router.replace(href);
 }
