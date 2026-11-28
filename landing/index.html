@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MADD · Secure e-wallet</title>
+<meta name="description" content="MADD is a secure Android e-wallet. Every transfer is checked before it leaves, and anything unusual waits for your OK.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B1B3F;--muted:#5A6788;--line:#E3E8F2;--bg:#FFFFFF;--soft:#F4F7FC;
+  --blue:#1E4FD8;--blue-dark:#1440B8;--blue-light:#3A6FF0;--tint:#E3ECFF;--sky-line:#B9CCFF;
+  --pink:#FDE7EF;--peach:#FFF1DC;--mint:#DFF5E7;--lilac:#ECE8FF;--sky:#E3ECFF;
+  --radius:28px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;overflow-x:hidden;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+h1,h2,h3{margin:0;letter-spacing:-.03em}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--tint);color:var(--blue);font-weight:700;font-size:13px;padding:7px 14px;border-radius:99px}
+.btn{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:15px;padding:15px 24px;border-radius:99px;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn-dark{background:var(--ink);color:#fff;box-shadow:0 10px 24px -12px rgba(11,27,63,.6)}
+.btn-ghost{background:var(--soft);color:var(--ink)}
+.store{display:inline-flex;align-items:center;gap:12px;background:var(--ink);color:#fff;padding:11px 20px 11px 16px;border-radius:14px}
+.store small{display:block;font-size:10px;opacity:.75;font-weight:500}
+.store b{font-size:17px;font-weight:700;line-height:1.1}
+
+/* nav */
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.85);backdrop-filter:blur(14px);border-bottom:1px solid transparent;transition:border-color .3s}
+header.scrolled{border-color:var(--line)}
+nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:22px;letter-spacing:-.04em}
+.logo i{width:36px;height:36px;border-radius:11px;background:var(--blue);display:grid;place-items:center}
+.links{display:flex;gap:30px;font-weight:600;font-size:15px;color:var(--muted)}
+.links a:hover{color:var(--ink)}
+.menu-btn{display:none;background:none;border:0;font-size:26px;cursor:pointer;color:var(--ink)}
+
+/* hero */
+.hero>*,.stats>*,.grid>*,.steps>*,.promise>*,.download>*{min-width:0}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:56px 0 40px}
+.hero h1{font-size:clamp(44px,6.2vw,80px);font-weight:900;line-height:.98;margin:22px 0 20px}
+.hero p.lead{font-size:19px;line-height:1.6;color:var(--muted);max-width:500px;margin:0 0 30px}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.trust{display:flex;align-items:center;gap:14px;margin-top:28px;color:var(--muted);font-size:14px;font-weight:500}
+.trust .dots{display:flex}
+.trust .dots span{width:34px;height:34px;border-radius:50%;border:3px solid #fff;margin-left:-10px;display:grid;place-items:center;font-size:11px;font-weight:800}
+.trust .dots span:first-child{margin-left:0}
+.stage{position:relative;height:620px}
+.blob{position:absolute;inset:40px 20px 20px 40px;background:linear-gradient(150deg,var(--blue-light),var(--blue-dark));border-radius:48px;transform:rotate(4deg)}
+.phone{position:absolute;left:50%;top:20px;width:290px;margin-left:-145px;border-radius:44px;background:#0d0f16;padding:10px;transform:rotate(-6deg);box-shadow:0 40px 80px -30px rgba(11,27,63,.55);animation:float 6s ease-in-out infinite}
+.phone img{border-radius:34px;width:100%}
+@keyframes float{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(-6deg) translateY(-14px)}}
+.float{position:absolute;background:#fff;border-radius:20px;padding:14px 16px;box-shadow:0 20px 40px -18px rgba(11,27,63,.35);display:flex;gap:12px;align-items:center;font-size:13px;animation:bob 5s ease-in-out infinite}
+.float b{display:block;font-size:14px}
+.float .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:800;flex:none}
+.f1{left:-10px;top:120px;animation-delay:-1s}
+.f2{right:-20px;top:300px;animation-delay:-2.5s}
+.f3{left:10px;bottom:40px;animation-delay:-3.5s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:30px 0 80px}
+.stat{background:var(--soft);border-radius:24px;padding:26px}
+.stat .n{font-size:46px;font-weight:900;letter-spacing:-.04em}
+.stat p{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.5}
+
+/* sections */
+section{padding:90px 0}
+.head{text-align:center;max-width:680px;margin:0 auto 50px}
+.head h2{font-size:clamp(34px,4.4vw,54px);font-weight:900;line-height:1.03;margin:16px 0 14px}
+.head p{color:var(--muted);font-size:18px;line-height:1.6;margin:0}
+
+/* protection cards */
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:18px}
+.card{border-radius:var(--radius);padding:30px;position:relative;overflow:hidden;min-height:250px;display:flex;flex-direction:column}
+.card .tag{font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.7}
+.card h3{font-size:26px;font-weight:800;line-height:1.1;margin:14px 0 10px}
+.card p{margin:0;color:rgba(11,27,63,.72);line-height:1.55;font-size:15px}
+.span2{grid-column:span 2}.span3{grid-column:span 3}.span4{grid-column:span 4}
+.c-peach{background:var(--peach)}.c-mint{background:var(--mint)}.c-lilac{background:var(--lilac)}.c-pink{background:var(--pink)}.c-sky{background:var(--sky)}
+.card .mini{margin-top:auto;padding-top:22px}
+.shot{margin:24px auto -30px;width:210px;border:7px solid #0d0f16;border-bottom:0;border-radius:28px 28px 0 0;overflow:hidden;height:220px;box-shadow:0 20px 40px -20px rgba(11,27,63,.45)}
+.shot img{width:100%}
+.shot.mid img{margin-top:-60px}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:700;box-shadow:0 6px 16px -10px rgba(0,0,0,.3)}
+.bar{height:10px;border-radius:5px;background:rgba(11,27,63,.08);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:0;background:var(--ink);border-radius:5px;transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.in .bar i{width:var(--w)}
+
+/* how */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.step{background:var(--soft);border-radius:var(--radius);padding:24px 24px 0;overflow:hidden;display:flex;flex-direction:column}
+.step .num{width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800}
+.step h3{font-size:22px;font-weight:800;margin:16px 0 8px}
+.step p{color:var(--muted);line-height:1.55;margin:0 0 20px;font-size:15px}
+.step img{width:72%;margin:auto auto 0;border-radius:26px 26px 0 0;border:8px solid #0d0f16;border-bottom:0}
+
+/* promise */
+.promise{background:var(--ink);color:#fff;border-radius:40px;padding:70px 60px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.promise h2{font-size:clamp(32px,4vw,50px);font-weight:900;line-height:1.05}
+.promise ul{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.promise li{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,.06);border-radius:20px;padding:18px 20px;line-height:1.5;color:#C9D3EC}
+.promise li b{color:#fff;display:block;font-size:16px}
+.promise li .ic{width:34px;height:34px;border-radius:10px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:900;flex:none}
+
+/* faq */
+.faq{max-width:780px;margin:0 auto;display:grid;gap:12px}
+details{background:var(--soft);border-radius:22px;padding:22px 26px}
+summary{cursor:pointer;font-weight:700;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:24px;font-weight:500;transition:transform .25s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{color:var(--muted);line-height:1.65;margin:14px 0 0}
+
+/* download */
+.download{background:linear-gradient(150deg,var(--blue-light),var(--blue-dark));color:#fff;border-radius:40px;padding:60px;display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:30px;overflow:hidden;position:relative}
+.download h2{font-size:clamp(34px,4.4vw,56px);font-weight:900;line-height:1.02}
+.download p{color:#DCE6FF;font-size:18px;line-height:1.6;margin:16px 0 28px;max-width:480px}
+.download .ph{width:240px;justify-self:center;border-radius:38px;background:#0d0f16;padding:9px;transform:rotate(8deg);margin-bottom:-120px;box-shadow:0 30px 60px -20px rgba(0,0,0,.4)}
+.download .ph img{border-radius:30px}
+
+footer{padding:60px 0 40px;color:var(--muted);font-size:14px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:30px;border-top:1px solid var(--line);padding-top:40px}
+.foot .cols{display:flex;gap:60px}
+.foot h4{color:var(--ink);margin:0 0 12px;font-size:14px}
+.foot a{display:block;margin:8px 0}
+.foot a:hover{color:var(--ink)}
+
+/* badge added to the page from outside (e.g. Netlify): keep its background see-through */
+.nl-badge,.nl-badge *{background:transparent!important;background-color:transparent!important;box-shadow:none!important}
+
+/* motion */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.words .w{display:inline-block;overflow:hidden;vertical-align:top}
+.words .w>span{display:inline-block;transform:translateY(105%);transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.words.in .w>span{transform:none}
+.hl .w>span,.hl:not(:has(.w)){color:var(--blue)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal,.words .w>span{opacity:1;transform:none}}
+
+/* responsive */
+@media (max-width:960px){
+  .hero{grid-template-columns:1fr;padding-top:30px}
+  .stage{height:560px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:1fr 1fr}.span2,.span3,.span4{grid-column:span 1}
+  .steps{grid-template-columns:1fr}
+  .promise,.download{grid-template-columns:1fr;padding:44px 28px}
+  .download .ph{margin-bottom:-150px}
+  .links{display:none}.menu-btn{display:block}
+  .links.open{display:flex;position:absolute;top:72px;left:0;right:0;flex-direction:column;background:#fff;padding:20px;border-bottom:1px solid var(--line);gap:18px}
+}
+@media (max-width:560px){
+  .grid{grid-template-columns:1fr}
+  .float{transform:scale(.86)}
+  .f1{left:-6px}.f2{right:-6px}
+  .phone{width:240px;margin-left:-120px}
+  .stage{height:500px}
+  .stat .n{font-size:36px}
+}
+</style>
+</head>
+<body>
+
+<header id="top">
+  <nav class="wrap">
+    <a href="#" class="logo"><i><svg width="20" height="20" viewBox="0 0 80 92"><path d="M10 30 C20 18 30 18 38 25 S56 32 70 20" fill="none" stroke="#B9CCFF" stroke-width="9" stroke-linecap="round"/><path d="M12 90 V60 a14 14 0 0 1 28 0 V90 M40 60 a14 14 0 0 1 28 0 V90" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/></svg></i>madd</a>
+    <div class="links" id="links">
+      <a href="#protection">Protection</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a href="#download" class="btn btn-dark" style="padding:11px 20px">Get MADD</a>
+    <button class="menu-btn" aria-label="Open menu" onclick="document.getElementById('links').classList.toggle('open')">☰</button>
+  </nav>
+</header>
+
+<main>
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <span class="eyebrow reveal">● Every transfer checked before it leaves</span>
+      <h1 class="words" data-words>Your money, <span class="hl">watched over.</span></h1>
+      <p class="lead reveal">MADD is the e-wallet that checks every transfer before it leaves. If something looks unusual, we pause it and ask you first. Always with the reason.</p>
+      <div class="cta reveal">
+        <a href="#download" class="store"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="#34D399" d="M3.6 2.2 13.4 12l-9.8 9.8c-.4-.2-.6-.6-.6-1.1V3.3c0-.5.2-.9.6-1.1z"/><path fill="#60A5FA" d="m16.8 8.6-3.4 3.4-9.8-9.8.3-.1c.4-.1.8 0 1.1.1z"/><path fill="#F87171" d="m16.8 15.4-11.8 6.8c-.3.2-.7.2-1.1.1l-.3-.1 9.8-9.8z"/><path fill="#FBBF24" d="m20.4 10.5-3.6-1.9-3.4 3.4 3.4 3.4 3.6-2c.9-.5.9-1.9 0-2.9z"/></svg><span><small>Download for</small><b>Android</b></span></a>
+        <a href="#how" class="btn btn-ghost">See how it works</a>
+      </div>
+      <div class="trust reveal">
+        <div class="dots"><span style="background:var(--mint);color:#15803D"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M17 7H9.5a3 3 0 0 0 0 6h5a3 3 0 0 1 0 6H6"/></svg></span><span style="background:var(--sky);color:var(--blue)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><span style="background:var(--lilac);color:#5B21B6"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span style="background:var(--pink);color:#BE185D"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span></div>
+        Amount, speed, device and sign-in, checked in under a second.
+      </div>
+    </div>
+
+    <div class="stage reveal">
+      <div class="blob"></div>
+      <div class="phone"><img src="assets/home.jpg" alt="MADD home screen: Protection on and a transfer waiting for confirmation"></div>
+      <div class="float f1"><span class="ic" style="background:var(--peach);color:#9A4A06">⏱</span><span><b>RM 800 paused</b>3× your usual amount</span></div>
+      <div class="float f2"><span class="ic" style="background:var(--mint);color:#15803D">✓</span><span><b>Sent to Sara</b>RM 25.00 · Lunch</span></div>
+      <div class="float f3"><span class="ic" style="background:var(--lilac);color:#5B21B6">📱</span><span><b>New phone?</b>Your usual phone decides</span></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat reveal"><div class="n"><span data-count="30">30</span> min</div><p>until you're signed out on your own, so a lost phone stays locked</p></div>
+    <div class="stat reveal"><div class="n">RM <span data-count="0">0</span></div><p>fees to send money to anyone on MADD</p></div>
+    <div class="stat reveal"><div class="n"><span data-count="5">5</span> min</div><p>to say yes or no before a paused transfer is cancelled</p></div>
+    <div class="stat reveal"><div class="n"><span data-count="1">1</span> tap</div><p>to freeze your account if something isn't you</p></div>
+  </div>
+</div>
+
+<section id="protection" style="padding-top:20px">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">Protection</span>
+      <h2 class="words" data-words>Always watching. <span class="hl">You decide.</span></h2>
+      <p class="reveal">MADD doesn't just check you at login. It keeps watching, and you always get the final say.</p>
+    </div>
+    <div class="grid">
+      <div class="card c-peach span3 reveal">
+        <span class="tag">BIG AMOUNTS</span>
+        <h3>Bigger than usual? We ask first.</h3>
+        <p>Over RM 500, or 3× what you normally send, the transfer waits for your OK.</p>
+        <div class="mini" style="display:grid;grid-template-columns:1fr 190px;gap:20px;align-items:end">
+          <div><div style="font-size:13px;font-weight:700">Your usual: RM 260</div><div class="bar"><i style="--w:33%"></i></div>
+          <div style="font-size:13px;font-weight:700;margin-top:12px">This one: RM 800</div><div class="bar"><i style="--w:100%;background:#F59E0B"></i></div></div>
+          <div class="shot mid" style="width:190px;margin:0 0 -30px"><img src="assets/held.jpg" alt="MADD pausing an RM 800 transfer and asking Was this you?"></div>
+        </div>
+      </div>
+      <div class="card c-sky span3 reveal">
+        <span class="tag">TOO FAST</span>
+        <h3>Too many, too fast? Paused.</h3>
+        <p>More than 3 transfers in 5 minutes looks like someone emptying a wallet. The 4th one waits for you.</p>
+        <div class="mini" style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill">✓ 1</span><span class="pill">✓ 2</span><span class="pill">✓ 3</span><span class="pill" style="background:var(--ink);color:#fff">⏱ 4 · held</span></div>
+      </div>
+      <div class="card c-lilac span2 reveal">
+        <span class="tag">NEW PHONE</span>
+        <h3>Only your phone says yes.</h3>
+        <p>A login from a new phone can look around, but its transfers wait for your usual phone.</p>
+        <div class="shot mid"><img src="assets/newdevice.jpg" alt="Approve on your usual phone screen"></div>
+      </div>
+      <div class="card c-pink span2 reveal">
+        <span class="tag">WRONG PASSWORDS</span>
+        <h3>Guessing passwords? Locked.</h3>
+        <p>5 wrong passwords in 15 minutes pauses sign-in, the same for any email.</p>
+        <div class="shot mid"><img src="assets/locked.jpg" alt="Too many wrong passwords, sign-in paused screen"></div>
+      </div>
+      <div class="card c-mint span2 reveal">
+        <span class="tag">EMAIL CODE</span>
+        <h3>PIN + a code to your inbox.</h3>
+        <p>Releasing a paused transfer needs your PIN and a 6-digit code we email you.</p>
+        <div class="shot" style="height:220px"><img src="assets/release.jpg" alt="Enter PIN to release a paused transfer" style="margin-top:-190px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how" style="background:linear-gradient(#fff,var(--soft) 30%,var(--soft) 70%,#fff)">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">How it works</span>
+      <h2 class="words" data-words>Send, check, <span class="hl">you decide.</span></h2>
+      <p class="reveal">Normal transfers go straight through. Only the unusual ones stop and ask.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><span class="num">1</span><h3>Send in seconds</h3><p>Type a phone number or scan a MADD QR code, enter the amount and your PIN.</p><img src="assets/review.jpg" alt="Review transfer and enter your PIN"></div>
+      <div class="step reveal"><span class="num">2</span><h3>We check it</h3><p>We check it on our side before any money moves. Something unusual? It's paused, with the reason.</p><img src="assets/checking.jpg" alt="Sending your money safely: PIN confirmed, recipient verified, checking for unusual activity"></div>
+      <div class="step reveal"><span class="num">3</span><h3>You decide</h3><p>Unusual? You see why. "Yes, it was me" sends it. "No" freezes your account and signs out every phone.</p><img src="assets/held.jpg" alt="Was this you? Yes, it was me or No, freeze my account"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="promise reveal">
+      <div>
+        <span class="eyebrow" style="background:rgba(255,255,255,.1);color:#B9CCFF">Our promise</span>
+        <h2 style="margin-top:18px">Security you can see, not just trust.</h2>
+        <p style="color:#C9D3EC;line-height:1.6;font-size:17px;margin:18px 0 0">Every decision is made on our server and written to a log that can never be edited. Our team can freeze an account to protect you, but can never move your money.</p>
+      </div>
+      <ul>
+        <li><span class="ic">✓</span><span><b>We always tell you why</b>Every pause explains what looked unusual, in plain words.</span></li>
+        <li><span class="ic">✓</span><span><b>Your PIN stays secret</b>Passwords and PINs are stored scrambled with bcrypt, never in plain text, and never shown to our team.</span></li>
+        <li><span class="ic">✓</span><span><b>Sessions end on their own</b>After 30 minutes, or right away when you log out or freeze.</span></li>
+        <li><span class="ic">✓</span><span><b>Only your phone number is shared</b>Your QR code and receipts hide everything else.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="faq" style="padding-top:40px">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">FAQ</span>
+      <h2 class="words" data-words>Questions, <span class="hl">answered.</span></h2>
+    </div>
+    <div class="faq">
+      <details class="reveal"><summary>Is MADD free?</summary><p>Yes. Sending and receiving money between MADD users has no fees.</p></details>
+      <details class="reveal"><summary>What happens when a transfer is paused?</summary><p>No money moves. You see why it was paused and have 5 minutes to confirm with your PIN and an emailed code, or say No, which freezes your account and signs out every phone. If you do nothing, it's cancelled.</p></details>
+      <details class="reveal"><summary>I logged in on a new phone. Can I still send money?</summary><p>You can sign in and look around, but transfers from the new phone wait until your usual phone approves it. This stops someone who stole your password from sending your money.</p></details>
+      <details class="reveal"><summary>How do I unfreeze my account?</summary><p>For your safety only our support team can unfreeze an account, after checking it's really you. Email maddwallet622@gmail.com.</p></details>
+      <details class="reveal"><summary>What do you do with my data?</summary><p>Only what's needed to run your wallet and protect it. We never sell it, and your password and PIN are stored scrambled so nobody can read them. Read our <a href="privacy.html" style="color:var(--blue);font-weight:600">privacy policy</a>.</p></details>
+      <details class="reveal"><summary>Which phones does MADD work on?</summary><p>MADD is available for Android phones.</p></details>
+    </div>
+  </div>
+</section>
+
+<section id="download" style="padding-bottom:140px">
+  <div class="wrap">
+    <div class="download reveal">
+      <div>
+        <h2>Get MADD.<br>Keep your money yours.</h2>
+        <p>Download the app, create your account in a minute and set your 6-digit PIN.</p>
+        <a href="#" class="store" data-apk style="background:#fff;color:var(--ink)"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="#34D399" d="M3.6 2.2 13.4 12l-9.8 9.8c-.4-.2-.6-.6-.6-1.1V3.3c0-.5.2-.9.6-1.1z"/><path fill="#60A5FA" d="m16.8 8.6-3.4 3.4-9.8-9.8.3-.1c.4-.1.8 0 1.1.1z"/><path fill="#F87171" d="m16.8 15.4-11.8 6.8c-.3.2-.7.2-1.1.1l-.3-.1 9.8-9.8z"/><path fill="#FBBF24" d="m20.4 10.5-3.6-1.9-3.4 3.4 3.4 3.4 3.6-2c.9-.5.9-1.9 0-2.9z"/></svg><span><small>Download for</small><b>Android</b></span></a>
+      </div>
+      <div class="ph"><img src="assets/main.jpg" alt="MADD start screen: Your money, watched over"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div style="max-width:320px">
+      <a href="#" class="logo" style="color:var(--ink)"><i><svg width="20" height="20" viewBox="0 0 80 92"><path d="M10 30 C20 18 30 18 38 25 S56 32 70 20" fill="none" stroke="#B9CCFF" stroke-width="9" stroke-linecap="round"/><path d="M12 90 V60 a14 14 0 0 1 28 0 V90 M40 60 a14 14 0 0 1 28 0 V90" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/></svg></i>madd</a>
+      <p style="line-height:1.6">A secure e-wallet that checks every transfer and lets you decide. Final Year Project, Asia Pacific University.</p>
+    </div>
+    <div class="cols">
+      <div><h4>Product</h4><a href="#protection">Protection</a><a href="#how">How it works</a><a href="#download">Download</a></div>
+      <div><h4>Help</h4><a href="#faq">FAQ</a><a href="mailto:maddwallet622@gmail.com">Contact support</a></div>
+      <div><h4>Legal</h4><a href="privacy.html">Privacy policy</a><a href="terms.html">Terms of use</a></div>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:30px">© 2026 MADD · We don't use cookies or tracking on this site.</div>
+</footer>
+
+<script>
+/** Splits every [data-words] heading into words that rise one by one when it scrolls into view. */
+function splitWords(el){
+  const walk=(node)=>{[...node.childNodes].forEach(n=>{
+    if(n.nodeType===3){const frag=document.createDocumentFragment();n.textContent.split(/(\s+)/).forEach(t=>{if(!t)return;if(/^\s+$/.test(t)){frag.append(t);return;}const w=document.createElement('span');w.className='w';const s=document.createElement('span');s.textContent=t;w.append(s);frag.append(w);});n.replaceWith(frag);}
+    else walk(n);});};
+  walk(el);
+  el.querySelectorAll('.w>span').forEach((s,i)=>s.style.transitionDelay=(i*70)+'ms');
+}
+document.querySelectorAll('[data-words]').forEach(splitWords);
+
+/** Counts a [data-count] number up from 0 once it is visible. */
+function countUp(el){
+  const to=Number(el.dataset.count),start=performance.now(),dur=1200;
+  const tick=(now)=>{const p=Math.min(1,(now-start)/dur);el.textContent=Math.round((1-Math.pow(1-p,3))*to);if(p<1)requestAnimationFrame(tick);};
+  requestAnimationFrame(tick);
+}
+
+const seen=new IntersectionObserver((entries)=>entries.forEach(e=>{
+  if(!e.isIntersecting)return;
+  e.target.classList.add('in');
+  e.target.querySelectorAll('[data-count]').forEach(countUp);
+  seen.unobserve(e.target);
+}),{threshold:.18});
+document.querySelectorAll('.reveal,[data-words]').forEach(el=>seen.observe(el));
+
+// Sticky header gets a hairline once the page scrolls.
+const header=document.getElementById('top');
+addEventListener('scroll',()=>header.classList.toggle('scrolled',scrollY>8),{passive:true});
+
+// The APK link: set this to where the APK is hosted (e.g. a GitHub release) before sharing the page.
+const APK_URL='';
+document.querySelectorAll('[data-apk]').forEach(a=>{if(APK_URL)a.href=APK_URL;else a.addEventListener('click',e=>{e.preventDefault();alert('The download link is coming soon.');});});
+</script>
+</body>
+</html>
