@@ -58,7 +58,7 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 | D · Detection and alerts (Inc 3) | D1–D8 | FR-11 to FR-16 |
 | E · Admin (Inc 4) | E1–E4 | FR-17 to FR-20, as a separate web console (`admin-web/`, decided 20 Nov 2026) |
 | F · Test and release | F1–F4 | Results, demo, APK, UAT |
-| G · Extra features (after F1) | G1–G9 | Camera in APK, phone format, email OTP, authenticator app, receipt image, Home colours, real contact info |
+| G · Extra features (after F1) | G1–G12 | Camera in APK, phone format, email OTP, receipt image, Home colours, real contact info, admin add/edit/deactivate, change phone, PDF statement |
 
 ## Progress
 
@@ -99,11 +99,11 @@ A secure mobile e-wallet that detects suspicious transactions in real time and p
 - [x] G3 Email sending with nodemailer (Gmail SMTP from `.env`, mock transport in tests)
 - [x] G4 Email code for held transfers: PIN + 6-digit code emailed to the owner (hashed, 5 min, 5 tries, resend every 60 s, max 3 emails)
 - [x] G4b Email verification at sign-up (same code system; unverified accounts can't sign in)
-- [ ] G5 Authenticator app (TOTP) as another way to approve, set up in Profile with PIN
+- [-] G5 Authenticator app (TOTP): dropped by the user on 25 Nov 2026 (email codes are enough)
 - [x] G6 Share receipt as an image (Sent and Transfer details)
 - [x] G7 Smaller Recent activity rows, money in green (+), money out red (−)
 - [x] G8 Real contact info: maddwallet622@gmail.com
-- [ ] G9 Phone test of G1–G8, then build and check the APK
+- [ ] G9 Phone test of G1–G12, then build and check the APK (an APK was built on 24 Nov before G10–G12; rebuild it)
 - [x] G10 Admin adds (email invite, customer sets own password + PIN, RM 0 wallet), edits (name/email/phone, reason, new email re-verified) and deactivates customers (RM 0 balance, nothing deleted, can't sign in or be paid)
 - [x] G11 Customer changes their phone number: PIN + 6-digit code emailed to them (5 min, 5 tries, resend limits), number saved only after the code, "number changed" email
 - [x] G12 Export History as a PDF statement: This month / Last month / Last 3 months / custom (max 1 year), All/In/Out, masked names, no balance; Share PDF (temp file deleted) or Save to phone

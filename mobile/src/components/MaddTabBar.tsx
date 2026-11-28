@@ -13,14 +13,14 @@ type Props = {
 
 const SIDE_TABS: { tab: Tab; label: string; icon: IconName }[] = [
   { tab: 'home', label: 'Home', icon: 'home' },
-  { tab: 'history', label: 'History', icon: 'history' },
+  { tab: 'history', label: 'History', icon: 'receipt' },
 ];
 const RIGHT_TABS: { tab: Tab; label: string; icon: IconName }[] = [
   { tab: 'inbox', label: 'Inbox', icon: 'bell' },
   { tab: 'profile', label: 'Profile', icon: 'user' },
 ];
 
-/** Bottom navigation: Home, History, a raised Scan button in the middle, Inbox (with unread dot), Profile. */
+/** Bottom navigation (option 7, chosen 28 Nov 2026): Home, History, a round Scan button rising out of the bar, Inbox (with unread dot), Profile. */
 export function MaddTabBar({ active, onSelect, hasUnread = false }: Props) {
   const insets = useSafeAreaInsets();
 
@@ -47,7 +47,7 @@ type ItemProps = { label: string; icon: IconName; selected: boolean; showDot?: b
 
 /** One normal tab: icon + label, blue when selected. */
 function TabItem({ label, icon, selected, showDot = false, onPress }: ItemProps) {
-  const tint = selected ? colors.blue : '#7A86A6';
+  const tint = selected ? colors.blue : colors.muted;
   return (
     <Pressable accessibilityRole="tab" accessibilityState={{ selected }} onPress={onPress} style={styles.item}>
       <View>
@@ -59,12 +59,12 @@ function TabItem({ label, icon, selected, showDot = false, onPress }: ItemProps)
   );
 }
 
-/** The raised blue Scan button in the middle of the bar. */
+/** The round blue Scan button that rises out of the middle of the bar, with a white ring so it looks cut out. */
 function ScanButton({ onPress }: { onPress: () => void }) {
   return (
     <Pressable accessibilityRole="button" accessibilityLabel="Scan" onPress={onPress} style={styles.item}>
       <View style={styles.scan}>
-        <Icon name="scan" size={28} color={colors.white} />
+        <Icon name="scan" size={26} color={colors.white} />
       </View>
       <Text style={[styles.label, { color: colors.ink }]}>Scan</Text>
     </Pressable>
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     backgroundColor: colors.white,
     borderTopWidth: 1,
-    borderTopColor: '#E6ECF7',
+    borderTopColor: colors.line,
     paddingTop: 10,
     paddingHorizontal: 8,
   },
@@ -95,14 +95,16 @@ const styles = StyleSheet.create({
     borderColor: colors.white,
   },
   scan: {
-    width: 60,
-    height: 60,
-    marginTop: -28,
-    borderRadius: 22,
+    width: 64,
+    height: 64,
+    marginTop: -36,
+    borderRadius: 32,
+    borderWidth: 5,
+    borderColor: colors.white,
     backgroundColor: colors.blue,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 8,
+    elevation: 10,
     shadowColor: colors.blue,
   },
 });

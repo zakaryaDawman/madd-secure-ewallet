@@ -23,4 +23,8 @@ export const colors = {
   dangerText: '#B91C1C',
   dangerBorder: '#F5C2C2', // "Freeze my account" card border (design 19)
   dangerSurface: '#FFF6F6', // "Freeze my account" card background
+  highlight: '#22D3EE', // marker sweep under the key word on the welcome tips (28 Nov 2026)
+  scrim: 'rgba(5,11,31,0.62)', // darkens the camera outside the scan window (Scan, 28 Nov 2026)
+  glass: 'rgba(255,255,255,0.18)', // round buttons and chips over the camera
+  shade: 'rgba(0,0,0,0.45)', // dark chips and buttons over the camera
 } as const;
